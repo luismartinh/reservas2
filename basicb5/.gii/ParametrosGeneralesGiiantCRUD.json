@@ -1,0 +1,70 @@
+{
+    "modelclass": {
+        "value": "app\\models\\ParametrosGenerales",
+        "name": "modelClass"
+    },
+    "searchmodelclass": {
+        "value": "app\\models\\ParametrosGeneralesSearch",
+        "name": "searchModelClass"
+    },
+    "controllerclass": {
+        "value": "app\\controllers\\ParametrosGeneralesController",
+        "name": "controllerClass"
+    },
+    "basecontrollerclass": {
+        "value": "yii\\web\\Controller",
+        "name": "baseControllerClass"
+    },
+    "viewpath": {
+        "value": "@app\/views",
+        "name": "viewPath"
+    },
+    "pathprefix": {
+        "value": "",
+        "name": "pathPrefix"
+    },
+    "enablei18n": {
+        "value": "1",
+        "name": "enableI18N"
+    },
+    "singularentities": {
+        "value": "0",
+        "name": "singularEntities"
+    },
+    "indexwidgettype": {
+        "value": "grid",
+        "name": "indexWidgetType"
+    },
+    "formlayout": {
+        "value": "default",
+        "name": "formLayout"
+    },
+    "actionbuttonclass": {
+        "value": "yii\\grid\\ActionColumn",
+        "name": "actionButtonClass"
+    },
+    "providerlist": {
+        "value": [
+            "schmunk42\\giiant\\generators\\crud\\providers\\core\\OptsProvider",
+            "schmunk42\\giiant\\generators\\crud\\providers\\core\\CallbackProvider",
+            "schmunk42\\giiant\\generators\\crud\\providers\\core\\RelationProvider"
+        ],
+        "name": "providerList"
+    },
+    "template": {
+        "value": "default",
+        "name": "template"
+    },
+    "accessfilter": {
+        "value": "1",
+        "name": "accessFilter"
+    },
+    "modelmessagecategory": {
+        "value": "models",
+        "name": "modelMessageCategory"
+    },
+    "enablecopy": {
+        "value": true,
+        "name": "enableCopy"
+    }
+}

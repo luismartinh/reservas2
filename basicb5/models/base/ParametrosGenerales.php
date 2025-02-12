@@ -6,6 +6,8 @@ namespace app\models\base;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the base-model class for table "parametros_generales".
@@ -13,9 +15,13 @@ use yii\helpers\ArrayHelper;
  * @property integer $id
  * @property string $clave
  * @property string $descr
- * @property string $valor
+ * @property array $valor
+ * @property string $created_at
+ * @property integer $created_by
+ * @property string $updated_at
+ * @property integer $updated_by
  */
-abstract class ParametrosGenerales extends \yii\db\ActiveRecord
+abstract class ParametrosGenerales extends ActiveRecordAudit
 {
 
     /**
@@ -29,14 +35,32 @@ abstract class ParametrosGenerales extends \yii\db\ActiveRecord
     /**
      * @inheritdoc
      */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['blameable'] = [
+            'class' => BlameableBehavior::class,
+        ];
+        $behaviors['timestamp'] = [
+            'class' => TimestampBehavior::class,
+            'value' => (new \DateTime())->format('Y-m-d H:i:s'),
+                        ];
+        
+    return $behaviors;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function rules()
     {
         $parentRules = parent::rules();
         return ArrayHelper::merge($parentRules, [
-            [['clave', 'descr', 'valor'], 'required'],
-            [['valor'], 'string'],
-            [['clave'], 'string', 'max' => 30],
-            [['descr'], 'string', 'max' => 255]
+            [['clave', 'valor','descr'], 'required'],
+            [['valor'], 'safe'],
+            [['clave'], 'string', 'max' => 45],
+            [['descr'], 'string', 'max' => 255],
+            [['clave'], 'unique']
         ]);
     }
 
@@ -48,8 +72,12 @@ abstract class ParametrosGenerales extends \yii\db\ActiveRecord
         return ArrayHelper::merge(parent::attributeLabels(), [
             'id' => Yii::t('models', 'ID'),
             'clave' => Yii::t('models', 'Clave'),
-            'descr' => Yii::t('models', 'Descr'),
+            'descr' => Yii::t('models', 'Descripcion'),
             'valor' => Yii::t('models', 'Valor'),
+            'created_at' => Yii::t('models', 'Created At'),
+            'created_by' => Yii::t('models', 'Created By'),
+            'updated_at' => Yii::t('models', 'Updated At'),
+            'updated_by' => Yii::t('models', 'Updated By'),
         ]);
     }
 

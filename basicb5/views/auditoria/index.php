@@ -4,7 +4,7 @@ use app\models\Auditoria;
 use yii\bootstrap5\Html;
 use yii\helpers\Url;
 use kartik\grid\GridView;
-
+use yii\bootstrap5\Modal;
 
 use kartik\icons\FontAwesomeAsset;
 FontAwesomeAsset::register($this);
@@ -15,6 +15,21 @@ FontAwesomeAsset::register($this);
  * @var yii\data\ActiveDataProvider $dataProvider
  * @var app\models\AuditoriaSearch $searchModel
  */
+
+
+Modal::begin([
+    'id' => 'confirm-delete-modal',
+    'title' => Yii::t('cruds', 'Confirmar eliminación'),
+    'footer' => Html::button(Yii::t('cruds', 'Cancelar'), ['class' => 'btn btn-secondary', 'data-bs-dismiss' => 'modal']) .
+        Html::a(Yii::t('cruds', 'Eliminar'), '#', [
+            'class' => 'btn btn-danger',
+            'id' => 'confirm-delete-btn'
+        ]),
+]);
+
+echo "<p>" . Yii::t('cruds', '¿Estás seguro de que deseas eliminar todos los registros? Esta acción no se puede deshacer.') . "</p>";
+
+Modal::end();
 
 $this->title = Yii::t('models', 'Auditoria Ver');
 $this->params['breadcrumbs'][] = $this->title;
@@ -35,23 +50,30 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="clearfix crud-navigation">
         <div class="pull-left">
             <?= Html::a('<i class="bi bi-toggles2"></i> ' . Yii::t('cruds', 'Activar auditorias'), ['auditoria-tabla/index'], ['class' => 'btn btn-primary']) ?>
+
+            <?= Html::a(
+                '<i class="bi bi-x-circle-fill"></i> ' . Yii::t('cruds', 'Eliminar todas'),
+                '#',
+                ['class' => 'btn btn-danger', 'id' => 'delete-all-btn', 'data-url' => Url::to(['auditoria/delete-todas'])]
+            ) ?>
         </div>
+
     </div>
 
 
     <hr />
 
     <div class="table-responsive">
-        <?php 
-        
-        
-        $columns=[
+        <?php
+
+
+        $columns = [
             [
                 'class' => 'kartik\grid\ExpandRowColumn',
                 'width' => '50px',
                 'value' => function ($model, $key, $index, $column) {
-                        return GridView::ROW_COLLAPSED;
-                    },
+                    return GridView::ROW_COLLAPSED;
+                },
                 'enableCache' => false,
                 'detailUrl' => Url::toRoute(['auditoria/ver-detalle']),
                 'headerOptions' => ['class' => 'kartik-sheet-style'],
@@ -79,15 +101,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => kartik\daterange\DateRangePicker::widget([
                     'id' => 'AuditoriaSearch-created_at',
                     'name' => 'AuditoriaSearch[created_at]',
-                    'value'=>$searchModel->created_at,
+                    'value' => $searchModel->created_at,
                     'convertFormat' => true,
                     'includeMonthsFilter' => true,
-                    'bsVersion'=>'5.x',
+                    'bsVersion' => '5.x',
                     'pluginOptions' => ['locale' => ['format' => 'd-m-Y']],
                     'options' => [
                         'data-pjax' => '0',
-                         'autocomplete' => 'off',
-                        'placeholder' => 'Select rango...']
+                        'autocomplete' => 'off',
+                        'placeholder' => 'Select rango...'
+                    ]
                 ]),
 
                 'format' => 'raw',
@@ -114,30 +137,31 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'action',
                 'headerOptions' => ['style' => 'text-align:center'],
                 'contentOptions' => ['style' => 'text-align:center'],
-                'filter' => Html::activeDropDownList($searchModel, 
-                        'action', 
-                        Auditoria::getDropdownOptions(),
-                        ['class'=>'form-control','prompt' => 'Select']
-                        ),        
+                'filter' => Html::activeDropDownList(
+                    $searchModel,
+                    'action',
+                    Auditoria::getDropdownOptions(),
+                    ['class' => 'form-control', 'prompt' => 'Select']
+                ),
                 'format' => 'raw',
 
 
             ],
 
         ];
-        
-        $ind=Html::a(
+
+        $ind = Html::a(
             '<i class="bi bi-arrow-counterclockwise me-2"></i>' . Yii::t('cruds', 'Reset'),
             ['index'],
             [
                 'class' => 'btn btn-outline-secondary btn-default float-end me-2',
                 'data-pjax' => '0',
-                ]
+            ]
         );
 
 
         echo GridView::widget([
-            'id' => 'auditoria_grid',            
+            'id' => 'auditoria_grid',
             'dataProvider' => $dataProvider,
             'pjax' => true,
             'pager' => [
@@ -155,7 +179,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'export' => false,
             'rowOptions' => function ($model) {
                 return ['data-id' => $model->id]; // Agrega el ID del modelo a la fila
-            },            
+            },
         ]);
 
         ?>
@@ -198,7 +222,16 @@ $(document).on('pjax:end', function() {
 
             
         }
-    });
+});
+
+
+
+$(document).on('click', '#delete-all-btn', function(e) {
+    e.preventDefault();
+    let url = $(this).data('url');
+    $('#confirm-delete-btn').attr('href', url);
+    $('#confirm-delete-modal').modal('show');
+});    
 
 
 JS;

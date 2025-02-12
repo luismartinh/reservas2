@@ -14,6 +14,7 @@ use yii\behaviors\TimestampBehavior;
  *
  * @property integer $id
  * @property string $msg
+ * @property string $file
  * @property string $created_at
  * @property integer $created_by
  *
@@ -57,7 +58,8 @@ abstract class NotifMensajes extends \yii\db\ActiveRecord
         $parentRules = parent::rules();
         return ArrayHelper::merge($parentRules, [
             [['msg'], 'required'],
-            [['msg'], 'string']
+            [['msg'], 'string'],
+            [['file'], 'string', 'max' => 255]
         ]);
     }
 
@@ -71,6 +73,7 @@ abstract class NotifMensajes extends \yii\db\ActiveRecord
             'msg' => Yii::t('models', 'Msg'),
             'created_at' => Yii::t('models', 'Created At'),
             'created_by' => Yii::t('models', 'Created By'),
+            'file' => Yii::t('models', 'File'),
         ]);
     }
 

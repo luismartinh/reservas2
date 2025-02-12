@@ -19,22 +19,23 @@ class Notificaciones extends BaseNotificaciones
     }
 
 
-    private static function getLastchangeAuditoria($tabla){
+    private static function getLastchangeAuditoria($tabla)
+    {
 
-        if(!Auditoria::hayQueAuditar($tabla)){
+        if (!Auditoria::hayQueAuditar($tabla)) {
             return "<div class=\"alert alert-danger\">Para ver los cambios debe activar la auditoria de $tabla </div>";
         }
-        $last=Auditoria::find()->where(['tabla'=>$tabla])->orderBy(['id'=>SORT_DESC])->one();
-        if(!$last){
+        $last = Auditoria::find()->where(['tabla' => $tabla])->orderBy(['id' => SORT_DESC])->one();
+        if (!$last) {
             return "<div class=\"alert alert-danger\">No se registro el cambio en auditoria de $tabla </div>";
         }
 
-        return '<pre style="padding:10px; border-radius:5px;">' . 
-            json_encode($last->changes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . 
+        return '<pre style="padding:10px; border-radius:5px;">' .
+            json_encode($last->changes, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) .
             '</pre>';
     }
 
-    public static function NotificarANivel($nivel, $tabla, $mensaje,$showChange=true)
+    public static function NotificarANivel($nivel, $tabla, $mensaje, $showChange = true)
     {
 
         $grupos = GrupoAcceso::find()->where(['nivel' => $nivel])->all();
@@ -55,14 +56,14 @@ class Notificaciones extends BaseNotificaciones
         $users_ids = array_unique(array_merge($users_ids, $id_array));
 
 
-        if($showChange){
+        if ($showChange) {
 
-            $change=self::getLastchangeAuditoria($tabla);
+            $change = self::getLastchangeAuditoria($tabla);
 
-            $msg="<p>$mensaje</p>$change";
+            $msg = "<p>$mensaje</p>$change";
 
-        }else{
-            $msg="<p>$mensaje</p>";
+        } else {
+            $msg = "<p>$mensaje</p>";
         }
 
         if (count($users_ids) > 0) {
@@ -71,7 +72,7 @@ class Notificaciones extends BaseNotificaciones
 
     }
 
-    public static function Nueva($users_ids, $tabla, $texto)
+    public static function Nueva($users_ids, $tabla, $texto, $file = null)
     {
 
         if (!Notificaciones::hayQueNotificar($tabla))
@@ -81,10 +82,16 @@ class Notificaciones extends BaseNotificaciones
 
         $msg->msg = $texto;
 
+        if ($file) {
+
+            $msg->file = $file;
+        }
+
+
         if (!$msg->save()) {
-            Yii::error("ERROR: Notificaciones.hayQueNotificar() msg->save()". implode(",", $msg->getErrorSummary(true)));
+            Yii::error("ERROR: Notificaciones.hayQueNotificar() msg->save()" . implode(",", $msg->getErrorSummary(true)));
             throw new \Exception("Error notif.msg save" . implode(",", $msg->getErrorSummary(true)));
-            
+
         }
 
 
@@ -95,10 +102,10 @@ class Notificaciones extends BaseNotificaciones
             $notif->id_user = $user_id;
             $notif->id_msg = $msg->id;
             $notif->leida = 0;
-            $notif->tabla=$tabla;
+            $notif->tabla = $tabla;
 
             if (!$notif->save()) {
-                Yii::error("ERROR: Notificaciones.hayQueNotificar() notif->save()". implode(",", $notif->getErrorSummary(true)));
+                Yii::error("ERROR: Notificaciones.hayQueNotificar() notif->save()" . implode(",", $notif->getErrorSummary(true)));
                 throw new \Exception("Error notif save " . implode(",", $notif->getErrorSummary(true)));
             }
 

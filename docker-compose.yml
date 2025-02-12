@@ -15,6 +15,20 @@ services:
       - '8281:80'
     networks:
      - red-bt5
+
+  php-queue:
+    depends_on:
+      db:
+        condition: service_healthy  
+    image: yiisoftware/yii2-php:7.4-apache
+    volumes:
+      - ./:/var/www/html/
+    working_dir: /var/www/html/basicb5  
+    command: php yii queue/listen
+    networks:
+      - red-bt5
+    restart: always
+
   db:
     image: mysql:5.7
     restart: always
@@ -32,6 +46,11 @@ services:
       - ./db:/var/db/
     networks:
      - red-bt5
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
  # phpmyadmin
   phpmyadmin:
     depends_on:

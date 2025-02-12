@@ -6,16 +6,25 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic-console',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'queue'],
     'controllerNamespace' => 'app\commands',
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
         '@tests' => '@app/tests',
     ],
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
+        ],
+        'queue' => [
+            'class' => yii\queue\db\Queue::class,  // o el tipo de cola que estés utilizando
+            'db' => 'db',  // o el componente de base de datos que estés utilizando
+            'tableName' => '{{%queue}}',
+            'channel' => 'default',
+            'ttr' => 60,  // tiempo de trabajo en segundos
+            //'retryInterval' => 5,  // intervalo entre reintentos
+            'mutex' => \yii\mutex\MysqlMutex::class,  // o el mutex que estés utilizando
         ],
         'log' => [
             'targets' => [

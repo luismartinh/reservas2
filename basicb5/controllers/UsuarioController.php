@@ -45,16 +45,6 @@ class UsuarioController extends BaseUsuarioController
                             'actions' => ['index', 'view', 'create', 'update', 'delete', 'setgrupoaccesos', 'setaccesos', 'mi-update'],
                             'roles' => ['@'],
                         ],
-                        [
-                            'allow' => true,
-                            'actions' => ['index', 'view'],
-                            'roles' => ['@']
-                        ],
-                        [
-                            'allow' => true,
-                            'actions' => ['update', 'create', 'delete'],
-                            'roles' => ['@']
-                        ],
                     ]
                 ]
             ]

@@ -78,3 +78,103 @@ Set custom checkbox:
 
 DateRangePiker:
 https://www.daterangepicker.com/#usage
+
+JsonEditor:
+https://github.com/dmitry-kulikov/yii2-json-editor
+composer require kdn/yii2-json-editor "*"
+
+
+backups desde yii2:
+
+comando cli:
+mysqldump --user=root --password=userbt51234 --host=db --databases bt5 --routines --skip-comments > /var/www/html/basicb5/runtime/backup_bt5.sql 2>&1
+
+
+Debe estar instalado mysql-client en el service de php:
+
+(agregar en DockerFile)
+RUN apt-get update && apt-get install -y mysql-client
+
+docker-compose down
+docker-compose build
+docker-compose up -d
+
+
+agregar la action en el controller:
+
+´´´
+    public function actionBackup()
+    {
+
+        $menu = new \app\models\Menu();
+        $menu->descr = "Auditoria backup de la base de datos";
+        $menu->label = "Backup";
+        $menu->menu = (string) RootMenu::CONFIG;
+        $menu->menu_path = "Seguridad/Backup";
+        $menu->url = Yii::$app->controller->id . '/backup';
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/backup',
+            "Auditoria backup de la base de datos",
+            $menu
+        );
+
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+
+        // Obtén la conexión de la base de datos
+        $db = Yii::$app->db;
+
+        // Archivo de backup
+        $backupFile = Yii::getAlias('@runtime') . "/backup.sql";
+
+        // Abre el archivo de respaldo para escribir
+        $file = fopen($backupFile, 'w');
+
+        // Desactivar la verificación de claves foráneas (evitar problemas con las claves foráneas)
+        fwrite($file, "SET FOREIGN_KEY_CHECKS=0;\n\n");
+
+        // Obtén todas las tablas de la base de datos
+        $tables = $db->createCommand('SHOW TABLES')->queryColumn();
+
+        // Escribir la estructura de cada tabla y los datos
+        foreach ($tables as $table) {
+            // Escribir el DROP TABLE IF EXISTS para eliminar la tabla si existe
+            fwrite($file, "DROP TABLE IF EXISTS `{$table}`;\n");
+
+            // Escribir la estructura de la tabla (CREATE TABLE)
+            $createTableQuery = $db->createCommand("SHOW CREATE TABLE `{$table}`")->queryOne();
+            fwrite($file, $createTableQuery['Create Table'] . ";\n\n");
+
+            // Escribir los datos de la tabla (INSERT INTO)
+            $rows = $db->createCommand("SELECT * FROM `{$table}`")->queryAll();
+            foreach ($rows as $row) {
+                $columns = array_keys($row);
+                $values = array_map([$db, 'quoteValue'], array_values($row)); // Escapar los valores
+                $insertQuery = "INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) VALUES (" . implode(', ', $values) . ");\n";
+                fwrite($file, $insertQuery);
+            }
+
+            fwrite($file, "\n\n");
+        }
+
+        // Reactivar la verificación de claves foráneas
+        fwrite($file, "SET FOREIGN_KEY_CHECKS=1;\n");
+
+        // Cerrar el archivo de respaldo
+        fclose($file);
+
+        Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'parametros_generales', "Se descargo un backup en backup_bt5.sql");
+        // Retornar el archivo generado para descarga
+        return Yii::$app->response->sendFile($backupFile, "backup_bt5.sql", ['mimeType' => 'application/sql'])
+            ->on(Response::EVENT_AFTER_SEND, function ($event) {
+                unlink($event->data);  // Eliminar el archivo temporal después de enviarlo
+            }, $backupFile);
+    }
+´´´
+
+

@@ -6,7 +6,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'bt5',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'queue'],
     'language' => 'es',
     'timeZone' => 'America/Argentina/Buenos_Aires',
     'aliases' => [
@@ -38,6 +38,16 @@ $config = [
             ],            
             'useFileTransport' =>false,// true,
         ],
+        'queue' => [
+            'class' => yii\queue\db\Queue::class,  // o el tipo de cola que estés utilizando
+            'db' => 'db',  // o el componente de base de datos que estés utilizando
+            'tableName' => '{{%queue}}',
+            'channel' => 'default',
+            'ttr' => 60,  // tiempo de trabajo en segundos
+            //'retryInterval' => 5,  // intervalo entre reintentos
+            'mutex' => \yii\mutex\MysqlMutex::class,  // o el mutex que estés utilizando
+        ],
+    
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [

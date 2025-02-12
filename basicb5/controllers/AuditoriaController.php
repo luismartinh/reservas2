@@ -2,10 +2,13 @@
 
 namespace app\controllers;
 
+use app\config\Niveles;
 use app\config\RootMenu;
+use app\jobs\BackupJob;
 use app\models\Auditoria;
 use app\models\AuditoriaSearch;
 use app\models\Identificador;
+use app\models\Notificaciones;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\base\InvalidConfigException;
@@ -39,7 +42,7 @@ class AuditoriaController extends BaseAuditoriaController
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => ['index', 'view', 'create', 'update', 'delete','ver-detalle'],
+                            'actions' => ['index', 'view', 'create', 'update', 'delete', 'ver-detalle', 'delete-todas', 'backup', 'download-backup'],
                             'roles' => ['@'],
                         ],
                     ]
@@ -95,7 +98,7 @@ class AuditoriaController extends BaseAuditoriaController
      */
     public function actionView($id)
     {
-        throw new HttpException(403,"Forbidden");
+        throw new HttpException(403, "Forbidden");
 
     }
 
@@ -109,7 +112,7 @@ class AuditoriaController extends BaseAuditoriaController
     public function actionCreate()
     {
 
-        throw new HttpException(403,"Forbidden");
+        throw new HttpException(403, "Forbidden");
     }
 
     /**
@@ -123,7 +126,7 @@ class AuditoriaController extends BaseAuditoriaController
      */
     public function actionUpdate($id)
     {
-        throw new HttpException(403,"Forbidden");
+        throw new HttpException(403, "Forbidden");
     }
 
     /**
@@ -137,7 +140,7 @@ class AuditoriaController extends BaseAuditoriaController
      */
     public function actionDelete($id)
     {
-        throw new HttpException(403,"Forbidden");
+        throw new HttpException(403, "Forbidden");
     }
 
 
@@ -160,7 +163,7 @@ class AuditoriaController extends BaseAuditoriaController
 
 
             $model = $this->findModel($_POST['expandRowKey']);
-            
+
 
             return Yii::$app->controller->renderPartial('_verDetalle', [
                 'model' => $model,
@@ -168,6 +171,122 @@ class AuditoriaController extends BaseAuditoriaController
 
         } else {
             return '<div class="alert alert-danger">No se encontraron pagos</div>';
+        }
+    }
+
+
+    /**
+     * Deletes an existing  model.
+     * If deletion is successful, 
+     *
+     * @param integer $id
+     *
+     * @throws \Throwable
+     * @return Response
+     */
+    public function actionDeleteTodas()
+    {
+
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/delete-todas',
+            "Auditoria eliminar todas",
+            null
+        );
+
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+
+        try {
+            Auditoria::deleteAll();
+            Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'parametros_generales', "Se eliminaron todas las auditorias (" . Yii::$app->user->identity->login . ")");
+            Yii::$app->session->setFlash('success', Yii::t("app", 'Se elimino correctamente'));
+        } catch (\Exception $e) {
+            Yii::error("ERROR:" . Yii::$app->controller->id . "/delete-todas " . ($e->errorInfo[2] ?? $e->getMessage()));
+            Yii::$app->getSession()->addFlash('error', $e->errorInfo[2] ?? $e->getMessage());
+        }
+
+        return $this->redirect(['index']);
+    }
+
+
+
+    public function actionBackup()
+    {
+
+        $menu = new \app\models\Menu();
+        $menu->descr = "Auditoria backup de la base de datos";
+        $menu->label = "Backup";
+        $menu->menu = (string) RootMenu::CONFIG;
+        $menu->menu_path = "Seguridad/Backup";
+        $menu->url = Yii::$app->controller->id . '/backup';
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/backup',
+            "Auditoria backup de la base de datos",
+            $menu
+        );
+
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+
+        if(BackupJob::isWorking()){
+            Yii::$app->session->setFlash('warning', Yii::t("app", 'El proceso de backup ya se encuentra en ejecución'));
+            return $this->goBack();
+        }
+        // Definir el nombre del archivo de backup
+        $backupFile = Yii::getAlias('@runtime') . "/backup_db_" . Yii::$app->user->identity->id . ".sql";
+
+        $job=new \app\jobs\BackupJob([
+            'backupFile' => $backupFile,
+            'user_id' => Yii::$app->user->identity->id
+        ]);
+
+        // Crear y poner el job en la cola
+        Yii::$app->queue->push(new \app\jobs\BackupJob([
+            'backupFile' => $backupFile,
+            'user_id' => Yii::$app->user->identity->id
+        ]));
+
+        // Retornar una respuesta indicando que el proceso ha comenzado
+        Yii::$app->session->setFlash('success', Yii::t("app", 'El proceso de backup ha comenzado. Recibirás una notificación para descargarlo una vez esté listo'));
+        return $this->goBack();
+
+    }
+
+    public function actionDownloadBackup($filename)
+    {
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/backup',
+            "Auditoria backup de la base de datos",
+            null
+        );
+
+        $filePath = Yii::getAlias('@runtime') . '/' . $filename;
+
+        if (file_exists($filePath)) {
+            return Yii::$app->response->sendFile($filePath, $filename, [
+                'mimeType' => 'application/octet-stream',
+                'inline' => false, // Esto forza la descarga
+            ])->on(Response::EVENT_AFTER_SEND, function ($event) {
+                unlink($event->data);  // Eliminar el archivo temporal después de enviarlo
+            }, $filePath);
+            ;
+        } else {
+            //throw new NotFoundHttpException('El archivo no existe.');
+            Yii::$app->session->setFlash('danger', Yii::t("app", 'El archivo ya fue descargado'));
+            return $this->goBack();
+    
         }
     }
 

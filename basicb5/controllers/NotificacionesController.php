@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\config\Niveles;
 use app\models\Notificaciones;
 use app\models\NotificacionesSearch;
 use yii\filters\AccessControl;
@@ -55,7 +56,7 @@ class NotificacionesController extends BaseNotificacionesController
 
 
         $searchModel = Yii::createObject(NotificacionesSearch::class);
-        $dataProvider = $searchModel->searchIndex($this->request->get(),Yii::$app->user->identity->id);
+        $dataProvider = $searchModel->searchIndex($this->request->get(), Yii::$app->user->identity->id);
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -195,18 +196,41 @@ class NotificacionesController extends BaseNotificacionesController
     public function actionDeleteLeidos()
     {
 
+        $notifs=Notificaciones::find()->where(['id_user' => Yii::$app->user->identity->id, 'leida' => 1])->all();
         try {
 
+            $this->_deleteMsgs($notifs);
             Notificaciones::deleteAll(['id_user' => Yii::$app->user->identity->id, 'leida' => 1]);
-
             Yii::$app->session->setFlash('success', Yii::t("app", 'Se elimino correctamente'));
+            
         } catch (\Exception $e) {
+            Yii::error("ERROR:" . Yii::$app->controller->id . "/delete-leidos " . ($e->errorInfo[2] ?? $e->getMessage()));
             Yii::$app->getSession()->addFlash('error', $e->errorInfo[2] ?? $e->getMessage());
         }
 
         return $this->redirect(['index']);
     }
 
+
+    private function _deleteMsgs($notifs)
+    {
+
+        foreach((array)$notifs as $notif){
+
+            $todas_notifs = $notif->msg->getNotificaciones()->where(['!=', 'id', $notif->id])->all();
+
+            if (count($todas_notifs) == 0) {
+                $file=$notif->msg->file;
+                if($file){
+                    if(file_exists($file))@unlink($file);
+                }
+                
+                $notif->msg->delete();
+            }
+    
+        }
+
+    }
 
     /**
      * Deletes an existing  model.
@@ -220,12 +244,16 @@ class NotificacionesController extends BaseNotificacionesController
     public function actionDeleteTodas()
     {
 
+
+        $notifs=Notificaciones::find()->where(['id_user' => Yii::$app->user->identity->id])->all();
         try {
 
+            $this->_deleteMsgs($notifs);
             Notificaciones::deleteAll(['id_user' => Yii::$app->user->identity->id]);
 
             Yii::$app->session->setFlash('success', Yii::t("app", 'Se elimino correctamente'));
         } catch (\Exception $e) {
+            Yii::error("ERROR:" . Yii::$app->controller->id . "/delete-todas " . ($e->errorInfo[2] ?? $e->getMessage()));
             Yii::$app->getSession()->addFlash('error', $e->errorInfo[2] ?? $e->getMessage());
         }
 

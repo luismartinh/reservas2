@@ -83,7 +83,7 @@ class SiteController extends Controller
 
             if (Yii::$app->session['userSessionTimeout'] < time()) {
                 Yii::$app->user->logout();
-                return false;
+                //return false;
             } else {
                 Yii::$app->session->set('userSessionTimeout', time() + Yii::$app->params['sessionTimeoutSeconds']);
                 return true;

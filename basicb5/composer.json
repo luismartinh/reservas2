@@ -27,7 +27,9 @@
         "kartik-v/yii2-grid": "dev-master",
         "kartik-v/yii2-icons": "@dev",
         "kartik-v/yii2-bootstrap5-dropdown": "@dev",
-        "kartik-v/yii2-date-range": "dev-master"
+        "kartik-v/yii2-date-range": "dev-master",
+        "kdn/yii2-json-editor": "*",
+        "yiisoft/yii2-queue": "^2.3"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

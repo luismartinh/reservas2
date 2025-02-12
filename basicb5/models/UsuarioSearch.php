@@ -20,9 +20,29 @@ class UsuarioSearch extends Usuario
     public function rules()
     {
         return [
-            [['id', 'activo', 'status', 'created_at', 'updated_at', 'created_by', 'updated_by', 'esUsuarioGrupo', 'nivel'], 'integer'],
-            [['login', 'nombre', 'apellido', 'pwd', 'id_session', 'last_login_time', 'last_login_ip', 'codigo', 'auth_key', 'password_hash',
-             'password_reset_token', 'email', 'user_sign_token', 'account', 'acc_pwd', 'access_token', 'locate', 'esUsuarioGrupo','nivel'], 'safe'],
+            [['id', 'activo', 'created_at', 'updated_at', 'created_by', 'updated_by', 'esUsuarioGrupo', 'nivel'], 'integer'],
+            [
+                [
+                    'login',
+                    'nombre',
+                    'apellido',
+                    'pwd',
+                    'id_session',
+                    'last_login_time',
+                    'last_login_ip',
+                    'codigo',
+                    'auth_key',
+                    'password_hash',
+                    'password_reset_token',
+                    'email',
+                    'user_sign_token',
+                    'access_token',
+                    'locate',
+                    'esUsuarioGrupo',
+                    'nivel'
+                ],
+                'safe'
+            ],
         ];
     }
 
@@ -64,7 +84,6 @@ class UsuarioSearch extends Usuario
             'id' => $this->id,
             'last_login_time' => $this->last_login_time,
             'activo' => $this->activo,
-            'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'created_by' => $this->created_by,
@@ -84,8 +103,6 @@ class UsuarioSearch extends Usuario
             ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'user_sign_token', $this->user_sign_token])
-            ->andFilterWhere(['like', 'account', $this->account])
-            ->andFilterWhere(['like', 'acc_pwd', $this->acc_pwd])
             ->andFilterWhere(['like', 'access_token', $this->access_token])
             ->andFilterWhere(['like', 'locate', $this->locate]);
 
@@ -120,9 +137,7 @@ class UsuarioSearch extends Usuario
 
         $query->andFilterWhere([
             'id' => $this->id,
-            //'last_login_time' => $this->last_login_time,
             'activo' => $this->activo,
-            'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'created_by' => $this->created_by,
@@ -142,8 +157,6 @@ class UsuarioSearch extends Usuario
             ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'user_sign_token', $this->user_sign_token])
-            ->andFilterWhere(['like', 'account', $this->account])
-            ->andFilterWhere(['like', 'acc_pwd', $this->acc_pwd])
             ->andFilterWhere(['like', 'access_token', $this->access_token])
             ->andFilterWhere(['like', 'locate', $this->locate]);
 
@@ -171,7 +184,7 @@ class UsuarioSearch extends Usuario
      *
      * @return ActiveDataProvider
      */
-    public function searchGrupo($params,$id_grupo,$nivel)
+    public function searchGrupo($params, $id_grupo, $nivel)
     {
         //$query = Usuario::find();
 
@@ -205,19 +218,21 @@ class UsuarioSearch extends Usuario
 
             } else {
                 $query = Usuario::find()
-                ->joinWith('grupoAccesos')
-                ->where([
-                    'or',
-                    ['grupo_acceso.id' => null], 
-                    ['not', ['grupo_acceso.id' => $id_grupo]] 
-                ])
-                ->andWhere(['not in', 'usuario.id', 
-                    (new \yii\db\Query())
-                        ->select('id_usuario')
-                        ->from('grupos_accesos_usuarios')
-                        ->where(['id_grupo_acceso' => $id_grupo])
-                ]);
-            
+                    ->joinWith('grupoAccesos')
+                    ->where([
+                        'or',
+                        ['grupo_acceso.id' => null],
+                        ['not', ['grupo_acceso.id' => $id_grupo]]
+                    ])
+                    ->andWhere([
+                        'not in',
+                        'usuario.id',
+                        (new \yii\db\Query())
+                            ->select('id_usuario')
+                            ->from('grupos_accesos_usuarios')
+                            ->where(['id_grupo_acceso' => $id_grupo])
+                    ]);
+
 
             }
 
@@ -227,16 +242,15 @@ class UsuarioSearch extends Usuario
                     'pageSize' => 20,
                     'pageParam' => 'page-usuarios',
                 ]
-    
+
             ]);
-    
+
         }
 
         $query->andFilterWhere([
             'id' => $this->id,
             'last_login_time' => $this->last_login_time,
             'activo' => $this->activo,
-            'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'created_by' => $this->created_by,
@@ -256,8 +270,6 @@ class UsuarioSearch extends Usuario
             ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'user_sign_token', $this->user_sign_token])
-            ->andFilterWhere(['like', 'account', $this->account])
-            ->andFilterWhere(['like', 'acc_pwd', $this->acc_pwd])
             ->andFilterWhere(['like', 'access_token', $this->access_token])
             ->andFilterWhere(['like', 'locate', $this->locate]);
 

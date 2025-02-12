@@ -26,10 +26,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $password_hash
  * @property string $password_reset_token
  * @property string $email
- * @property integer $status
  * @property string $user_sign_token
- * @property string $account
- * @property string $acc_pwd
  * @property string $access_token
  * @property string $locate
  * @property integer $nivel
@@ -65,9 +62,9 @@ abstract class Usuario extends ActiveRecordAudit
         ];
         $behaviors['timestamp'] = [
             'class' => TimestampBehavior::class,
-                        ];
-        
-    return $behaviors;
+        ];
+
+        return $behaviors;
     }
 
     /**
@@ -77,12 +74,22 @@ abstract class Usuario extends ActiveRecordAudit
     {
         $parentRules = parent::rules();
         return ArrayHelper::merge($parentRules, [
-            [['login', 'nombre', 'apellido', 'pwd','nivel'], 'required'],
+            [['login', 'nombre', 'apellido', 'pwd', 'nivel'], 'required'],
             [['last_login_time'], 'safe'],
-            [['activo', 'status'], 'integer'],
+            [['activo'], 'integer'],
             [['nivel'], 'integer', 'min' => 0, 'max' => 5],
-            [['login', 'password_hash', 'password_reset_token', 'email', 
-            'user_sign_token', 'account', 'acc_pwd', 'access_token'], 'string', 'max' => 255],
+            [
+                [
+                    'login',
+                    'password_hash',
+                    'password_reset_token',
+                    'email',
+                    'user_sign_token',
+                    'access_token'
+                ],
+                'string',
+                'max' => 255
+            ],
             [['nombre', 'apellido', 'pwd', 'last_login_ip'], 'string', 'max' => 45],
             [['id_session'], 'string', 'max' => 150],
             [['codigo'], 'string', 'max' => 20],
@@ -90,19 +97,19 @@ abstract class Usuario extends ActiveRecordAudit
             [['locate'], 'string', 'max' => 10],
             [['login'], 'unique'],
             [['password_reset_token'], 'unique'],
-    
+
             // ✅ Si 'email' está vacío, conviértelo a NULL
             [['email'], 'default', 'value' => null],
-    
+
             // ✅ Validación de email solo si tiene contenido
             [['email'], 'email', 'skipOnEmpty' => true],
-    
+
             // ✅ Unique solo si el email tiene contenido
             [['email'], 'unique', 'skipOnEmpty' => true],
         ]);
     }
-    
-     /**
+
+    /**
      * @inheritdoc
      */
     public function attributeLabels()
@@ -122,14 +129,11 @@ abstract class Usuario extends ActiveRecordAudit
             'password_hash' => Yii::t('models', 'Password Hash'),
             'password_reset_token' => Yii::t('models', 'Password Reset Token'),
             'email' => Yii::t('models', 'Email'),
-            'status' => Yii::t('models', 'Status'),
             'created_at' => Yii::t('models', 'Created At'),
             'updated_at' => Yii::t('models', 'Updated At'),
             'created_by' => Yii::t('models', 'Created By'),
             'updated_by' => Yii::t('models', 'Updated By'),
             'user_sign_token' => Yii::t('models', 'User Sign Token'),
-            'account' => Yii::t('models', 'Account'),
-            'acc_pwd' => Yii::t('models', 'Acc Pwd'),
             'access_token' => Yii::t('models', 'Access Token'),
             'locate' => Yii::t('models', 'Locate'),
             'nivel' => Yii::t('models', 'Jerarquia'),

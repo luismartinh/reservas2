@@ -55,6 +55,10 @@ class PasswordResetRequestForm extends Model
         }
         
 
+        $config=ParametrosGenerales::getParametro("MAIL_CFG")->valor;
+
+        Yii::$app->mailer->setTransport($config);
+
        Yii::$app->mailer->compose('@app/views/mails/passwordResetToken', ['user' => $user])
        ->setFrom(Yii::$app->params['adminEmail'])
        ->setTo($this->email)
