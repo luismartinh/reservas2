@@ -282,7 +282,9 @@ class Menu extends BaseMenu
         $badge=<<<HTML
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                             $cant
-                        <span class="visually-hidden">unread messages</span>                        
+                            <span class="visually-hidden">unread messages</span>                        
+                        </span>     
+                        
 
         HTML;
 

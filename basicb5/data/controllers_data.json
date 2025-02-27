@@ -1,0 +1,110 @@
+[
+    {
+        "namespace": "app\\controllers",
+        "class": "AuditoriaController",
+        "actions": [
+            "actionIndex",
+            "actionView",
+            "actionCreate",
+            "actionUpdate",
+            "actionDelete",
+            "actionVerDetalle",
+            "actionDeleteTodas",
+            "actionBackup",
+            "actionDownloadBackup"
+        ]
+    },
+    {
+        "namespace": "app\\controllers",
+        "class": "AuditoriaTablaController",
+        "actions": [
+            "actionIndex",
+            "actionView",
+            "actionCreate",
+            "actionUpdate",
+            "actionDelete",
+            "actionActivate"
+        ]
+    },
+    {
+        "namespace": "app\\controllers",
+        "class": "GrupoAccesoController",
+        "actions": [
+            "actionIndex",
+            "actionView",
+            "actionCreate",
+            "actionUpdate",
+            "actionDelete",
+            "actionSetusuario",
+            "actionSetacceso"
+        ]
+    },
+    {
+        "namespace": "app\\controllers",
+        "class": "NotifTablasController",
+        "actions": [
+            "actionIndex",
+            "actionView",
+            "actionCreate",
+            "actionUpdate",
+            "actionDelete",
+            "actionActivate"
+        ]
+    },
+    {
+        "namespace": "app\\controllers",
+        "class": "NotificacionesController",
+        "actions": [
+            "actionIndex",
+            "actionView",
+            "actionCreate",
+            "actionUpdate",
+            "actionDelete",
+            "actionSetLeidas",
+            "actionVerDetalle",
+            "actionDeleteLeidos",
+            "actionDeleteTodas"
+        ]
+    },
+    {
+        "namespace": "app\\controllers",
+        "class": "ParametrosGeneralesController",
+        "actions": [
+            "actionIndex",
+            "actionView",
+            "actionCreate",
+            "actionUpdate",
+            "actionDelete",
+            "actionVerDetalle",
+            "actionPrueba"
+        ]
+    },
+    {
+        "namespace": "app\\controllers",
+        "class": "SiteController",
+        "actions": [
+            "actions",
+            "actionIndex",
+            "actionLogin",
+            "actionLogout",
+            "actionContact",
+            "actionAbout",
+            "actionRequestPasswordReset",
+            "actionResetPassword"
+        ]
+    },
+    {
+        "namespace": "app\\controllers",
+        "class": "UsuarioController",
+        "actions": [
+            "actionIndex",
+            "actionCreate",
+            "actionView",
+            "actionUpdate",
+            "actionMiUpdate",
+            "actionDelete",
+            "actionSetgrupoaccesos",
+            "actionSetaccesos"
+        ]
+    }
+]

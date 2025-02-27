@@ -1,0 +1,34 @@
+{
+    "candidates": [
+        {
+            "content": {
+                "parts": [
+                    {
+                        "text": "No puedo generar una consulta para esta solicitud."
+                    }
+                ],
+                "role": "model"
+            },
+            "finishReason": "STOP",
+            "avgLogprobs": 5.386148889859518e-7
+        }
+    ],
+    "usageMetadata": {
+        "promptTokenCount": 4948,
+        "candidatesTokenCount": 9,
+        "totalTokenCount": 4957,
+        "promptTokensDetails": [
+            {
+                "modality": "TEXT",
+                "tokenCount": 4948
+            }
+        ],
+        "candidatesTokensDetails": [
+            {
+                "modality": "TEXT",
+                "tokenCount": 9
+            }
+        ]
+    },
+    "modelVersion": "gemini-2.0-flash"
+}

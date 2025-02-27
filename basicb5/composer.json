@@ -29,7 +29,9 @@
         "kartik-v/yii2-bootstrap5-dropdown": "@dev",
         "kartik-v/yii2-date-range": "dev-master",
         "kdn/yii2-json-editor": "*",
-        "yiisoft/yii2-queue": "^2.3"
+        "yiisoft/yii2-queue": "^2.3",
+        "nikic/php-parser": "^5.4",
+        "guzzlehttp/guzzle": "^7.9"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",

@@ -12,10 +12,7 @@ use app\models\UsuarioSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\base\InvalidConfigException;
-use yii\helpers\Url;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
-use yii\web\Request;
 use yii\web\Response;
 use Yii;
 

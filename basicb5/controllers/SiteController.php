@@ -23,10 +23,10 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::class,
-                'only' => ['logout'],
+                'only' => ['logout', 'index-dentro'],
                 'rules' => [
                     [
-                        'actions' => ['logout'],
+                        'actions' => ['logout', 'index-dentro'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -64,8 +64,15 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+
+        if (Yii::$app->user->isGuest) {
+            return $this->render('index');
+        }
+
+        return $this->render('index_dentro');
+
     }
+
 
 
     public function beforeAction($action)
@@ -169,7 +176,8 @@ class SiteController extends Controller
      *
      * @return mixed
      */
-    public function actionRequestPasswordReset() {
+    public function actionRequestPasswordReset()
+    {
         $model = new \app\models\PasswordResetRequestForm();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
@@ -183,7 +191,7 @@ class SiteController extends Controller
         }
 
         return $this->render('requestPasswordResetToken', [
-                    'model' => $model,
+            'model' => $model,
         ]);
     }
 
@@ -194,7 +202,8 @@ class SiteController extends Controller
      * @return mixed
      * @throws BadRequestHttpException
      */
-    public function actionResetPassword($token) {
+    public function actionResetPassword($token)
+    {
         try {
             $model = new \app\models\ResetPasswordForm($token);
         } catch (InvalidParamException $e) {
@@ -207,7 +216,8 @@ class SiteController extends Controller
         }
 
         return $this->render('resetPasswordForm', [
-                    'model' => $model,]);
+            'model' => $model,
+        ]);
     }
 
 }

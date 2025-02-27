@@ -1,0 +1,220 @@
+[
+    {
+        "namespace": "app\\models",
+        "class": "Acceso",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "AccesoSearch",
+        "attributes": [
+            "esAccesoUsuario",
+            "esAccesoGrupo"
+        ],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "Auditoria",
+        "attributes": [],
+        "relations": [
+            "getDropdownOptions"
+        ]
+    },
+    {
+        "namespace": "app\\models",
+        "class": "AuditoriaSearch",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "AuditoriaTabla",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "AuditoriaTablaSearch",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "ContactForm",
+        "attributes": [
+            "name",
+            "email",
+            "subject",
+            "body",
+            "verifyCode"
+        ],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "GrupoAcceso",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "GrupoAccesoAcceso",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "GrupoAccesoSearch",
+        "attributes": [
+            "esUsuarioGrupo"
+        ],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "GrupoAccesoUsuario",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "Identificador",
+        "attributes": [],
+        "relations": [
+            "getAuthKey",
+            "getId"
+        ]
+    },
+    {
+        "namespace": "app\\models",
+        "class": "LoginForm",
+        "attributes": [
+            "username",
+            "password",
+            "rememberMe",
+            "_user"
+        ],
+        "relations": [
+            "getUser"
+        ]
+    },
+    {
+        "namespace": "app\\models",
+        "class": "Menu",
+        "attributes": [],
+        "relations": [
+            "getMenu",
+            "getRootMenu",
+            "getcustomMenu",
+            "getColSeparator",
+            "getDarkModeMenu",
+            "getNotificacionesMenu"
+        ]
+    },
+    {
+        "namespace": "app\\models",
+        "class": "NotifMensajes",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "NotifTablas",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "NotifTablasSearch",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "Notificaciones",
+        "attributes": [],
+        "relations": [
+            "getCantNoLeidas",
+            "getLastchangeAuditoria"
+        ]
+    },
+    {
+        "namespace": "app\\models",
+        "class": "NotificacionesSearch",
+        "attributes": [
+            "fecha"
+        ],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "ParametrosGenerales",
+        "attributes": [],
+        "relations": [
+            "getParametro"
+        ]
+    },
+    {
+        "namespace": "app\\models",
+        "class": "ParametrosGeneralesSearch",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "PasswordResetRequestForm",
+        "attributes": [
+            "email"
+        ],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "ResetPasswordForm",
+        "attributes": [
+            "password",
+            "repeatpassword",
+            "Login",
+            "_user"
+        ],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "User",
+        "attributes": [
+            "id",
+            "username",
+            "password",
+            "authKey",
+            "accessToken",
+            "users"
+        ],
+        "relations": [
+            "getId",
+            "getAuthKey"
+        ]
+    },
+    {
+        "namespace": "app\\models",
+        "class": "Usuario",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "UsuarioAcceso",
+        "attributes": [],
+        "relations": []
+    },
+    {
+        "namespace": "app\\models",
+        "class": "UsuarioSearch",
+        "attributes": [
+            "esUsuarioGrupo"
+        ],
+        "relations": []
+    }
+]

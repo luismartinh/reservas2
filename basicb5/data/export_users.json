@@ -1,0 +1,317 @@
+[
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Administrar Usuarios",
+        "acceso": "usuario\/index"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Administrar Grupos de acceso",
+        "acceso": "grupo-acceso\/index"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Crear usuarios",
+        "acceso": "usuario\/create"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Modificar usuarios",
+        "acceso": "usuario\/update"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Eliminar usuarios",
+        "acceso": "usuario\/delete"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Crear grupos de acceso",
+        "acceso": "grupo-acceso\/create"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Modificar grupos de acceso",
+        "acceso": "grupo-acceso\/update"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Eliminar grupos de acceso",
+        "acceso": "grupo-acceso\/delete"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Modificar permisos de grupos de acceso",
+        "acceso": "grupo-acceso\/view"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Modificar permisos de usuarios",
+        "acceso": "usuario\/view"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Modificar mi usuario",
+        "acceso": "usuario\/mi-update"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Ver Auditoria cambios",
+        "acceso": "auditoria\/index"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Administrar Auditoria cambios",
+        "acceso": "auditoria-tabla\/index"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Administrar notificaciones",
+        "acceso": "notif-tablas\/index"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Administrar parametros generales",
+        "acceso": "parametros-generales\/index"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Modificar parametros",
+        "acceso": "parametros-generales\/update"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Auditoria eliminar todas",
+        "acceso": "auditoria\/delete-todas"
+    },
+    {
+        "usuario": "sysadmin nmbre sysadmin",
+        "login": "sysadmin",
+        "nivel": "0",
+        "activo": "1",
+        "grupo_acceso": "grupo sysadmin",
+        "permiso": "Auditoria backup de la base de datos",
+        "acceso": "auditoria\/backup"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Administrar Usuarios",
+        "acceso": "usuario\/index"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Administrar Grupos de acceso",
+        "acceso": "grupo-acceso\/index"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Crear usuarios",
+        "acceso": "usuario\/create"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Modificar usuarios",
+        "acceso": "usuario\/update"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Eliminar usuarios",
+        "acceso": "usuario\/delete"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Crear grupos de acceso",
+        "acceso": "grupo-acceso\/create"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Modificar grupos de acceso",
+        "acceso": "grupo-acceso\/update"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Eliminar grupos de acceso",
+        "acceso": "grupo-acceso\/delete"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Modificar permisos de grupos de acceso",
+        "acceso": "grupo-acceso\/view"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Modificar permisos de usuarios",
+        "acceso": "usuario\/view"
+    },
+    {
+        "usuario": "admin admin",
+        "login": "admin",
+        "nivel": "1",
+        "activo": "1",
+        "grupo_acceso": "grupo admin",
+        "permiso": "Modificar mi usuario",
+        "acceso": "usuario\/mi-update"
+    },
+    {
+        "usuario": "usuario2 usuario2",
+        "login": "gerente",
+        "nivel": "2",
+        "activo": "1",
+        "grupo_acceso": "grupo gerentes",
+        "permiso": "Administrar Grupos de acceso",
+        "acceso": "grupo-acceso\/index"
+    },
+    {
+        "usuario": "usuario2 usuario2",
+        "login": "gerente",
+        "nivel": "2",
+        "activo": "1",
+        "grupo_acceso": "grupo gerentes",
+        "permiso": "Modificar mi usuario",
+        "acceso": "usuario\/mi-update"
+    },
+    {
+        "usuario": "usuario5 us",
+        "login": "operador",
+        "nivel": "3",
+        "activo": "1",
+        "grupo_acceso": "grupo operador",
+        "permiso": "Ver Auditoria cambios",
+        "acceso": "auditoria\/index"
+    },
+    {
+        "usuario": "pepe1 nuevo",
+        "login": "usuario",
+        "nivel": "5",
+        "activo": "1",
+        "grupo_acceso": "grupo usuarios web",
+        "permiso": "Modificar mi usuario",
+        "acceso": "usuario\/mi-update"
+    },
+    {
+        "usuario": "usuario5 us",
+        "login": "webuser",
+        "nivel": "5",
+        "activo": "1",
+        "grupo_acceso": null,
+        "permiso": "Administrar Usuarios",
+        "acceso": "usuario\/index"
+    },
+    {
+        "usuario": "usuario5 us",
+        "login": "webuser",
+        "nivel": "5",
+        "activo": "1",
+        "grupo_acceso": null,
+        "permiso": "Modificar mi usuario",
+        "acceso": "usuario\/mi-update"
+    }
+]

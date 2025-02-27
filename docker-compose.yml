@@ -64,6 +64,16 @@ services:
       MYSQL_ROOT_PASSWORD: pepe 
     networks:
       - red-bt5     
+
+ # Servicio ChatGPT proxy a openAI
+ #   chatgpt:
+ #     image: pawanosman/chatgpt:latest
+ #     restart: always
+ #     ports:
+ #       - '3040:3040'
+ #     networks:
+ #       - red-bt5
+
 volumes:
   vol-bt5:
 networks:
