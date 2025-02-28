@@ -37,4 +37,22 @@ class ParametrosGenerales extends BaseParametrosGenerales
 
     } 
 
+
+    public static function updateParametro($clave,$valor){
+
+        $par=ParametrosGenerales::find()->where(['clave'=>$clave])->one();
+        if(!$par){
+            return false;
+        }else{
+            $par->valor=$valor;
+        }
+
+        if (!$par->save()) {
+            Yii::error("ERROR: ParametrosGenerales.setParametro() par->save()". implode(",", $par->getErrorSummary(true)));
+            throw new \Exception("Error ParametrosGenerales.updateParametro() par->save() " . implode(",", $par->getErrorSummary(true)));
+        }
+
+        return true;
+    } 
+
 }

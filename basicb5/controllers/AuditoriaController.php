@@ -42,7 +42,19 @@ class AuditoriaController extends BaseAuditoriaController
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => ['index', 'view', 'create', 'update', 'delete', 'ver-detalle', 'delete-todas', 'backup', 'download-backup'],
+                            'actions' => [
+                                'index',
+                                'view',
+                                'create',
+                                'update',
+                                'delete',
+                                'ver-detalle',
+                                'delete-todas',
+                                'backup',
+                                'download-backup',
+                                'update-db',
+                                'rollback-update'
+                            ],
                             'roles' => ['@'],
                         ],
                     ]
@@ -238,14 +250,14 @@ class AuditoriaController extends BaseAuditoriaController
         }
 
 
-        if(BackupJob::isWorking()){
+        if (BackupJob::isWorking()) {
             Yii::$app->session->setFlash('warning', Yii::t("app", 'El proceso de backup ya se encuentra en ejecución'));
             return $this->goBack();
         }
         // Definir el nombre del archivo de backup
         $backupFile = Yii::getAlias('@runtime') . "/backup_db_" . Yii::$app->user->identity->id . ".sql";
 
-        $job=new \app\jobs\BackupJob([
+        $job = new \app\jobs\BackupJob([
             'backupFile' => $backupFile,
             'user_id' => Yii::$app->user->identity->id
         ]);
@@ -286,9 +298,122 @@ class AuditoriaController extends BaseAuditoriaController
             //throw new NotFoundHttpException('El archivo no existe.');
             Yii::$app->session->setFlash('danger', Yii::t("app", 'El archivo ya fue descargado'));
             return $this->goBack();
-    
+
         }
     }
 
+
+
+    public function actionUpdateDb()
+    {
+
+        $menu = new \app\models\Menu();
+        $menu->descr = "Actualizar la version de la base de datos";
+        $menu->label = "UpgradeDB";
+        $menu->menu = (string) RootMenu::CONFIG;
+        $menu->menu_path = "Seguridad/UpgradeDB";
+        $menu->url = Yii::$app->controller->id . '/update-db';
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/update-db',
+            "Auditoria actualizar la version de la base de datos",
+            $menu
+        );
+
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+
+        $model = new \app\models\UpdateDBForm();
+        $model->scenario = 'upgrade';
+
+        $model->setDefault();
+
+        $processed = [];
+
+        try {
+
+            if ($model->load($this->request->post())) {
+
+
+                $resp = $model->actualizar();
+
+                if ($resp['st'] == 'ok') {
+                    $processed = $resp['processed'];
+                    $cant = count($processed);
+                    Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'parametros_generales', "Se ejecutaron $cant actualizaciones actual:{$model->last_update} ");
+                    Yii::$app->session->setFlash('success', Yii::t("app", "Se ejecutaron $cant actualizaciones actual:{$model->last_update} "));
+                } else {
+                    $model->addError('_exception', $resp['msg']);
+                }
+
+            }
+            if (!Yii::$app->request->isPost) {
+                $model->load($this->request->get());
+            }
+        } catch (\Exception $e) {
+            $model->addError('_exception', $e->errorInfo[2] ?? $e->getMessage());
+            Yii::error("ERROR:" . Yii::$app->controller->id . "/update-db " . ($e->errorInfo[2] ?? $e->getMessage()));
+        }
+        return $this->render('dbversion/update', ['model' => $model, 'processed' => $processed]);
+
+
+    }
+
+
+    public function actionRollbackUpdate()
+    {
+
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/rollback-update',
+            "Auditoria deshacer actualizaciones la version de la base de datos",
+            null
+        );
+
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+        $model = new \app\models\UpdateDBForm();
+        $model->scenario = 'downgrade';
+
+        $model->setDefaultDowngrade();
+
+        $processed = [];
+
+        try {
+
+            if ($model->load($this->request->post())) {
+
+
+                $resp = $model->downgrade();
+
+                if ($resp['st'] == 'ok') {
+                    $processed = $resp['processed'];
+                    $cant = count($processed);
+                    Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'parametros_generales', "Se ejecutaron $cant rollback actual:{$model->last_update} ");
+                    Yii::$app->session->setFlash('success', Yii::t("app", "Se ejecutaron $cant rollback actual:{$model->last_update} "));
+                } else {
+                    $model->addError('_exception', $resp['msg']);
+                }
+
+            }
+            if (!Yii::$app->request->isPost) {
+                $model->load($this->request->get());
+            }
+        } catch (\Exception $e) {
+            $model->addError('_exception', $e->errorInfo[2] ?? $e->getMessage());
+            Yii::error("ERROR:" . Yii::$app->controller->id . "/rollback-update " . ($e->errorInfo[2] ?? $e->getMessage()));
+        }
+        return $this->render('dbversion/downgrade/update', ['model' => $model, 'processed' => $processed]);
+
+
+    }
 
 }
