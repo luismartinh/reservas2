@@ -220,4 +220,8 @@ class SiteController extends Controller
         ]);
     }
 
+    private function prueba(){
+        echo "hola";
+    }
+    
 }
