@@ -76,14 +76,9 @@ $modelGrupo = $model;
         <?php
         echo kartik\grid\GridView::widget([
             'id' => 'accesos-grid',
-            'layout' => '{summary}<div class="text-center">{pager}</div>{items}<div class="text-center">{pager}</div>',
+            'layout' => '{summary}<div class="text-center"></div>{items}<div class="text-center">{pager}</div>',
             'dataProvider' => $dataAProvider,
             'filterModel' => $searchAModel,
-            'pager' => [
-                'class' => yii\widgets\LinkPager::class,
-                'firstPageLabel' => Yii::t('cruds', 'First'),
-                'lastPageLabel' => Yii::t('cruds', 'Last')
-            ],
             'columns' => [
                 [
                     'class' => 'kartik\grid\CheckboxColumn',
@@ -180,14 +175,9 @@ $modelGrupo = $model;
         <?php
         echo kartik\grid\GridView::widget([
             'id' => 'usuarios-grid',
-            'layout' => '{summary}<div class="text-center">{pager}</div>{items}<div class="text-center">{pager}</div>',
+            'layout' => '{summary}<div class="text-center"></div>{items}<div class="text-center">{pager}</div>',
             'dataProvider' => $dataUsProvider,
             'filterModel' => $searchUsModel,
-            'pager' => [
-                'class' => yii\widgets\LinkPager::class,
-                'firstPageLabel' => Yii::t('cruds', 'First'),
-                'lastPageLabel' => Yii::t('cruds', 'Last')
-            ],
             'columns' => [
                 [
                     'class' => 'kartik\grid\CheckboxColumn',
