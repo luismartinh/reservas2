@@ -6,12 +6,18 @@ namespace app\models\base;
 
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the base-model class for table "grupos_accesos_accesos".
  *
  * @property integer $id_grupo_acceso
  * @property integer $id_acceso
+ * @property string $created_at 
+ * @property integer $created_by 
+ * @property string $updated_at 
+ * @property integer $updated_by 
  *
  * @property \app\models\Acceso $accesos
  * @property \app\models\GrupoAcceso $grupoAcceso
@@ -26,6 +32,24 @@ abstract class GrupoAccesoAcceso extends ActiveRecordAudit
     {
         return 'grupos_accesos_accesos';
     }
+
+   /** 
+    * @inheritdoc 
+    */ 
+    public function behaviors() 
+    { 
+        $behaviors = parent::behaviors(); 
+        $behaviors['blameable'] = [ 
+            'class' => BlameableBehavior::class, 
+        ]; 
+        $behaviors['timestamp'] = [ 
+            'class' => TimestampBehavior::class, 
+            'value' => (new \DateTime())->format('Y-m-d H:i:s'), 
+                        ]; 
+         
+    return $behaviors; 
+    }
+ 
 
     /**
      * @inheritdoc
@@ -50,6 +74,10 @@ abstract class GrupoAccesoAcceso extends ActiveRecordAudit
         return ArrayHelper::merge(parent::attributeLabels(), [
             'id_grupo_acceso' => Yii::t('models', 'id Grupo Acceso'),
             'id_acceso' => Yii::t('models', 'id Accesos'),
+            'created_at' => Yii::t('models', 'Created At'),
+            'created_by' => Yii::t('models', 'Created By'),
+            'updated_at' => Yii::t('models', 'Updated At'),
+            'updated_by' => Yii::t('models', 'Updated By'),            
         ]);
     }
 

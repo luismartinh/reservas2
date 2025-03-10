@@ -151,11 +151,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'id' => 'notificaciones_grid',
             'dataProvider' => $dataProvider,
             'pjax' => true,
-            'pager' => [
-                'class' => yii\widgets\LinkPager::class,
-                'firstPageLabel' => Yii::t('cruds', 'First'),
-                'lastPageLabel' => Yii::t('cruds', 'Last'),
-            ],
             'filterModel' => $searchModel,
             'columns' => $columns,
             'panel' => [

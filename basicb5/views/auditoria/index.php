@@ -164,11 +164,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'id' => 'auditoria_grid',
             'dataProvider' => $dataProvider,
             'pjax' => true,
-            'pager' => [
-                'class' => yii\widgets\LinkPager::class,
-                'firstPageLabel' => Yii::t('cruds', 'First'),
-                'lastPageLabel' => Yii::t('cruds', 'Last'),
-            ],
             'filterModel' => $searchModel,
             'columns' => $columns,
             'panel' => [
