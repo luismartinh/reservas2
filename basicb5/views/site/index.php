@@ -23,7 +23,7 @@ $url_images = Yii::getAlias('@web') . '/';
 
             <div class="col-md-6">
 
-                <img border="0" width="65%" src="<?= Empresas::getMyConfig('images', 'indexPPAL') ?>" />
+
 
             </div>
         </div>
