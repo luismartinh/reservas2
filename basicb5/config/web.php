@@ -6,7 +6,18 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'bt5',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log', 'queue'],
+    'bootstrap' => [
+        'log',
+        'queue',
+        function () {
+
+            // Registrar el evento para que siempre se escuche
+            //yii\base\Event::on(\app\models\Stock::class, \app\models\Stock::EVENT_STOCK_SAVED, [\app\models\StockListener::class, 'onStockSaved']);
+
+            //yii\base\Event::on(\app\models\Stock::class, \app\models\Stock::EVENT_STOCK_DELETED, [\app\models\StockListener::class, 'onStockDeleted']);
+        }
+    ],
+
     'language' => 'es',
     'timeZone' => 'America/Argentina/Buenos_Aires',
     'aliases' => [

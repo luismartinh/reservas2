@@ -39,6 +39,9 @@ use yii\behaviors\TimestampBehavior;
  * @property \app\models\GrupoAcceso[] $grupoAccesos
  * @property \app\models\GrupoAccesoUsuario[] $gruposAccesosUsuarios
  * @property \app\models\UsuarioAcceso[] $usuariosAccesos
+ * @property \app\models\Sucursal[] $sucursales
+ * @property \app\models\PuntoVenta[] $puntoVentas
+ * @property \app\models\PuntoVenta $puntoVentaDefault
  */
 abstract class Usuario extends ActiveRecordAudit
 {
@@ -189,6 +192,30 @@ abstract class Usuario extends ActiveRecordAudit
     public function getUsuariosAccesos()
     {
         return $this->hasMany(\app\models\UsuarioAcceso::class, ['id_usuario' => 'id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getSucursales()
+    {
+        return $this->hasMany(\app\models\Sucursal::class, ['id' => 'id_sucursal'])->viaTable('sucursal_usuario', ['id_usuario' => 'id']);
+    }
+
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPuntoVentas()
+    {
+        return $this->hasMany(\app\models\PuntoVenta::class, ['id' => 'id_punto_venta'])->viaTable('punto_venta_usuario', ['id_usuario' => 'id']);
+    }
+
+    public function getPuntoVentaDefault()
+    {
+        return $this->hasOne(\app\models\PuntoVenta::class, ['id' => 'id_punto_venta'])->viaTable('punto_venta_usuario_default', ['id_usuario' => 'id']);
     }
 
 }

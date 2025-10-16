@@ -5,8 +5,10 @@ namespace app\controllers;
 
 use app\config\Niveles;
 use app\config\RootMenu;
+//use app\models\PuntoVentaUsuarioDefault;
 use app\models\Identificador;
 use app\models\Notificaciones;
+//use app\models\PuntoVenta;
 use app\models\Usuario;
 use app\models\UsuarioSearch;
 use yii\filters\AccessControl;
@@ -116,9 +118,12 @@ class UsuarioController extends BaseUsuarioController
 
         $model = Yii::createObject(Identificador::class);
         $model->activo = 1;
+
+       // $this->getPuntoVentaDefault($model);
         try {
 
             if ($model->load($this->request->post())) {
+                $hay_errores = false;
 
                 $model->setPassword($model->pwd);
 
@@ -128,9 +133,22 @@ class UsuarioController extends BaseUsuarioController
                     Yii::$app->session->set('skip afterSave', '1');
 
                     if ($model->save()) {
-                        Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'usuario', "Se creo el usuario {$model->login}");
-                        Yii::$app->session->setFlash('success', Yii::t("app", 'Se guardo correctamente'));
-                        return $this->redirect(['view', 'id' => $model->id]);
+
+                        /*
+                        $ret = $this->savePuntoVentaDefault($model);
+
+                        if ($ret['status'] == 'error') {
+                            $model->addError('id_punto_venta_default', $ret['msg']);
+                            $hay_errores = true;
+                        }
+                        */    
+
+                        if (!$hay_errores) {
+                            Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'usuario', "Se creo el usuario {$model->login}");
+                            Yii::$app->session->setFlash('success', Yii::t("app", 'Se guardo correctamente'));
+                            return $this->redirect(['view', 'id' => $model->id]);
+
+                        }
                     }
                 }
             }
@@ -205,12 +223,36 @@ class UsuarioController extends BaseUsuarioController
 
         $model = Identificador::findOne($id);
 
+        $relAttributes = [];
+        $relAttributesHidden = [];
+
+        //$this->getPuntoVentaDefault($model);
+
         if ($model->load($this->request->post())) {
+
+            $hay_errores = false;
 
             $cambio = $model->isAttributeChanged('pwd');
 
+            //$id_punto_venta_default_cambio = $model->isAttributeChanged('id_punto_venta_default');
+
             if ($model->save()) {
-                if ($cambio) {
+
+
+                /*
+
+                $ret = $this->savePuntoVentaDefault($model);
+
+                if ($ret['status'] == 'error') {
+                    $model->addError('id_punto_venta_default', $ret['msg']);
+                    $hay_errores = true;
+                }
+
+                */
+
+
+
+                if ($cambio && !$hay_errores) {
                     $model->setPassword($model->pwd);
                     $model->generateAuthKey();
                     $model->pwd = Yii::$app->security->generateRandomString();
@@ -224,16 +266,101 @@ class UsuarioController extends BaseUsuarioController
 
 
                 } else {
-                    Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'usuario', "Se modifico el usuario {$model->login}");
-                    Yii::$app->session->setFlash('success', Yii::t("app", 'Se guardo correctamente'));
-                    return $this->redirect(['view', 'id' => $model->id]);
+                    if (!$hay_errores) {
+                        Notificaciones::NotificarANivel(Niveles::SYSADMIN, 'usuario', "Se modifico el usuario {$model->login}");
+                        Yii::$app->session->setFlash('success', Yii::t("app", 'Se guardo correctamente'));
+                        return $this->redirect(['view', 'id' => $model->id]);
+                    }
                 }
             }
         }
 
-        return $this->render('update', ['model' => $model, 'nivel' => Yii::$app->user->identity->nivel]);
+        return $this->render('update', [
+            'model' => $model,
+            'nivel' => Yii::$app->user->identity->nivel,
+            'user' => Yii::$app->user->identity,
+            'relAttributes' => $relAttributes,
+            'relAttributesHidden' => $relAttributesHidden,
+
+        ]);
     }
 
+/*
+    private function getPuntoVentaDefault(&$model)
+    {
+        if (!$model) {
+            return;
+        }
+
+        if (!$model->id) {
+            return;
+        }
+
+        
+        $puntoVentaUsuario = PuntoVentaUsuarioDefault::find()->where(['id_usuario' => $model->id])->one();
+        $model->id_punto_venta_default = $puntoVentaUsuario ? $puntoVentaUsuario->id_punto_venta : null;
+        
+    }
+*/
+
+    /*
+    private function savePuntoVentaDefault($model)
+    {
+        if (!$model->id_punto_venta_default) {
+
+            $puntoVentaUsuario = PuntoVentaUsuarioDefault::find()->where(['id_usuario' => $model->id])->one();
+
+            if(!$puntoVentaUsuario){
+                return [
+                    'status' => 'OK',
+                    'msg' => "",
+                ];
+            }
+
+            $puntoVentaUsuario->delete();
+
+            return [
+                'status' => 'OK',
+                'msg' => "",
+            ];
+        }
+
+        $punto_venta = PuntoVenta::findOne($model->id_punto_venta_default);
+        if (!$punto_venta) {
+            return [
+                'status' => 'error',
+                'msg' => "Error no existe un punto de venta default ",
+            ];
+
+        }
+
+        $puntoVentaUsuario = PuntoVentaUsuarioDefault::find()->where(['id_usuario' => $model->id])->one();
+
+        if ($puntoVentaUsuario) {
+            $puntoVentaUsuario->id_punto_venta = $model->id_punto_venta_default;
+            $puntoVentaUsuario->save();
+        } else {
+            $puntoVentaUsuario = new PuntoVentaUsuarioDefault;
+            $puntoVentaUsuario->id_punto_venta = $model->id_punto_venta_default;
+            $puntoVentaUsuario->id_usuario = $model->id;
+            $puntoVentaUsuario->save();
+        }
+
+        if (!$puntoVentaUsuario->save()) {
+            $errorestxt = implode(", ", $puntoVentaUsuario->getErrorSummary(true));
+            return [
+                'status' => 'error',
+                'msg' => "Error al guardar el punto de venta default: $errorestxt",
+            ];
+
+        }
+        return [
+            'status' => 'OK',
+            'msg' => "",
+        ];
+
+    }
+    */    
 
     /**
      * Updates an existing Usuario model.

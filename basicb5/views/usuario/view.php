@@ -2,6 +2,7 @@
 
 
 use app\models\GrupoAccesoUsuario;
+use app\models\PuntoVentaUsuarioDefault;
 use app\models\UsuarioAcceso;
 use yii\bootstrap5\Html;
 use yii\web\View;
@@ -42,6 +43,14 @@ $modelUsuario = $model;
 
     <?php
     $niveles = app\config\Niveles::getNiveles();
+
+    /*
+    $puntoVentaUsuario = PuntoVentaUsuarioDefault::find()->where(['id_usuario' => $model->id])->one();
+    if($puntoVentaUsuario){
+        $model->id_punto_venta_default = $puntoVentaUsuario->id_punto_venta;
+    }
+    */
+
     echo DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -57,10 +66,18 @@ $modelUsuario = $model;
                 'label' => 'Desde',
                 'value' => $model->last_login_time != null ? date("d-M-Y H:i", strtotime($model->last_login_time)) : '',
             ],
+            /*
             [
-                'attribute' => 'activo',
-                'value' => $model->activo == '1' ? 'Si' : 'No',
+                'attribute' => 'id_punto_venta_default',
+                'label' => 'Punto de venta preferido',
+                'value' => $puntoVentaUsuario  ? $puntoVentaUsuario->puntoVenta->descr : '',
             ],
+            */
+            [
+                'attribute' => 'nivel',
+                'value' =>  $niveles[$model->nivel] ,
+            ],
+            
             'email:email',
             'last_login_ip',
             'codigo',
@@ -90,7 +107,7 @@ $modelUsuario = $model;
     <div class="table-responsive mt-2">
         <?php
         echo kartik\grid\GridView::widget([
-            'id' => 'grupoaccesos-grid',
+            'id' => 'grupoacc-grid',
             'layout' => '{summary}<div class="text-center"></div>{items}<div class="text-center">{pager}</div>',
             'dataProvider' => $dataGrProvider,
             'filterModel' => $searchGrModel,
@@ -357,12 +374,12 @@ $(document).on('change', '.kv-row-checkbox', function() {
     let estado = $(this).is(':checked') ? 1 : 0; // Estado: 1 si está marcado, 0 si está desmarcado
 
     console.log(id, estado, row.attr('class'));
-    //1 1 'grupoaccesos-grid table-success'
-    //1 0 'grupoaccesos-grid'
+    //1 1 'grupoacc-grid table-success'
+    //1 0 'grupoaccs-grid'
     //1 1 accesos-grid table-success
     //1 0 'accesos-grid'
 
-    const esDeGrupoAccesos=row.attr('class').toLowerCase().includes("grupoaccesos-grid".toLowerCase());
+    const esDeGrupoAccesos=row.attr('class').toLowerCase().includes("grupoacc-grid".toLowerCase());
     const esDeAccesos=row.attr('class').toLowerCase().includes("accesos-grid".toLowerCase());
 
 

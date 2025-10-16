@@ -358,7 +358,6 @@ $(document).on('change', '.kv-row-checkbox', function() {
     const esDeUsuarios=row.attr('class').toLowerCase().includes("usuarios-grid".toLowerCase());
     const esDeAccesos=row.attr('class').toLowerCase().includes("accesos-grid".toLowerCase());
 
-
     if(esDeUsuarios){
         // Enviar los datos por AJAX
         $.ajax({

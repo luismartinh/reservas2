@@ -28,6 +28,8 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
 
+    <!-- Agregar el favicon -->
+
     <style>
         /* customize primary dark */
         $primary: #001199;
@@ -100,7 +102,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                 element.addEventListener('click', function (e) {
                     e.stopPropagation(); // Evita que se cierre el menú al hacer clic
                 });
-            });            
+            });
         });
 
 
@@ -123,42 +125,47 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
 
         NavBar::begin([
-            'brandLabel' => Yii::$app->name,
+            /*
+            'brandLabel' => Html::img(Empresas::getMyConfig(
+                'images',
+                'brandLabel'
+            ), ["width" => "70px"]),
+            */
             'brandUrl' => Yii::$app->homeUrl,
             'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
         ]);
 
 
 
-        if(Yii::$app->user->isGuest){
+        if (Yii::$app->user->isGuest) {
             $items = [
                 ['label' => 'Home', 'url' => ['/site/index']],
-                ['label' => 'About', 'url' => ['/site/about']],
-                ['label' => 'Contact', 'url' => ['/site/contact']],
+                ['label' => 'Acerca de', 'url' => ['/site/about']],
+                ['label' => 'Contacto', 'url' => ['/site/contact']],
             ];
-    
-    
-            
+
+
+
             echo Nav::widget([
                 'options' => ['class' => 'navbar-nav'],
                 'items' => $items,
             ]);
-    
-
-        }else{
 
 
-            echo app\models\Menu::getMenu([RootMenu::OTHER],Yii::$app->user->identity);
+        } else {
 
 
-            
+            echo app\models\Menu::getMenu([RootMenu::OTHER], Yii::$app->user->identity);
+
+
+
         }
-        
+
 
         echo '<ul class="navbar-nav ms-auto">'; // 'ms-auto' alinea a la derecha
-        if(Yii::$app->user->isGuest){
-            echo app\models\Menu::getcustomMenu("Ingresar",'<i class="bi bi-box-arrow-in-right"></i>','/site/login'); 
-        }else{
+        if (Yii::$app->user->isGuest) {
+            echo app\models\Menu::getcustomMenu("Ingresar", '<i class="bi bi-box-arrow-in-right"></i>', '/site/login');
+        } else {
             $items = [
                 Yii::$app->user->isGuest ?
                 ['label' => 'Login', 'url' => ['/site/login']] :
@@ -176,11 +183,11 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                 'items' => $items,
             ]);
 
-            echo app\models\Menu::getNotificacionesMenu('/notificaciones/index',Yii::$app->user->identity); 
+            echo app\models\Menu::getNotificacionesMenu('/notificaciones/index', Yii::$app->user->identity);
 
         }
 
-        
+
         //echo app\models\Menu::getColSeparator();
         echo app\models\Menu::getDarkModeMenu();
 
@@ -208,7 +215,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     <footer id="footer" class="mt-auto py-3 bg-dark">
         <div class="container">
             <div class="row text-muted">
-                <div class="col-md-6 text-center text-md-start">&copy; My Company <?= date('Y') ?></div>
+                <div class="col-md-6 text-center text-md-start">&copy; LMH <?= date('Y') ?></div>
                 <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
             </div>
         </div>

@@ -5,6 +5,7 @@ use app\config\Niveles;
 /**
  * @var yii\web\View $this
  * @var app\models\Usuario $model
+ * @var app\models\Usuario $user
  * @var yii\widgets\ActiveForm $form
  */
 ?>
@@ -90,10 +91,27 @@ if (!(isset($relAttributesHidden) && isset($relAttributesHidden['activo']))) {
 
 <!-- attribute codigo -->
 <?php
-if (!isset($relAttributesHidden) && isset($relAttributesHidden['codigo'])) {
-    echo $form->field($model, 'codigo')->textInput([
-        'disabled' => (isset($relAttributes) && isset($relAttributes['codigo'])),
-        'maxlength' => true
-    ]);
-}
+
+echo $form->field($model, 'codigo')->textInput([
+    'disabled' => (isset($relAttributes) && isset($relAttributes['codigo'])),
+    'maxlength' => true
+]);
+
 ?>
+
+<!-- attribute id_punto_venta_default -->
+<?php
+/*
+$items = Niveles::getPuntosVentaYSucursalesPermitidosDropDown($user);
+$puntosVenta = $items['puntoVentas'];
+echo
+    $form->field($model, 'id_punto_venta_default')->dropDownList(
+        $puntosVenta,
+        [
+            'prompt' => Yii::t('cruds', 'sel...'),
+            'disabled' => (isset($relAttributes) && isset($relAttributes['id_punto_venta_default'])),
+        ]
+    )->label('Punto de venta preferido')->hint("Seleccione el punto de venta preferido") ; 
+    
+*/    
+    ?>

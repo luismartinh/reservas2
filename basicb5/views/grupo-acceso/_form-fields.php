@@ -11,5 +11,5 @@
 <?php echo $form->field($model, 'descr')->textInput(['maxlength' => true]) ?>
 
 <?php 
-echo $form->field($model, 'nivel')->dropDownList(app\config\Niveles::getNivelesDesde($nivel)); ;
+echo $form->field($model, 'nivel')->dropDownList(app\config\Niveles::getNivelesDesde($nivel)); 
 ?>

@@ -258,6 +258,26 @@ class Identificador extends Usuario implements \yii\web\IdentityInterface
     }
 
 
+    public static function autorizarPorNivel($user, $nivel)
+    {
+        if ($user->nivel <= $nivel) {
+            return [
+                "auth" => true,
+                "status" => "ok",
+                "msg" => "Acceso OK",
+                "redirect" => ""
+            ];
+        } else {
+            return [
+                "auth" => false,
+                "status" => "ok",
+                "msg" => "Acceso DENEGADO",
+                "redirect" => Url::toRoute('site/login')
+            ];
+        }
+    }
+
+
 
     public static function isPasswordResetTokenValid($token)
     {

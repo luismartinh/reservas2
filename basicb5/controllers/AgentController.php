@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\config\Niveles;
+use app\models\Identificador;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use app\components\OpenAIClientGemini;
@@ -36,41 +38,6 @@ class AgentController extends Controller
         );
     }
 
-    /*
-    public function actionAskOpenai()
-    {
-        //$question = Yii::$app->request->post('question');
-        $model = new GeneralForm();
-
-        if ($model->load($this->request->post())) {
-
-            $openAIClient = new OpenAIClient();
-            $response = $openAIClient->askQuestion($model->question);
-            return $this->render('response', ['response' => $response]);
-        }
-
-        return $this->render('ask', ['model' => $model]);
-    }
-
-
-
-    public function actionAskPawan()
-    {
-        $model = new GeneralForm();
-
-        if ($model->load($this->request->post())) {
-
-            $openAIClient = new OpenAIClientPawan();
-            $response = $openAIClient->askQuestion($model->question);
-
-            if ($response['st'] == 'error') {
-                $model->addError('_exception', $response['msg']);
-            }
-        }
-
-        return $this->render('ask_response_pawan', ['model' => $model, 'response' => $response['response'] ?? null]);
-    }
-        */
 
     public function actionAskGemini()
     {
@@ -94,6 +61,17 @@ class AgentController extends Controller
 
     public function actionAskGeminiSql()
     {
+
+        $permiso = Identificador::autorizarPorNivel(
+            Yii::$app->user->identity,
+            Niveles::ADMIN
+        );
+
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
 
         $model = new GeneralForm();
 

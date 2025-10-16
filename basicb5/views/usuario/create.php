@@ -5,6 +5,7 @@ use yii\bootstrap5\Html;
 /**
  * @var yii\web\View $this
  * @var app\models\Usuario $model
+ * @var app\models\Usuario $user
  */
 
 $this->title = Yii::t('models', 'Crear usuario');
@@ -33,7 +34,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
-        'nivel' => $nivel
+        'nivel' => $nivel,
+        'user' => $user
     ]); ?>
 
 

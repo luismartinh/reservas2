@@ -7,6 +7,7 @@ use kartik\form\ActiveForm;
 /**
  * @var yii\web\View $this
  * @var app\models\Usuario $model
+ * @var app\models\Usuario $user
  * @var yii\widgets\ActiveForm $form
  */
 
@@ -55,6 +56,7 @@ $trait->init($this);
                                 'nivel' => $nivel,
                                 'relAttributes' => $relAttributes,
                                 'relAttributesHidden' => $relAttributesHidden,
+                                'user' => $user
                             ]) . '</div>',
                         'active' => true,
                     ]

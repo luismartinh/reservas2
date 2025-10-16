@@ -22,7 +22,7 @@ echo $form->field($model, 'valor')->widget(
     ]
 );
 
-//echo $form->field($model, 'valor')->textInput() 
+
 
 ?>
 

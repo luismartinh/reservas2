@@ -15,9 +15,18 @@ $this->title = 'Consultas sobre esta aplicación';
 <?php $form = ActiveForm::begin(); ?>
 
 <div class="row">
+    <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-3"></i>
+        <div>
+            <strong>Cuidado! solo uso experimental!</strong><spam class="ms-3">Las respuestas pueden ser incorrectas!</spam> 
+        </div>
+    </div>
+</div>
+
+<div class="row">
     <?= $form->field($model, 'question')->textarea(['maxlength' => true])
-    ->label("Pregunta:")
-    ->hint("Escriba su pregunta aqui") ?>
+        ->label("Pregunta:")
+        ->hint("Escriba su pregunta aqui") ?>
 </div>
 
 <div class="row">

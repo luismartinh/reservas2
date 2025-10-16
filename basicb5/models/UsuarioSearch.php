@@ -14,13 +14,30 @@ use app\models\Usuario;
 class UsuarioSearch extends Usuario
 {
     public $esUsuarioGrupo;
+
+    public $esUsuarioSucursal;
+    public $esUsuarioPuntoVenta;
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['id', 'activo', 'created_at', 'updated_at', 'created_by', 'updated_by', 'esUsuarioGrupo', 'nivel'], 'integer'],
+            [
+                [
+                    'id',
+                    'activo',
+                    'created_at',
+                    'updated_at',
+                    'created_by',
+                    'updated_by',
+                    'esUsuarioGrupo',
+                    'nivel',
+                    'esUsuarioSucursal',
+                    'esUsuarioPuntoVenta'
+                ],
+                'integer'
+            ],
             [
                 [
                     'login',
@@ -39,7 +56,9 @@ class UsuarioSearch extends Usuario
                     'access_token',
                     'locate',
                     'esUsuarioGrupo',
-                    'nivel'
+                    'nivel',
+                    'esUsuarioSucursal',
+                    'esUsuarioPuntoVenta'
                 ],
                 'safe'
             ],
@@ -273,6 +292,212 @@ class UsuarioSearch extends Usuario
             ->andFilterWhere(['like', 'access_token', $this->access_token])
             ->andFilterWhere(['like', 'locate', $this->locate]);
 
+
+        return $dataProvider;
+    }
+
+
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     * @param int $id_sucursal
+     * @param Usuario $user
+     * 
+     * @return ActiveDataProvider
+     */
+    public function searchSucursal($params, $id_sucursal, $user)
+    {
+        $query = Usuario::find()->where(['>=', 'nivel', $user->nivel]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20,
+                'pageParam' => 'page-usuarios',
+            ]
+
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            //$query->where('0=1');
+
+            return $dataProvider;
+        }
+
+
+
+        if ($this->esUsuarioSucursal != null && $id_sucursal != null) {
+
+
+            if ($this->esUsuarioSucursal == 1) {
+                $query = Usuario::find()->where(['>=', 'nivel', $user->nivel])
+                    ->joinWith('sucursales')
+                    ->where(['sucursal.id' => $id_sucursal])
+                    ->distinct(true);
+
+
+            } else {
+                $query = Usuario::find()->where(['>=', 'nivel', $user->nivel])
+                    ->joinWith('sucursales')
+                    ->where([
+                        'or',
+                        ['sucursal.id' => null],
+                        ['not', ['sucursal.id' => $id_sucursal]]
+                    ])
+                    ->andWhere([
+                        'not in',
+                        'usuario.id',
+                        (new \yii\db\Query())
+                            ->select('id_usuario')
+                            ->from('sucursal_usuario')
+                            ->where(['id_sucursal' => $id_sucursal])
+                    ]);
+
+
+            }
+
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+                'pagination' => [
+                    'pageSize' => 20,
+                    'pageParam' => 'page-usuarios',
+                ]
+
+            ]);
+
+        }
+
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'last_login_time' => $this->last_login_time,
+            'activo' => $this->activo,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'created_by' => $this->created_by,
+            'updated_by' => $this->updated_by,
+            'nivel' => $this->nivel
+        ]);
+
+        $query->andFilterWhere(['like', 'login', $this->login])
+            ->andFilterWhere(['like', 'nombre', $this->nombre])
+            ->andFilterWhere(['like', 'apellido', $this->apellido])
+            ->andFilterWhere(['like', 'pwd', $this->pwd])
+            ->andFilterWhere(['like', 'id_session', $this->id_session])
+            ->andFilterWhere(['like', 'last_login_ip', $this->last_login_ip])
+            ->andFilterWhere(['like', 'codigo', $this->codigo])
+            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
+            ->andFilterWhere(['like', 'password_hash', $this->password_hash])
+            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
+            ->andFilterWhere(['like', 'email', $this->email])
+            ->andFilterWhere(['like', 'user_sign_token', $this->user_sign_token])
+            ->andFilterWhere(['like', 'access_token', $this->access_token])
+            ->andFilterWhere(['like', 'locate', $this->locate]);
+
+        return $dataProvider;
+    }
+
+
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     * @param int $id_punto_venta
+     * @param Usuario $user
+     * 
+     * @return ActiveDataProvider
+     */
+    public function searchPuntoVenta($params, $id_punto_venta, $user)
+    {
+        $query = Usuario::find()->where(['>=', 'nivel', $user->nivel]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20,
+                'pageParam' => 'page-usuarios',
+            ]
+
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+
+
+        if ($this->esUsuarioPuntoVenta != null && $id_punto_venta != null) {
+
+
+            if ($this->esUsuarioPuntoVenta == 1) {
+                $query = Usuario::find()->where(['>=', 'nivel', $user->nivel])
+                    ->joinWith('puntoVentas')
+                    ->where(['punto_venta.id' => $id_punto_venta])
+                    ->distinct(true);
+
+
+            } else {
+                $query = Usuario::find()->where(['>=', 'nivel', $user->nivel])
+                    ->joinWith('puntoVentas')
+                    ->where([
+                        'or',
+                        ['punto_venta.id' => null],
+                        ['not', ['punto_venta.id' => $id_punto_venta]]
+                    ])
+                    ->andWhere([
+                        'not in',
+                        'usuario.id',
+                        (new \yii\db\Query())
+                            ->select('id_usuario')
+                            ->from('punto_venta_usuario')
+                            ->where(['id_punto_venta' => $id_punto_venta])
+                    ]);
+
+
+            }
+
+            $dataProvider = new ActiveDataProvider([
+                'query' => $query,
+                'pagination' => [
+                    'pageSize' => 20,
+                    'pageParam' => 'page-usuarios',
+                ]
+
+            ]);
+
+        }
+
+        $query->andFilterWhere([
+            'id' => $this->id,
+            'last_login_time' => $this->last_login_time,
+            'activo' => $this->activo,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'created_by' => $this->created_by,
+            'updated_by' => $this->updated_by,
+            'nivel' => $this->nivel
+        ]);
+
+        $query->andFilterWhere(['like', 'login', $this->login])
+            ->andFilterWhere(['like', 'nombre', $this->nombre])
+            ->andFilterWhere(['like', 'apellido', $this->apellido])
+            ->andFilterWhere(['like', 'pwd', $this->pwd])
+            ->andFilterWhere(['like', 'id_session', $this->id_session])
+            ->andFilterWhere(['like', 'last_login_ip', $this->last_login_ip])
+            ->andFilterWhere(['like', 'codigo', $this->codigo])
+            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
+            ->andFilterWhere(['like', 'password_hash', $this->password_hash])
+            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
+            ->andFilterWhere(['like', 'email', $this->email])
+            ->andFilterWhere(['like', 'user_sign_token', $this->user_sign_token])
+            ->andFilterWhere(['like', 'access_token', $this->access_token])
+            ->andFilterWhere(['like', 'locate', $this->locate]);
 
         return $dataProvider;
     }

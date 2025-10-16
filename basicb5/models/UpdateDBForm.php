@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\base\Model;
+use function PHPUnit\Framework\throwException;
 
 /**
  * UpdateDBForm
@@ -85,8 +86,9 @@ class UpdateDBForm extends Model
     {
 
         $this->last_update = ParametrosGenerales::getParametro("DBVRESION")->valor;
+        //$this->last_update = json_decode(ParametrosGenerales::getParametro("DBVRESION")->valor);
+        $this->update_from = (int)$this->last_update + 1;
 
-        $this->update_from = $this->last_update + 1;
 
         $this->update_files = $this->_getSqlFiles();
 

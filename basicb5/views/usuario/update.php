@@ -5,6 +5,9 @@ use yii\bootstrap5\Html;
 /**
  * @var yii\web\View $this
  * @var app\models\Usuario $model
+ * @var app\models\Usuario $user
+ * @var array $relAttributes
+ * @var array $relAttributesHidden
  */
 
 $this->title = Yii::t('models', 'Modificar Usuario');
@@ -38,6 +41,7 @@ $this->params['breadcrumbs'][] = Yii::t('cruds', 'Editar');
         'nivel' => $nivel,
         'relAttributes' => $relAttributes,
         'relAttributesHidden' => $relAttributesHidden,
+        'user' => $user
 
     ]); ?>
 

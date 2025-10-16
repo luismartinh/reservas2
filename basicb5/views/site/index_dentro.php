@@ -1,11 +1,13 @@
 <?php
 
+use app\config\Empresas;
 use yii\bootstrap5\Html;
 
 /** @var yii\web\View $this */
 
-$this->title = 'My Yii Application';
+$this->title = 'Ventas v2';
 
+$url_images = Yii::getAlias('@web') . '/images/';
 
 
 ?>
@@ -14,10 +16,17 @@ $this->title = 'My Yii Application';
 
 
     <div class="jumbotron text-center bg-transparent mt-5 mb-5">
-        <h1 class="display-4">Congratulations!</h1>
 
-        <p class="lead">You have successfully created your Yii-powered application.</p>
+        <div class="row">
+            <div class="col-md-3">
+            </div>
 
+            <div class="col-md-6">
+
+                
+
+            </div>
+        </div>
 
     </div>
 

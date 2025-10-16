@@ -221,6 +221,7 @@ class SiteController extends Controller
     }
 
     private function prueba(){
+        echo "hola hijo";
         echo "hola del padre";
     }
     
