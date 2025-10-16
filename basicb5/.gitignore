@@ -35,5 +35,6 @@ tests/_support/_generated
 db/
 
 web/assets/
-
 config/db.php
+.env
+otros.txt

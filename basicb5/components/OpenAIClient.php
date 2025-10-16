@@ -12,9 +12,9 @@ class OpenAIClient extends Component
     public function __construct($config = [])
     {
         parent::__construct($config);
-        $this->apiKey = 'OPENAI_API_KEY_ENV'; // Reemplaza con tu API Key de OpenAI
+        $this->apiKey = getenv('OPENAI_API_KEY');
 
-        
+
     }
 
     public function askQuestion($question)
@@ -36,12 +36,12 @@ class OpenAIClient extends Component
             'max_tokens' => 150,
             'temperature' => 0.7,
         ];
-        
+
         $ch = curl_init($url);
         if (!$ch) {
             return 'Error: No se pudo inicializar cURL.';
         }
-    
+
 
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -61,15 +61,15 @@ class OpenAIClient extends Component
         if (curl_errno($ch)) {
             return 'Error en la conexión: ' . curl_error($ch);
         }
-        
+
         curl_close($ch);
 
         file_put_contents(__DIR__ . '/debug_openai_response.json', $response);
 
         $responseData = json_decode($response, true);
-        
+
         //return json_encode($responseData, JSON_PRETTY_PRINT);  // Devuelve la respuesta completa en formato legible
-        
+
 
         $responseData = json_decode($response, true);
         return $responseData['choices'][0]['text'] ?? 'No se pudo obtener una respuesta.';
