@@ -24,6 +24,7 @@ sacar web/.htaccess
 Crear web/ y ejecutar en el host
 dentro de web/
 sudo chmod 777 -R assets/
+sudo chmod 777 -R runtime/cache/
 
 
 en /

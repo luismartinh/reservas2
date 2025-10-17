@@ -9,7 +9,7 @@ services:
     volumes:
       - ./:/var/www/html/
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
-    working_dir: /var/www/html/basicb5
+    working_dir: /var/www/html/reservas2
 
     ports:
       - '8281:80'
@@ -23,7 +23,7 @@ services:
     image: yiisoftware/yii2-php:7.4-apache
     volumes:
       - ./:/var/www/html/
-    working_dir: /var/www/html/basicb5  
+    working_dir: /var/www/html/reservas2  
     command: php yii queue/listen
     networks:
       - red-bt5
