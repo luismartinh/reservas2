@@ -1,10 +1,14 @@
 <?php
 
-$params = require __DIR__ . '/params.php';
+//$params = require __DIR__ . '/params.php';
+$params = array_merge(
+    require __DIR__ . '/params.php',
+    file_exists(__DIR__ . '/params-local.php') ? require __DIR__ . '/params-local.php' : []
+);
 $db = require __DIR__ . '/db.php';
 
 $config = [
-    'id' => 'bt5',
+    'id' => 'reservas2',
     'basePath' => dirname(__DIR__),
     'bootstrap' => [
         'log',
@@ -13,13 +17,41 @@ $config = [
 
             // Registrar el evento para que siempre se escuche
             //yii\base\Event::on(\app\models\Stock::class, \app\models\Stock::EVENT_STOCK_SAVED, [\app\models\StockListener::class, 'onStockSaved']);
-
+        
             //yii\base\Event::on(\app\models\Stock::class, \app\models\Stock::EVENT_STOCK_DELETED, [\app\models\StockListener::class, 'onStockDeleted']);
         }
     ],
 
     'language' => 'es',
+    'sourceLanguage' => 'en-US', // idioma "fuente" de tus claves
     'timeZone' => 'America/Argentina/Buenos_Aires',
+
+    // 👇 Cambia lenguaje por query ?lang= y guarda cookie
+    'on beforeRequest' => function () {
+        $supported = Yii::$app->params['supportedLanguages'] ?? ['es' => 'Español', 'en' => 'English'];
+        $qLang = Yii::$app->request->get('lang');
+
+        if ($qLang && isset($supported[$qLang])) {
+            Yii::$app->language = $qLang;
+            Yii::$app->response->cookies->add(new \yii\web\Cookie([
+                'name' => '_lang',
+                'value' => $qLang,
+                'httpOnly' => true,
+                'expire' => time() + 31536000, // 1 año
+            ]));
+        } else {
+            $cookie = Yii::$app->request->cookies->get('_lang');
+            if ($cookie && isset($supported[$cookie->value])) {
+                Yii::$app->language = $cookie->value;
+            }
+        }
+
+        // Alinea formatos de fecha/número/moneda al idioma activo
+        Yii::$app->formatter->locale = Yii::$app->language;
+    },
+
+
+
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm' => '@vendor/npm-asset',
@@ -36,18 +68,39 @@ $config = [
             'identityClass' => 'app\models\Identificador',
             'enableAutoLogin' => true,
         ],
-        
+        'formatter' => [
+            'class' => yii\i18n\Formatter::class,
+            'timeZone' => 'America/Argentina/Salta',       // destino
+            'defaultTimeZone' => 'America/Argentina/Salta' // origen (lo que viene de la DB)
+        ],
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
         'mailer' => [
-            'class' => \yii\symfonymailer\Mailer::class,
-            'viewPath' => '@app/mail',
-            // send all mails to a file by default.
+            'class' => yii\symfonymailer\Mailer::class,
+            // En dev: deja true para NO enviar mails y guardarlos como archivos
+            // En prod: ponlo en false para enviar realmente
+            'useFileTransport' => false,
             'transport' => [
-                'dsn' => 'smtp://2ae2b0f72ef658:3a5db127caecad@sandbox.smtp.mailtrap.io:2525?encryption=tls'
-            ],            
-            'useFileTransport' =>false,// true,
+                'scheme' => 'smtp',
+                'host' => $params['smtp.host'],
+                'username' => $params['smtp.user'],
+                'password' => $params['smtp.pass'],
+                'port' => (int) $params['smtp.port'],
+                'encryption' => $params['smtp.encryption'],
+                // Opcional: para certs self-signed en entornos locales
+                'streamOptions' => [
+                    'ssl' => [
+                        'allow_self_signed' => true,
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                ],
+                // 👇 dirección remitente por defecto
+                'messageConfig' => [
+                    'from' => [$params['senderEmail'] => $params['senderName']],
+                ],
+            ],
         ],
         'queue' => [
             'class' => yii\queue\db\Queue::class,  // o el tipo de cola que estés utilizando
@@ -58,7 +111,7 @@ $config = [
             //'retryInterval' => 5,  // intervalo entre reintentos
             'mutex' => \yii\mutex\MysqlMutex::class,  // o el mutex que estés utilizando
         ],
-    
+
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
@@ -71,17 +124,46 @@ $config = [
         'db' => $db,
         'i18n' => [
             'translations' => [
-                '*' => [
-                    'class' => 'yii\i18n\PhpMessageSource',
-                    'basePath' => '@app/messages', // if advanced application, set @frontend/messages
-                    'sourceLanguage' => 'en',
+                // Tus mensajes de aplicación
+                'app*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
                     'fileMap' => [
-                        //'main' => 'main.php',
+                        'app' => 'app.php',
                     ],
+                ],
+                // 👇 Agregar esto
+                'cruds*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
+                    'fileMap' => ['cruds' => 'cruds.php'],
+                ],
+                // 👇 agrega estas dos líneas para tus categorías
+                'models' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
+                    'fileMap' => ['models' => 'models.php'],
+                ],
+                'models.plural' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
+                    'fileMap' => ['models.plural' => 'models.plural.php'],
+                ],
+                'giiant*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    // En versiones recientes la carpeta es src/messages
+                    'basePath' => '@vendor/schmunk42/yii2-giiant/src/messages',
+                    'sourceLanguage' => 'en-US',
+                ],
+                // Opcional: sobreescribir mensajes del core si querés
+                'yii*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    //'basePath' => '@app/messages',
+                    'basePath' => '@yii/messages',   // <— clave
+                    'sourceLanguage' => 'en-US',
                 ],
             ],
         ],
-
     ],
     'params' => $params,
     'modules' => [

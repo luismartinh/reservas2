@@ -10,6 +10,8 @@ use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
+use yii\helpers\Url;
+
 
 AppAsset::register($this);
 
@@ -190,6 +192,37 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
         //echo app\models\Menu::getColSeparator();
         echo app\models\Menu::getDarkModeMenu();
+
+        // ---- Language Switcher (dropdown) ----
+        $supported = Yii::$app->params['supportedLanguages'] ?? ['es' => 'Español', 'en' => 'English'];
+        $currentLang = Yii::$app->language;
+
+        // Item dropdown al final del navbar-right
+        echo '<li class="nav-item dropdown">';
+
+        echo '<a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">';
+        echo '<i class="bi bi-translate me-1"></i>' . Html::encode($supported[$currentLang] ?? strtoupper($currentLang));
+        echo '</a>';
+
+        echo '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">';
+
+        foreach ($supported as $code => $label) {
+            // Mantiene la ruta actual y agrega/reemplaza ?lang=<code>
+            $url = Url::current(['lang' => $code]);
+            $active = $code === $currentLang ? ' active' : '';
+            echo '<li>';
+            echo '<a class="dropdown-item' . $active . '" href="' . Html::encode($url) . '">'
+                . Html::encode($label)
+                . ' <small class="text-muted ms-1">' . Html::encode($code) . '</small>'
+                . '</a>';
+            echo '</li>';
+        }
+
+        echo '</ul>';
+        echo '</li>';
+        // ---- /Language Switcher ----
+        
+
 
         echo '</ul>';
 

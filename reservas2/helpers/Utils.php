@@ -20,6 +20,68 @@ class Utils
 
 
 
+    /**
+     * Devuelve la hora mínima [H, i] de checkin entre un conjunto de cabañas.
+     */
+    public static function obtenerHoraMinimaCheckin(array $cabanas): array
+    {
+        $minH = 23;
+        $minM = 59;
+        $found = false;
 
+        $parseHM = function (?string $t): ?array {
+            if (!$t) {
+                return null;
+            }
+            $t = trim(str_ireplace(['a. m.', 'p. m.', 'a.m.', 'p.m.'], ['am', 'pm', 'am', 'pm'], $t));
+            foreach (['H:i', 'H:i:s', 'g:i a', 'g:i A', 'h:i a', 'h:i A'] as $f) {
+                $dt = \DateTime::createFromFormat($f, $t);
+                if ($dt instanceof \DateTime) {
+                    return [(int) $dt->format('H'), (int) $dt->format('i')];
+                }
+            }
+            $ts = strtotime($t);
+            return $ts ? [(int) date('H', $ts), (int) date('i', $ts)] : null;
+        };
+
+        foreach ($cabanas as $c) {
+            $hm = $parseHM($c->checkin ?? null);
+            if ($hm) {
+                [$h, $m] = $hm;
+                $found = true;
+                if ($h < $minH || ($h === $minH && $m < $minM)) {
+                    $minH = $h;
+                    $minM = $m;
+                }
+            }
+        }
+
+        if (!$found) {
+            return [0, 0];
+        }
+
+        return [$minH, $minM];
+    }
+
+
+
+    /**
+     * Normaliza una fecha ingresada (d/m/Y, d-m-Y o Y-m-d) a Y-m-d.
+     */
+    public static function normalizarFechaReserva(?string $v): ?string
+    {
+        if ($v === null || $v === '') {
+            return null;
+        }
+
+        $v = trim($v);
+        foreach (['d/m/Y', 'd-m-Y', 'Y-m-d'] as $fmt) {
+            $d = \DateTime::createFromFormat($fmt, $v);
+            if ($d instanceof \DateTime) {
+                return $d->format('Y-m-d');
+            }
+        }
+        return null;
+    }
 
 }

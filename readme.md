@@ -32,7 +32,7 @@ sudo chmod 777 -R views/
 sudo chmod 777 -R assets/
 
 4- Ver la app
-http://localhost:8281/basicb5/web/
+http://localhost:8281/reservas2/web/index.php
 
 
 5- instalar bootstrap5
@@ -100,7 +100,6 @@ RUN apt-get update && apt-get install -y mysql-client
 docker-compose down
 docker-compose build
 docker-compose up -d
-
 
 agregar la action en el controller:
 
@@ -179,4 +178,8 @@ agregar la action en el controller:
     }
 ´´´
 
+idiomas:
 
+actualizar mensajes:
+
+php yii message @app/messages.php

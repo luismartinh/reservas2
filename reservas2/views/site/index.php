@@ -1,10 +1,11 @@
 <?php
 
 use app\config\Empresas;
+use yii\bootstrap5\Html;
 
 /** @var yii\web\View $this */
 
-$this->title = 'ventas v2';
+$this->title = 'Reservas v2';
 
 $url_images = Yii::getAlias('@web') . '/';
 
@@ -15,7 +16,13 @@ $url_images = Yii::getAlias('@web') . '/';
 
     <div class="jumbotron text-center bg-transparent mt-5 mb-5">
 
-        <p class="lead">Sistema de ventas v2.</p>
+
+
+        <div class="row">
+            <div class="col-12 text-start"> <!-- Asegura que ocupe toda la fila y alinee a la izquierda -->
+                <?= Html::a('<i class="bi bi-patch-question"></i> ' . Yii::t('cruds', 'Buscar disponibilidad'), ['disponibilidad/buscar'], ['class' => 'btn btn-link']) ?>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-3">

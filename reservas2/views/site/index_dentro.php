@@ -5,7 +5,7 @@ use yii\bootstrap5\Html;
 
 /** @var yii\web\View $this */
 
-$this->title = 'Ventas v2';
+$this->title = 'reservas v2';
 
 $url_images = Yii::getAlias('@web') . '/images/';
 
@@ -31,6 +31,13 @@ $url_images = Yii::getAlias('@web') . '/images/';
     </div>
 
     <div class="body-content">
+
+        <div class="row">
+            <div class="col-12 text-start"> <!-- Asegura que ocupe toda la fila y alinee a la izquierda -->
+                <?= Html::a('<i class="bi bi-patch-question"></i> ' . Yii::t('cruds', 'Buscar disponibilidad'), ['disponibilidad/buscar'], ['class' => 'btn btn-link']) ?>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12 text-start"> <!-- Asegura que ocupe toda la fila y alinee a la izquierda -->
                 <?= Html::a('<i class="bi bi-patch-question"></i> ' . Yii::t('cruds', 'Asistente de ayuda para mis funciones'), ['agent/ask-gemini'], ['class' => 'btn btn-link']) ?>
