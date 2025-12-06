@@ -38,7 +38,7 @@ class Reserva extends BaseReserva
             ->andWhere(new Expression('NOT (:hasta <= r.desde OR :desde >= r.hasta)'))
             ->params([
                 ':desde' => $desdeYmd,
-                ':hasta' => $hastaYmd,
+                ':hasta' => $hastaYmd.' 23:59:59',
             ]);
 
         // Mantener SOLO cabañas para las cuales NO exista una reserva solapada
@@ -48,6 +48,35 @@ class Reserva extends BaseReserva
 
     }
 
+
+    public static function cabanasEstaLibre($id_cabana, $desdeYmd, $hastaYmd)
+    {
+
+        $query = Cabana::find()->alias('c');
+        $query->andWhere(['c.activa' => 1, 'c.id' => $id_cabana]);
+
+        // Subconsulta: reserva(s) de la misma cabaña que se SOLAPEN con [desde, hasta)
+        // No hay solape si:  nueva_hasta <= r.desde  OR  nueva_desde >= r.hasta
+        // Hay solape si NO se cumple lo anterior:
+        //     NOT ( :hasta <= r.desde OR :desde >= r.hasta )
+        $subSolape = (new \yii\db\Query())
+            ->from(['rc' => ReservaCabana::tableName()])
+            ->innerJoin(['r' => Reserva::tableName()], 'r.id = rc.id_reserva')
+            ->where('rc.id_cabana = c.id')
+            ->andWhere(new Expression('(rc.id_cabana = :id_cabana)'))
+            ->andWhere(new Expression('NOT (:hasta <= r.desde OR :desde >= r.hasta)'))
+            ->params([
+                ':desde' => $desdeYmd,
+                ':hasta' => $hastaYmd.' 23:59:59',
+                ':id_cabana' => $id_cabana
+            ]);
+
+        // Mantener SOLO cabañas para las cuales NO exista una reserva solapada
+        $query->andWhere(['not exists', $subSolape]);
+
+        return $query;
+
+    }
 
 
     /**

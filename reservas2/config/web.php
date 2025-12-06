@@ -21,7 +21,7 @@ $config = [
             //yii\base\Event::on(\app\models\Stock::class, \app\models\Stock::EVENT_STOCK_DELETED, [\app\models\StockListener::class, 'onStockDeleted']);
         }
     ],
-
+    'layout' => 'app',
     'language' => 'es',
     'sourceLanguage' => 'en-US', // idioma "fuente" de tus claves
     'timeZone' => 'America/Argentina/Buenos_Aires',

@@ -7,6 +7,11 @@ use yii\bootstrap5\Html;
 /** @var int           $email_token_expira_hr */
 /** @var Datetime     $fecha_expira */
 
+$this->registerCssFile('@web/css/cabana.css', [
+    'depends' => [\yii\bootstrap5\BootstrapAsset::class]
+]);
+
+
 // Mapear totales por id_cabana a partir de request_cabanas
 $totales = [];
 if (!empty($reserva->requestCabanas)) {
@@ -36,72 +41,69 @@ foreach ($cabanas as $c) {
     $totalGeneral += $totales[$c->id] ?? 0.0;
 }
 
-// URL de seguimiento absoluta
-$trackingUrl = Yii::$app->urlManager->createAbsoluteUrl(['disponibilidad/seguimiento', 'hash' => $hash]);
-
 $this->title = Yii::t('app', 'Solicitud de Reserva');
+
+
 ?>
 
-<h2 class="mb-4 text-center"><?= Yii::t('app', 'Solicitud de Reserva') ?></h2>
+<div class="site-index container py-5 py-lg-5">
 
-<!-- ✅ Fecha (success) -->
-<div class="alert alert-success">
+    <?= $this->render('//partials/_dhBackground') ?>
 
-    <h3><?= Yii::t('app', 'Solicitud de Reserva recibida') ?></h3>
-    <h4><?= Yii::t('app', 'Enviaremos un correo de confirmación a su email.') ?></h4>
-    <h4><strong><?= Yii::t('app', 'Por favor, revise su bandeja de entrada para continuar..') ?></strong></h4>
-    <hr>
-    <strong><?= Yii::t('app', 'Fecha de la solicitud:') ?>:</strong>
-    <?= Yii::$app->formatter->asDatetime($reserva->fecha, 'php:d/m/Y H:i') ?>
-</div>
+    <section class="dh-hero mb-5">
+        <h2 class="mb-4 text-center"><?= Yii::t('app', 'Solicitud de Reserva') ?></h2>
 
-<!-- ⚠️ Estado (warning) -->
-<div class="alert alert-warning">
-    <strong><?= Yii::t('app', 'Estado') ?>:</strong>
-    <?= Html::encode($reserva->estado->descr ?? Yii::t('app', 'Pendiente')) ?>
-    <strong><?= Yii::t('app', 'Vencimiento de esta solicitud') ?>:</strong>
-    <?= Yii::t('app', 'El ') ?><?= $fecha_expira->format('d/m/Y H:i') ?> (<?= $email_token_expira_hr ?> hs.)
-    <br>
-    <?= Yii::t('app', 'Una vez vencida, si el email no fue confiramdo, se elimina automáticamente') ?>
-</div>
+        <!-- ✅ Fecha (success) -->
+        <div class="alert alert-success">
 
-<h4 class="mt-4 mb-3"><?= Yii::t('app', 'Cabañas seleccionadas') ?></h4>
+            <h3><?= Yii::t('app', 'Solicitud de Reserva recibida') ?></h3>
+            <h4><?= Yii::t('app', 'Enviaremos un correo de confirmación a su email.') ?></h4>
+            <h4><strong><?= Yii::t('app', 'Por favor, revise su bandeja de entrada para continuar..') ?></strong></h4>
+            <hr>
+            <strong><?= Yii::t('app', 'Fecha de la solicitud:') ?>:</strong>
+            <?= Yii::$app->formatter->asDatetime($reserva->fecha, 'php:d/m/Y H:i') ?>
+        </div>
 
-<?php foreach ($cabanas as $cabana): ?>
-    <?= $this->render('_cabana_card', [
-        'model' => $cabana,
-        'totales' => $totales,                           // muestra precio en la card
-        'desde' => $desdeDate->format('d-m-Y'),        // para el pie de la card
-        'hasta' => $hastaDate->format('d-m-Y'),
-        'mostrarSwitch' => false,                               // no mostrar switch en esta vista
-    ]) ?>
-<?php endforeach; ?>
+        <!-- ⚠️ Estado (warning) -->
+        <div class="alert alert-warning">
+            <strong><?= Yii::t('app', 'Estado') ?>:</strong>
+            <?= Html::encode($reserva->estado->descr ?? Yii::t('app', 'Pendiente')) ?>
+            <strong><?= Yii::t('app', 'Vencimiento de esta solicitud') ?>:</strong>
+            <?= Yii::t('app', 'El ') ?><?= $fecha_expira->format('d/m/Y H:i') ?> (<?= $email_token_expira_hr ?> hs.)
+            <br>
+            <?= Yii::t('app', 'Una vez vencida, si el email no fue confiramdo, se elimina automáticamente') ?>
+        </div>
 
-<!-- 🔹 Resumen destacado (partial reutilizable) -->
-<?= $this->render('_resumen_solicitud', [
-    'cabanas' => $cabanas,
-    'desde' => $desdeDate->format('d-m-Y'),
-    'hasta' => $hastaDate->format('d-m-Y'),
-    'dias' => $dias,
-    'fechaIngreso' => $fechaIngreso,
-    'fechaEgreso' => $fechaEgreso,
-    'paxAcumulado' => $paxTotal,          // el partial espera 'paxAcumulado'
-    'totalGeneral' => $totalGeneral,
-]) ?>
 
-<!-- 🔗 URL de seguimiento -->
-<div class="card border-secondary">
-    <div class="card-body">
-        <h6 class="card-title mb-2">
-            <i class="bi bi-link-45deg me-1"></i><?= Yii::t('app', 'URL de seguimiento') ?>
-        </h6>
-        <p class="mb-2">
-            <?= Html::a(Html::encode($trackingUrl), $trackingUrl, ['target' => '_blank', 'rel' => 'noopener']) ?>
-        </p>
-        <?= Html::a(
-            '<i class="bi bi-box-arrow-up-right me-1"></i>' . Yii::t('app', 'Abrir seguimiento'),
-            $trackingUrl,
-            ['class' => 'btn btn-outline-primary', 'target' => '_blank', 'rel' => 'noopener']
-        ) ?>
-    </div>
+        <h4><?= count($cabanas) > 1 ? Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' :
+            Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' ?> </h4>
+
+        <?php foreach ($cabanas as $cabana): ?>
+            <?= $this->render('_cabana_card', [
+                'model' => $cabana,
+                'totales' => $totales,                           // muestra precio en la card
+                'desde' => $desdeDate->format('d-m-Y'),        // para el pie de la card
+                'hasta' => $hastaDate->format('d-m-Y'),
+                'mostrarSwitch' => false,                               // no mostrar switch en esta vista
+            ]) ?>
+        <?php endforeach; ?>
+
+        <!-- 🔹 Resumen destacado (partial reutilizable) -->
+        <?= $this->render('_resumen_solicitud', [
+            'cabanas' => $cabanas,
+            'desde' => $desdeDate->format('d-m-Y'),
+            'hasta' => $hastaDate->format('d-m-Y'),
+            'dias' => $dias,
+            'fechaIngreso' => $fechaIngreso,
+            'fechaEgreso' => $fechaEgreso,
+            'paxAcumulado' => $paxTotal,          // el partial espera 'paxAcumulado'
+            'totalGeneral' => $totalGeneral,
+        ]) ?>
+
+        <!-- 🔗 URL de seguimiento -->
+        <?= $this->render('//partials/_trackingUrlCard', [
+            'hash' => $hash
+        ]) ?>
+
+    </section>
 </div>

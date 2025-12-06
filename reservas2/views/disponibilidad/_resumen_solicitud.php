@@ -14,10 +14,10 @@ use yii\bootstrap5\Html;
 ?>
 <div class="card border-info shadow-lg mt-4 mb-5">
     <div class="card-body">
-        <h5 class="card-title text-info fw-bold mb-3">
+        <h3 class="card-title text-info fw-bold mb-3">
             <i class="bi bi-info-circle-fill me-2"></i>
-            <?= Yii::t('app', 'Resumen de Solicitud') ?>
-        </h5>
+            <?= Yii::t('app', 'Resumen TOTAL de Solicitud') ?>
+        </h3>
 
         <!-- Contenedor de 50% del ancho, centrado -->
         <ul class="list-unstyled fs-6 w-50 mx-auto">
@@ -64,8 +64,8 @@ use yii\bootstrap5\Html;
 
             <!-- Total más destacado -->
             <li class="d-flex justify-content-between align-items-baseline pt-3">
-                <span class="fw-bold me-3"><?= Yii::t('app', 'Total estimado') ?>:</span>
-                <span class="fw-bold fs-5 text-success px-3 py-1 rounded border border-success">
+                <span class="fw-bold fs-2 me-3"><?= Yii::t('app', 'Total estimado') ?>:</span>
+                <span class="fw-bold fs-2 text-success px-3 py-1 rounded border border-success">
                     <?= '$ ' . number_format((float) $totalGeneral, 2, ',', '.') ?>
                 </span>
             </li>

@@ -7,6 +7,8 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\models\Reserva;
+use app\models\Cabana;
+use app\models\RequestReserva;
 
 /**
  * ReservaSearch represents the model behind the search form about `app\models\Reserva`.
@@ -21,7 +23,7 @@ class ReservaSearch extends Reserva
     {
         return [
             [['id', 'id_locador', 'pax', 'id_estado', 'created_by', 'updated_by'], 'integer'],
-            [['fecha', 'desde', 'hasta', 'obs', 'created_at', 'updated_at','denominacion'], 'safe'],
+            [['fecha', 'desde', 'hasta', 'obs', 'created_at', 'updated_at', 'denominacion'], 'safe'],
         ];
     }
 
@@ -155,5 +157,116 @@ class ReservaSearch extends Reserva
 
         return $dataProvider;
     }
+
+
+    /**
+     * Normaliza el filtro de cabañas que viene por GET (cabanas[]).
+     *
+     * @param \yii\web\Request $request
+     * @param string $paramName
+     * @return array
+     */
+    public static function getSelectedCabanasFromRequest(\yii\web\Request $request, $paramName = 'cabanas')
+    {
+        $selectedCabanas = $request->get($paramName, []);
+
+        if (!is_array($selectedCabanas)) {
+            $selectedCabanas = [$selectedCabanas];
+        }
+
+        // Opcional: limpiar vacíos
+        $result = [];
+        foreach ($selectedCabanas as $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+            $result[] = $value; // dejamos tipo tal cual (string/int), como tenías antes
+        }
+
+        return $result;
+    }
+
+
+    /**
+     * Obtiene reservas para el calendario de ocupación:
+     * - normaliza el filtro cabanas[]
+     * - aplica filtro por locador
+     * - arma el query con solapamiento de fechas
+     * - hace eager loading de relaciones usadas en el calendario
+     *
+     * @param \yii\web\Request $request
+     * @param string $fromDate Y-m-d H:i:s
+     * @param string $toDate   Y-m-d H:i:s
+     * @return array [Reserva[] $reservas, array $selectedCabanas, int $idLocador, string $locadorLabel]
+     */
+    public static function searchCalendario(\yii\web\Request $request, $fromDate, $toDate)
+    {
+        // Filtro de cabañas
+        $selectedCabanas = self::getSelectedCabanasFromRequest($request);
+
+        // Filtro de locador
+        $idLocador = (int) $request->get('id_locador', 0);
+
+        if ($idLocador === 0) {
+            $idLocador = null;     // ← esto evita el "0" en Select2
+            $locadorLabel = '';    // ← sin texto inicial
+        }
+
+        $reservaTable = self::tableName();
+        $cabanaTable = Cabana::tableName();
+
+        $query = self::find()
+            ->joinWith(['reservaCabanas.cabana'])
+            ->with([
+                // usa el nombre correcto de tus relaciones
+                'requestReservas',
+                'estado',
+                'locador',
+                'reservaCabanas.cabana',
+            ])
+            ->andWhere([
+                'NOT',
+                [
+                    'OR',
+                    ['<', "$reservaTable.hasta", $fromDate],
+                    ['>', "$reservaTable.desde", $toDate],
+                ],
+            ]);
+
+        if (!empty($selectedCabanas)) {
+            $query->andWhere(["$cabanaTable.id" => $selectedCabanas]);
+        }
+
+        if ($idLocador > 0) {
+            $query->andWhere(["$reservaTable.id_locador" => $idLocador]);
+        }
+
+        /** @var Reserva[] $reservas */
+        $reservas = $query->all();
+
+        // Armar label del locador (para mostrarse en el Select2)
+        $locadorLabel = '';
+        if ($idLocador > 0) {
+            $locador = Locador::findOne($idLocador);
+            if ($locador) {
+                $parts = [];
+                if ($locador->denominacion) {
+                    $parts[] = $locador->denominacion;
+                }
+                if ($locador->documento) {
+                    $parts[] = $locador->documento;
+                }
+                if ($locador->email) {
+                    $parts[] = $locador->email;
+                }
+                $locadorLabel = implode(' - ', $parts);
+            }
+        }
+
+        return [$reservas, $selectedCabanas, $idLocador, $locadorLabel];
+    }
+
+
+
 
 }

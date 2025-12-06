@@ -17,12 +17,15 @@ CREATE TABLE IF NOT EXISTS `cabanas` (
   `max_pax` SMALLINT(6) NOT NULL,
   `activa` SMALLINT(6) NOT NULL,
   `caracteristicas` JSON NULL DEFAULT NULL,
+  `config` JSON NULL,
+  `numero` SMALLINT NULL,
   `created_at` DATETIME NULL DEFAULT NULL,
   `created_by` INT(11) NULL DEFAULT NULL,
   `updated_at` DATETIME NULL DEFAULT NULL,
   `updated_by` INT(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `descr_UNIQUE` (`descr` ASC) )
+  UNIQUE INDEX `descr_UNIQUE` (`descr` ASC) ,
+  UNIQUE INDEX `numero_UNIQUE` (`numero` ASC) )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 

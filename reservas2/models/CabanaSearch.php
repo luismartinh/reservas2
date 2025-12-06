@@ -18,8 +18,8 @@ class CabanaSearch extends Cabana
     public function rules()
     {
         return [
-            [['id', 'max_pax', 'activa', 'created_by', 'updated_by'], 'integer'],
-            [['descr', 'checkin', 'checkout', 'caracteristicas', 'created_at', 'updated_at'], 'safe'],
+            [['id', 'max_pax', 'activa','numero', 'created_by', 'updated_by'], 'integer'],
+            [['descr', 'checkin', 'checkout', 'caracteristicas', 'created_at', 'updated_at', 'numero'], 'safe'],
         ];
     }
 
@@ -62,6 +62,7 @@ class CabanaSearch extends Cabana
             'checkin' => $this->checkin,
             'checkout' => $this->checkout,
             'max_pax' => $this->max_pax,
+            'numero' => $this->numero,
             'activa' => $this->activa,
             'created_at' => $this->created_at,
             'created_by' => $this->created_by,
@@ -106,6 +107,7 @@ class CabanaSearch extends Cabana
             'checkin' => $this->checkin,
             'checkout' => $this->checkout,
             'max_pax' => $this->max_pax,
+            'numero' => $this->numero,
             'activa' => $this->activa,
             'created_at' => $this->created_at,
             'created_by' => $this->created_by,

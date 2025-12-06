@@ -2,6 +2,9 @@
 use yii\bootstrap5\Html;
 use yii\bootstrap5\ActiveForm;
 use yii\captcha\Captcha;
+use app\assets\SubmitOverlayAsset;
+SubmitOverlayAsset::register($this);
+
 
 /** @var \app\models\RequestReserva $reservaReq */
 /** @var \app\models\Cabana[] $cabanas */
@@ -109,7 +112,11 @@ $this->title = Yii::t('app', 'Registrar Pago');
 <?php $af = ActiveForm::begin([
     'action' => ['registrar-pago', 'hash' => $reservaReq->hash],
     'method' => 'post',
-    'options' => ['enctype' => 'multipart/form-data']
+    'options' => [
+        'enctype' => 'multipart/form-data',
+        'data-submit-overlay' => 'true',
+        'data-overlay-text' => Yii::t('app', 'Registrando pago, por favor espere...'),
+    ],
 ]); ?>
 
 
@@ -211,7 +218,9 @@ $this->title = Yii::t('app', 'Registrar Pago');
 
 <div class="text-center mt-4">
     <?= Html::submitButton('<i class="bi bi-cash-coin"></i> ' . Yii::t('app', 'Registrar Pago'), [
-        'class' => 'btn btn-success btn-lg px-5'
+        'class' => 'btn btn-success btn-lg px-5',
+        'data-submit-overlay-btn' => 'true',
+        'data-loading-text' => Yii::t('app', 'Guardando...'),
     ]) ?>
 </div>
 
@@ -226,7 +235,10 @@ $this->title = Yii::t('app', 'Registrar Pago');
 </div>
 
 <!-- Cabañas -->
-<h4 class="mt-3 mb-2"><?= Yii::t('app', 'Cabañas seleccionadas') ?></h4>
+<h4 class="mt-3 mb-2"><?= count($cabanas) > 1 ? Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' :
+    Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' ?> </h4>
+
+
 <?php foreach ($cabanas as $cabana): ?>
     <?= $this->render('_cabana_card', [
         'model' => $cabana,

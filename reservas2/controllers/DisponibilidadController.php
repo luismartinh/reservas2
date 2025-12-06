@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\config\Niveles;
 use app\helpers\Utils;
+use app\models\Cabana;
 use app\models\CabanaTarifa;
 use app\models\DisponibilidadSearch;
 use app\models\Notificaciones;
@@ -37,6 +38,7 @@ class DisponibilidadController extends \yii\web\Controller
 
     public function actionBuscar()
     {
+        $this->layout = 'main';
 
         $searchModel = Yii::createObject(DisponibilidadSearch::class);
         $dataProvider = $searchModel->search($this->request->get());
@@ -55,6 +57,41 @@ class DisponibilidadController extends \yii\web\Controller
             'searchModel' => $searchModel,
             'totales' => $totales,     // 👈 pasamos los totales
             'esAdmin'=>false
+        ]);
+
+
+    }
+
+
+    public function actionBuscarEnCabana($id_cabana)
+    {
+
+        $this->layout = 'main';
+
+        $cabana=Cabana::findOne($id_cabana);
+
+        if(!$cabana){
+            throw new \yii\web\NotFoundHttpException();
+        }
+        
+        $searchModel = Yii::createObject(DisponibilidadSearch::class);
+        $dataProvider = $searchModel->searchEnCabana($id_cabana,$this->request->get());
+
+        // calcular totales solo si hay rango
+        $totales = [];
+        if (!empty($searchModel->desde) && !empty($searchModel->hasta)) {
+            $ids = array_map(fn($m) => (int) $m->id, $dataProvider->getModels());
+            if ($ids) {
+                $totales = CabanaTarifa::calcularTotalesParaCabanas($ids, $searchModel->desde, $searchModel->hasta);
+            }
+        }
+
+        return $this->render('busqueda', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'totales' => $totales,     // 👈 pasamos los totales
+            'esAdmin'=>false,
+            'cabana'=>$cabana
         ]);
 
 
@@ -83,6 +120,9 @@ class DisponibilidadController extends \yii\web\Controller
 
     public function actionSolicitarReserva()
     {
+
+        $this->layout = 'main';
+        
         $ids = Yii::$app->request->post('seleccionadas', []);
         $desde = Yii::$app->request->post('desde');
         $hasta = Yii::$app->request->post('hasta');
@@ -92,7 +132,7 @@ class DisponibilidadController extends \yii\web\Controller
             return $this->redirect(['buscar']);
         }
 
-        $cabanas = \app\models\Cabana::findAll($ids);
+        $cabanas = Cabana::findAll($ids);
 
         // 🔹 Modelo para el formulario con captcha
         $formModel = $this->crearFormModel();
@@ -328,6 +368,7 @@ class DisponibilidadController extends \yii\web\Controller
 
     public function actionSolicitudGenerada($hash)
     {
+        $this->layout = 'main';
 
         $estadoPendiente = \app\models\Estado::find()->where(['slug' => 'pendiente-email-verificar'])->one();
         $estadoId = (int) $estadoPendiente->id;
@@ -348,7 +389,7 @@ class DisponibilidadController extends \yii\web\Controller
         // Podés obtener las cabañas desde la relación, si la tenés:
         // $cabanas = $reserva->requestCabanas ...
         // o si no:
-        $cabanas = \app\models\Cabana::find()
+        $cabanas = Cabana::find()
             ->joinWith('requestCabanas rc')
             ->where(['rc.id_request' => $reserva->id])
             ->all();
@@ -496,74 +537,6 @@ class DisponibilidadController extends \yii\web\Controller
     }
 
 
-
-    /**
-     * Normaliza una fecha ingresada (d/m/Y, d-m-Y o Y-m-d) a Y-m-d.
-     */
-    /*
-    protected function normalizarFechaReserva(?string $v): ?string
-    {
-        if ($v === null || $v === '') {
-            return null;
-        }
-
-        $v = trim($v);
-        foreach (['d/m/Y', 'd-m-Y', 'Y-m-d'] as $fmt) {
-            $d = \DateTime::createFromFormat($fmt, $v);
-            if ($d instanceof \DateTime) {
-                return $d->format('Y-m-d');
-            }
-        }
-        return null;
-    }
-
-    */
-
-    /**
-     * Devuelve la hora mínima [H, i] de checkin entre un conjunto de cabañas.
-     */
-    /*
-    protected function obtenerHoraMinimaCheckin(array $cabanas): array
-    {
-        $minH = 23;
-        $minM = 59;
-        $found = false;
-
-        $parseHM = function (?string $t): ?array {
-            if (!$t) {
-                return null;
-            }
-            $t = trim(str_ireplace(['a. m.', 'p. m.', 'a.m.', 'p.m.'], ['am', 'pm', 'am', 'pm'], $t));
-            foreach (['H:i', 'H:i:s', 'g:i a', 'g:i A', 'h:i a', 'h:i A'] as $f) {
-                $dt = \DateTime::createFromFormat($f, $t);
-                if ($dt instanceof \DateTime) {
-                    return [(int) $dt->format('H'), (int) $dt->format('i')];
-                }
-            }
-            $ts = strtotime($t);
-            return $ts ? [(int) date('H', $ts), (int) date('i', $ts)] : null;
-        };
-
-        foreach ($cabanas as $c) {
-            $hm = $parseHM($c->checkin ?? null);
-            if ($hm) {
-                [$h, $m] = $hm;
-                $found = true;
-                if ($h < $minH || ($h === $minH && $m < $minM)) {
-                    $minH = $h;
-                    $minM = $m;
-                }
-            }
-        }
-
-        if (!$found) {
-            return [0, 0];
-        }
-
-        return [$minH, $minM];
-    }
-    */    
-
     /**
      * Envía el mail de confirmación usando la vista mail_confirmacion.
      */
@@ -704,6 +677,9 @@ class DisponibilidadController extends \yii\web\Controller
 
     public function actionSeguimiento($hash)
     {
+
+        $this->layout = 'main';
+        
         /** @var \app\models\RequestReserva|null $reserva */
         $reserva = RequestReserva::find()
             ->where(['hash' => $hash])

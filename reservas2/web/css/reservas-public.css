@@ -1,0 +1,330 @@
+/* ================= PALETA & TIPOGRAFÍA BASE ================= */
+:root {
+    --dh-primary: #154CA6;
+    --dh-primary-light: #D8E0FD;
+    --dh-primary-soft: #748DB6;
+    --dh-black: #000000;
+    --dh-white: #FFFFFF;
+}
+
+.dh-heading {
+    font-family: 'League Spartan', system-ui, sans-serif;
+}
+
+/* ================= BOTÓN PRINCIPAL ================= */
+.btn-dh-primary {
+    background-color: var(--dh-primary);
+    border-color: var(--dh-primary);
+    color: var(--dh-white);
+    border-radius: 999px;
+    padding-inline: 1.75rem;
+    padding-block: 0.65rem;
+    font-weight: 600;
+}
+
+.btn-dh-primary:hover,
+.btn-dh-primary:focus {
+    background-color: #0f3a7c;
+    border-color: #0f3a7c;
+}
+
+/* ================= FONDO ANIMADO ================= */
+.dh-bg-rotator {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.dh-bg-rotator::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.35), rgba(255,255,255,0.55));
+}
+
+.dh-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 1.8s, transform 1.8s;
+}
+
+.dh-bg-img.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ================= HERO MARGIN ================= */
+.site-index .dh-hero {
+    margin-top: 4rem !important;
+}
+@media (max-width: 991px) {
+    .site-index .dh-hero {
+        margin-top: 3rem !important;
+    }
+}
+@media (max-width: 576px) {
+    .site-index .dh-hero {
+        margin-top: 2rem !important;
+    }
+}
+
+/* ================= CTA XXL ================= */
+.dh-hero-btn-xl,
+.dh-cabana-cta-btn {
+    position: relative;
+    overflow: hidden;
+    font-size: 1.8rem !important;
+    padding: 1.4rem 4rem !important;
+    border-radius: 999px !important;
+    font-weight: 800;
+    background-color: var(--dh-primary) !important;
+    color: #fff !important;
+    border: none;
+    box-shadow: 0 22px 60px rgba(21,76,166,0.55);
+    animation: dh-cta-pulse 2.8s infinite;
+    transition: all .25s ease;
+}
+
+.dh-hero-btn-xl:hover,
+.dh-cabana-cta-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 26px 65px rgba(21,76,166,0.70);
+}
+
+@keyframes dh-cta-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(21,76,166,0.50); }
+    70% { box-shadow: 0 0 0 20px rgba(21,76,166,0); }
+    100% { box-shadow: 0 0 0 0 rgba(21,76,166,0); }
+}
+
+.dh-hero-btn-xl::after,
+.dh-cabana-cta-btn::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    left: -60%;
+    width: 40%;
+    height: 180%;
+    background: rgba(255,255,255,0.45);
+    transform: skewX(-25deg);
+    opacity: 0;
+    animation: dh-cta-shine 3.5s infinite;
+}
+
+@keyframes dh-cta-shine {
+    0% { left: -60%; opacity: 0; }
+    10% { opacity: 1; }
+    35% { left: 130%; opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* ================= GLASS BOX ================= */
+.dh-glass-box {
+    background: rgba(255,255,255,0.70);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.5);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+}
+
+/* ================= BADGE DE CAPACIDAD ================= */
+.dh-capacity-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 1.2rem;
+    border-radius: 999px;
+    background: rgba(21,76,166,0.10);
+    color: var(--dh-primary);
+    font-weight: 600;
+}
+
+/* ================= RESPONSIVE CTA ================= */
+@media (max-width: 991px) {
+    .dh-hero-btn-xl,
+    .dh-cabana-cta-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* ====================== NAVBAR PÚBLICA (estilo DH) ====================== */
+.dh-navbar {
+    background: rgba(216, 224, 253, 0.25); /* --dh-primary-light translúcido */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    transition:
+        background 0.35s ease,
+        backdrop-filter 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+/* Estado al hacer scroll: más sólida y con sombra */
+.dh-navbar.scrolled {
+    background: rgba(216, 224, 253, 0.90);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Logo pequeño + texto marca */
+.dh-navbar-logo {
+    max-height: 40px;
+    width: auto;
+}
+
+.dh-navbar-brand-text {
+    font-family: 'League Spartan', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--dh-primary);
+}
+
+/* Links del menú */
+.dh-navbar .navbar-nav .nav-link {
+    color: var(--dh-primary) !important; /* texto azul DH */
+    font-weight: 600;
+    font-family: 'Poppins', system-ui, sans-serif;
+    transition: color 0.25s ease, opacity 0.2s ease;
+}
+
+.dh-navbar .navbar-nav .nav-link:hover,
+.dh-navbar .navbar-nav .nav-link:focus {
+    color: #0f3c81 !important; /* un poco más oscuro */
+    opacity: 0.9;
+}
+
+/* Íconos dentro de la navbar */
+.dh-navbar .nav-link i {
+    font-size: 1rem;
+}
+
+/* Dropdown */
+.dh-navbar .dropdown-menu {
+    background: rgba(216, 224, 253, 0.96);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    backdrop-filter: blur(16px);
+}
+
+.dh-navbar .dropdown-item {
+    color: var(--dh-primary);
+    font-weight: 500;
+}
+
+.dh-navbar .dropdown-item:hover,
+.dh-navbar .dropdown-item:focus {
+    background-color: var(--dh-primary-soft);
+    color: var(--dh-white);
+}
+
+/* Toggler (botón hamburguesa) estilo DH */
+.dh-navbar .navbar-toggler {
+    border-color: rgba(21, 76, 166, 0.5);
+}
+
+.dh-navbar .navbar-toggler-icon {
+    background-image: none;
+    position: relative;
+}
+
+.dh-navbar .navbar-toggler-icon::before,
+.dh-navbar .navbar-toggler-icon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background-color: var(--dh-primary);
+    box-shadow: 0 -5px 0 var(--dh-primary), 0 5px 0 var(--dh-primary);
+}
+
+/* Responsive navbar */
+@media (max-width: 767.98px) {
+    .dh-navbar {
+        padding-inline: 0.75rem;
+    }
+}
+
+
+/* ====================== FOOTER PÚBLICO (estilo DH) ====================== */
+.dh-footer {
+    background: rgba(216, 224, 253, 0.25); /* similar a navbar inicial */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    color: var(--dh-primary);
+    font-size: 0.95rem;
+    font-family: 'Poppins', sans-serif;
+    transition: background 0.35s ease, backdrop-filter 0.35s ease;
+}
+
+/* Footer más sólido al hacer scroll */
+.dh-footer.scrolled {
+    background: rgba(216, 224, 253, 0.85); /* más sólido */
+    backdrop-filter: blur(18px);
+}
+
+/* Enlaces */
+.dh-footer a {
+    color: var(--dh-primary);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.dh-footer a:hover {
+    color: #0f3c81; /* un poco más oscuro */
+}
+
+/* Sombra sutil arriba del footer */
+.dh-footer-shadow {
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.08);
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .dh-footer {
+        text-align: center;
+        padding: 1.5rem 1rem;
+    }
+}
+
+
+/* =============== Redes Sociales – Estilo A =============== */
+.footer-social-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #154CA6;            /* color institucional */
+    font-size: 1.4rem;
+    margin: 0 6px;
+    transition: all .25s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    text-decoration: none !important;
+}
+
+.footer-social-link:hover {
+    background: #154CA6;
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+
+/* Hover verde exclusivo para WhatsApp */
+.footer-social-link i.bi-whatsapp:hover {
+    color: #25D366 !important;
+}

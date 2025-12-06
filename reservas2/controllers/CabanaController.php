@@ -166,6 +166,17 @@ class CabanaController extends BaseCabanaController
         }
 
         $model = Yii::createObject(Cabana::class);
+
+        $paleta = Cabana::getPaletaTraducida();
+
+        $usados = Cabana::coloresUsados();
+        // Filtrar por clave (hex)
+        $coloresDisponibles = array_diff_key($paleta, array_flip($usados));
+
+        $numerosDisponibles = Cabana::getNumerosDisponibles($model);
+
+
+
         try {
 
             if ($model->load($this->request->post())) {
@@ -182,7 +193,11 @@ class CabanaController extends BaseCabanaController
             $model->addError('_exception', $e->errorInfo[2] ?? $e->getMessage());
             Yii::error("ERROR:" . Yii::$app->controller->id . "/create " . ($e->errorInfo[2] ?? $e->getMessage()));
         }
-        return $this->render('create', ['model' => $model]);
+        return $this->render('create', [
+            'model' => $model,
+            'coloresDisponibles' => $coloresDisponibles,
+            'numerosDisponibles' => $numerosDisponibles,
+        ]);
     }
 
 
@@ -212,6 +227,14 @@ class CabanaController extends BaseCabanaController
 
         $model = $this->findModel($id);
 
+        $paleta = Cabana::getPaletaTraducida();
+
+        $usados = Cabana::coloresUsados();
+        $usados = array_diff($usados, [$model->color_cabana]); // permitir elegir el color actual
+        // Filtrar por clave (hex)
+        $coloresDisponibles = array_diff_key($paleta, array_flip($usados));
+        $numerosDisponibles = Cabana::getNumerosDisponibles($model);
+
 
         if ($model->load($this->request->post())) {
 
@@ -221,7 +244,11 @@ class CabanaController extends BaseCabanaController
             }
         }
 
-        return $this->render('update', ['model' => $model]);
+        return $this->render('update', [
+            'model' => $model,
+            'coloresDisponibles' => $coloresDisponibles,
+            'numerosDisponibles' => $numerosDisponibles,
+        ]);
     }
 
 
@@ -340,7 +367,7 @@ class CabanaController extends BaseCabanaController
                     $errors[] = "La tarifa '{$t->descr}' se superpone con otra ya asociada.";
                     continue;
                 }
-                */    
+                */
 
                 $ct = new \app\models\CabanaTarifa();
                 $ct->id_cabana = $id_cabana;
@@ -389,17 +416,17 @@ class CabanaController extends BaseCabanaController
             ->andWhere(['not exists', $sub2])
             ->orderBy(['t.inicio' => SORT_ASC])
             ->all();
-        */    
+        */
 
-        $tarifasDisponibles =\app\models\CabanaTarifa::getTarifasDisponibles($id_cabana);    
+        $tarifasDisponibles = \app\models\CabanaTarifa::getTarifasDisponibles($id_cabana);
         $listaTarifas = ArrayHelper::map(
             $tarifasDisponibles,
             'id',
             function ($m) {
                 $ini = (new \DateTime($m->inicio))->format('d-m-Y');
                 $fin = (new \DateTime($m->fin))->format('d-m-Y');
-                $cd =$m->min_dias;
-                $valor =$m->valor_dia;
+                $cd = $m->min_dias;
+                $valor = $m->valor_dia;
                 return "{$m->descr} ({$ini} → {$fin}) ({$cd}d / $ {$valor})";
             }
         );

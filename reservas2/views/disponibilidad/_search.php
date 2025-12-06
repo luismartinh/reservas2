@@ -11,9 +11,15 @@ use yii\web\JsExpression;
  * @var app\models\DisponibilidadSearch $searchModel
  * @var kartik\form\ActiveForm $form
  * @var bool $esAdmin
+ * @var app\models\Cabana $cabana
  */
 
-$frmAction = $esAdmin ? ['reserva/reservar'] : ['disponibilidad/buscar'];
+if($cabana){
+	$frmAction = $esAdmin ? ['reserva/reservar'] : ['disponibilidad/buscar-en-cabana', 'id_cabana' => $cabana->id	];
+}else{
+	$frmAction = $esAdmin ? ['reserva/reservar'] : ['disponibilidad/buscar'];
+}
+
 ?>
 
 <div class="disponibilidad-search">
@@ -53,7 +59,7 @@ $frmAction = $esAdmin ? ['reserva/reservar'] : ['disponibilidad/buscar'];
 						'options' => [
 							//'data-pjax' => '0',
 							'autocomplete' => 'off',
-							'placeholder' => 'seleccione rango...'
+							'placeholder' => yii::t('app','seleccione rango...')
 						]
 
 					]);
@@ -69,13 +75,13 @@ $frmAction = $esAdmin ? ['reserva/reservar'] : ['disponibilidad/buscar'];
 
 			<div class="form-group d-flex align-items-end" style="margin-top:32px;">
 				<?= Html::submitButton(
-					'<i class="bi bi-search me-2"></i>' . Yii::t('cruds', 'Buscar'),
+					'<i class="bi bi-search me-2"></i>' . Yii::t('cruds', 'Buscar disponibilidad'),
 					['class' => 'btn btn-primary me-2']
 				) ?>
 
 				<?= Html::a(
 					'<i class="bi bi-arrow-counterclockwise me-2"></i>' . Yii::t('cruds', 'Reiniciar'),
-					['buscar'], // acción del controlador que renderiza el search
+					$frmAction, // acción del controlador que renderiza el search
 					[
 						'class' => 'btn btn-outline-secondary',
 						'data-pjax' => 1, // 🔹 IMPORTANTE: recarga el bloque PJAX vacío

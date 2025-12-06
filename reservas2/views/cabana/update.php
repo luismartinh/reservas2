@@ -3,9 +3,11 @@
 use yii\helpers\Html;
 
 /**
-* @var yii\web\View $this
-* @var app\models\Cabana $model
-*/
+ * @var yii\web\View $this
+ * @var app\models\Cabana $model
+ * @var array $coloresDisponibles
+ * @var array $numerosDisponibles 
+ */
 
 $this->title = Yii::t('models', 'Modificar cabana');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('models', 'Cabañas'), 'url' => ['index']];
@@ -34,7 +36,9 @@ $this->params['breadcrumbs'][] = Yii::t('cruds', 'Editar');
     <hr />
 
     <?php echo $this->render('_form', [
-    'model' => $model,
+        'model' => $model,
+        'coloresDisponibles' => $coloresDisponibles,
+        'numerosDisponibles' => $numerosDisponibles,
     ]); ?>
 
 </div>

@@ -5,6 +5,8 @@ use yii\bootstrap5\Html;
 /**
 * @var yii\web\View $this
 * @var app\models\Cabana $model
+* @var array $coloresDisponibles
+* @var array $numerosDisponibles
 */
 
 $this->title = Yii::t('models', 'Nueva cabaña');
@@ -33,6 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
     'model' => $model,
+    'coloresDisponibles' => $coloresDisponibles,
+     'numerosDisponibles' => $numerosDisponibles,
     ]); ?>
 
 </div>

@@ -1,6 +1,7 @@
 <?php
 
 
+use app\models\Cabana;
 use yii\bootstrap5\Html;
 use yii\widgets\DetailView;
 use yii\bootstrap5\Tabs;
@@ -40,6 +41,7 @@ $this->params['breadcrumbs'][] = Yii::t('cruds', 'Ver');
         'model' => $model,
         'attributes' => [
             'descr',
+            'numero',
             [
                 'attribute' => 'activa',
                 'value' => $model->activa == '1' ? 'Si' : 'No',
@@ -48,6 +50,29 @@ $this->params['breadcrumbs'][] = Yii::t('cruds', 'Ver');
             'checkin',
             'max_pax',
             'caracteristicas',
+            // 🔹 Nuevo campo: color de la cabaña tomado de config[color_cabana]
+            [
+                'attribute' => 'color_cabana',
+                'label' => Yii::t('app', 'Color de la cabaña'),
+                'format' => 'raw',
+                'value' => function ($model) {
+                    /** @var \app\models\Cabana $model */
+                    $hex = $model->color_cabana;     // viene del getter que lee config['color_cabana']
+                    if (!$hex) {
+                        return Html::tag('span', Yii::t('app', 'No definido'), [
+                            'class' => 'badge bg-secondary',
+                        ]);
+                    }
+
+                    $nombre = Cabana::$PALETA[$hex] ?? $hex;
+
+                    return Html::tag('span', $nombre, [
+                        'class' => 'badge rounded-pill',
+                        'style' => "background: {$hex}; color: #000; font-weight:bold;",
+                        'title' => $hex,
+                    ]);
+                },
+            ],
 
 
         ],

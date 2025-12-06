@@ -5,13 +5,17 @@ namespace app\controllers;
 use app\controllers\base\ReservaController as BaseReservaController;
 
 use app\config\RootMenu;
+use app\helpers\CalendarHelper;
 use app\helpers\Utils;
+use app\models\Cabana;
 use app\models\CabanaTarifa;
 use app\models\DisponibilidadSearch;
 use app\models\Identificador;
+use app\models\Locador;
 use app\models\RequestReserva;
 use app\models\RequestResponse;
 use app\models\Reserva;
+use app\models\ReservaCabana;
 use app\models\ReservaSearch;
 use yii\base\DynamicModel;
 use yii\filters\AccessControl;
@@ -38,11 +42,11 @@ class ReservaController extends BaseReservaController
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['index', 'delete', 'cambiar-estado', 'reservar', 'solicitar-reserva'],
+                    'only' => ['index', 'delete', 'cambiar-estado', 'reservar', 'solicitar-reserva', 'calendario-ocupacion', 'locador-autocomplete'],
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => ['index', 'delete', 'cambiar-estado', 'reservar', 'solicitar-reserva'],
+                            'actions' => ['index', 'delete', 'cambiar-estado', 'reservar', 'solicitar-reserva', 'calendario-ocupacion', 'locador-autocomplete'],
                             'roles' => ['@'],
                             'matchCallback' => function ($rule, $action) {
                                 return true;
@@ -317,7 +321,7 @@ class ReservaController extends BaseReservaController
 
         //------------- POST ---------------
 
-        if (Yii::$app->request->isPost && $first_post=="0") {
+        if (Yii::$app->request->isPost && $first_post == "0") {
             $formModel->load(Yii::$app->request->post());
             $formModel->comprobante = \yii\web\UploadedFile::getInstance($formModel, 'comprobante');
 
@@ -611,4 +615,123 @@ class ReservaController extends BaseReservaController
     }
 
 
+
+
+    public function actionCalendarioOcupacion()
+    {
+        $u = Yii::$app->user->identity;
+
+        $menu = new \app\models\Menu();
+        $menu->descr = "Administrar reservas por calendario de ocupación";
+        $menu->label = "Calendario de ocupación";
+        $menu->menu = (string) RootMenu::ADMIN;
+        $menu->menu_path = "Reservas/Calendario";
+        $menu->url = Yii::$app->controller->id . '/calendario-ocupacion';
+
+        $permiso = Identificador::autorizar(
+            $u,
+            Yii::$app->controller->id . '/calendario-ocupacion',
+            "Administrar reservas por calendario de ocupación",
+            $menu
+        );
+
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+        $request = Yii::$app->request;
+
+        // year / month desde GET, con default al mes actual
+        $year = (int) $request->get('year', date('Y'));
+        $month = (int) $request->get('month', date('m'));
+
+        // 1) Rango base (dos meses)
+        list($start1, $start2, $fromDate, $toDate) =
+            CalendarHelper::buildTwoMonthRange($year, $month);
+
+        // 2) Reservas + filtros (cabañas + locador) delegados al Search
+        list($reservas, $selectedCabanas, $idLocador, $locadorLabel) =
+            ReservaSearch::searchCalendario($request, $fromDate, $toDate);
+
+        // 3) Cabañas para el filtro
+        $cabanas = Cabana::find()
+            ->orderBy(['descr' => SORT_ASC])
+            ->all();
+
+        // 4) Estructura del calendario + colores
+        list($calendarData, $cabanaColors) = CalendarHelper::buildCalendarData(
+            $reservas,
+            $fromDate,
+            $toDate,
+            $selectedCabanas // 👈 ahora se pasa al helper
+        );
+
+        return $this->render('calendario/calendario_ocupacion', [
+            'start1' => $start1,
+            'start2' => $start2,
+            'calendarData' => $calendarData,
+            'cabanas' => $cabanas,
+            'cabanaColors' => $cabanaColors,
+            'selectedCabanas' => $selectedCabanas,
+            'selectedLocadorId' => $idLocador,
+            'selectedLocadorText' => $locadorLabel,
+        ]);
+    }
+
+
+    public function actionLocadorAutocomplete($q = null)
+    {
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/reservar',
+            "Crear reserva",
+            null
+        );
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $term = trim((string) $q);
+        if ($term === '') {
+            return ['results' => []];
+        }
+
+        $locadores = Locador::find()
+            ->andFilterWhere([
+                'or',
+                ['like', 'denominacion', $term],
+                ['like', 'documento', $term],
+                ['like', 'email', $term],
+            ])
+            ->orderBy(['denominacion' => SORT_ASC])
+            ->limit(20)
+            ->all();
+
+        $results = [];
+        foreach ($locadores as $loc) {
+            /** @var Locador $loc */
+            $parts = [];
+            if ($loc->denominacion) {
+                $parts[] = $loc->denominacion;
+            }
+            if ($loc->documento) {
+                $parts[] = $loc->documento;
+            }
+            if ($loc->email) {
+                $parts[] = $loc->email;
+            }
+
+            $results[] = [
+                'id' => (int) $loc->id,
+                'text' => implode(' - ', $parts),
+            ];
+        }
+
+        return ['results' => $results];
+    }
 }

@@ -19,6 +19,8 @@ use yii\behaviors\TimestampBehavior;
  * @property integer $max_pax
  * @property integer $activa
  * @property array $caracteristicas
+ * @property array $config
+ * @property integer $numero
  * @property string $created_at
  * @property integer $created_by
  * @property string $updated_at
@@ -67,7 +69,7 @@ abstract class Cabana extends \yii\db\ActiveRecord
         $parentRules = parent::rules();
 
         return ArrayHelper::merge($parentRules, [
-            [['descr', 'checkin', 'checkout', 'max_pax', 'activa'], 'required'],
+            [['descr', 'checkin', 'checkout', 'max_pax', 'activa', 'numero'], 'required'],
 
             // checkin / checkout como hora (HH:mm)
             [['checkin', 'checkout'], 'date', 'type' => 'time', 'format' => 'php:H:i'],
@@ -78,13 +80,16 @@ abstract class Cabana extends \yii\db\ActiveRecord
             // max_pax entre 1 y 9
             ['max_pax', 'integer', 'min' => 1, 'max' => 9],
 
+            ['numero', 'integer', 'min' => 1, 'max' => 99],
+
             // activa solo 0 o 1
             //['activa', 'in', 'range' => [0, 1], 'strict' => true],
             ['activa', 'boolean'],
 
-            [['caracteristicas'], 'safe'],
+            [['caracteristicas', 'config'], 'safe'],
             [['descr'], 'string', 'max' => 45],
             [['descr'], 'unique'],
+            [['numero'], 'unique'],
         ]);
     }
 
@@ -126,6 +131,8 @@ abstract class Cabana extends \yii\db\ActiveRecord
             'max_pax' => Yii::t('models', 'Capacidad Maxima'),
             'activa' => Yii::t('models', 'Esta Activa'),
             'caracteristicas' => Yii::t('models', 'Caracteristicas'),
+            'config' => Yii::t('models', 'Configuracion'),
+            'numero' => Yii::t('models', 'Numero'),
             'created_at' => Yii::t('models', 'Created At'),
             'created_by' => Yii::t('models', 'Created By'),
             'updated_at' => Yii::t('models', 'Updated At'),
@@ -147,6 +154,8 @@ abstract class Cabana extends \yii\db\ActiveRecord
             'max_pax' => Yii::t('models', 'Indique la Capacidad Maxima de pasajeros'),
             'activa' => Yii::t('models', 'Indique si esta activa o no '),
             'caracteristicas' => Yii::t('models', 'Ingrese las Caracteristicas'),
+            'numero' => Yii::t('models', 'Ingrese el Numero de la Cabana'),
+            'config' => Yii::t('models', 'Ingrese las configuraciones'),
             'created_at' => Yii::t('models', 'Created At'),
             'created_by' => Yii::t('models', 'Created By'),
             'updated_at' => Yii::t('models', 'Updated At'),

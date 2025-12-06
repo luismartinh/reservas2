@@ -86,3 +86,50 @@ a.desc:after {
 .form-group {
     margin-bottom: 1rem;
 }
+
+:root {
+    --dh-primary: #154CA6;
+    --dh-primary-light: #D8E0FD;
+    --dh-primary-soft: #748DB6;
+    --dh-black: #000000;
+    --dh-white: #FFFFFF;
+}
+
+/* Fuente base de todo el sitio */
+body {
+    font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.dh-heading {
+    font-family: 'League Spartan', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Botón principal de marca */
+.btn-dh-primary {
+    background-color: var(--dh-primary);
+    border-color: var(--dh-primary);
+    color: #fff;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+
+.btn-dh-primary:hover {
+    background-color: #0f3a7c;
+    border-color: #0f3a7c;
+}
+/* Chips/etiquetas suaves */
+.badge-dh-soft {
+    background-color: var(--dh-primary-light);
+    color: var(--dh-primary);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+}
+
+/* Fondo suave para secciones (ej: “Experiencia patagónica”) */
+.section-soft {
+    background-color: #F5F7FF;
+}
+
+

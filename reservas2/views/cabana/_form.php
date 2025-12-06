@@ -8,6 +8,8 @@ use kartik\form\ActiveForm;
  * @var yii\web\View $this
  * @var app\models\Cabana $model
  * @var yii\widgets\ActiveForm $form
+ * @var array $coloresDisponibles
+ * @var array $numerosDisponibles 
  */
 
 $trait = new app\traits\FormTraitClass();
@@ -48,7 +50,12 @@ $trait->init($this);
                     [
                         'label' => Yii::t('cruds', 'Ingrese los datos:'),
                         'content' => '<div class="row mt-3 ps-3" style="width: 90%">' .
-                            $this->render('_form-fields', ['form' => $form, 'model' => $model]) . '</div>',
+                            $this->render('_form-fields', [
+                                'form' => $form,
+                                'model' => $model,
+                                'coloresDisponibles' => $coloresDisponibles,
+                                'numerosDisponibles' => $numerosDisponibles,
+                            ]) . '</div>',
                         'active' => true,
                     ]
                 ]

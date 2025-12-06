@@ -27,6 +27,14 @@ class ContactForm extends Model
             [['name', 'email', 'subject', 'body'], 'required'],
             // email has to be a valid email address
             ['email', 'email'],
+            [['name', 'subject'], 'string', 'max' => 255],
+            // 🔹 límite de 500 caracteres en el mensaje
+            [
+                'body',
+                'string',
+                'max' => 500,
+                'tooLong' => Yii::t('app', 'El mensaje no puede superar los 500 caracteres.')
+            ],            
             // verifyCode needs to be entered correctly
             ['verifyCode', 'captcha'],
         ];
@@ -38,7 +46,11 @@ class ContactForm extends Model
     public function attributeLabels()
     {
         return [
-            'verifyCode' => 'Verification Code',
+            'name'       => Yii::t('app', 'Nombre'),
+            'email'      => Yii::t('app', 'Email'),
+            'subject'    => Yii::t('app', 'Asunto'),
+            'body'       => Yii::t('app', 'Mensaje'),
+            'verifyCode' => Yii::t('app', 'Código de verificación'),
         ];
     }
 

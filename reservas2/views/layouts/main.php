@@ -3,24 +3,55 @@
 /** @var yii\web\View $this */
 /** @var string $content */
 
-use app\assets\AppAsset;
-use app\config\RootMenu;
+
+use app\assets\PublicPortalAsset;
 use app\widgets\Alert;
-use yii\bootstrap5\Breadcrumbs;
 use yii\bootstrap5\Html;
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
 use yii\helpers\Url;
 
 
-AppAsset::register($this);
+PublicPortalAsset::register($this);
+
 
 $this->registerCsrfMetaTags();
 $this->registerMetaTag(['charset' => Yii::$app->charset], 'charset');
 $this->registerMetaTag(['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1, shrink-to-fit=no']);
-$this->registerMetaTag(['name' => 'description', 'content' => $this->params['meta_description'] ?? '']);
-$this->registerMetaTag(['name' => 'keywords', 'content' => $this->params['meta_keywords'] ?? '']);
-$this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii::getAlias('@web/favicon.ico')]);
+$this->registerLinkTag([
+    'rel' => 'icon',
+    'type' => 'image/x-icon',
+    'href' => Yii::getAlias('@web/favicon.ico'),
+]);
+
+$this->registerLinkTag([
+    'rel' => 'icon',
+    'type' => 'image/png',
+    'sizes' => '16x16',
+    'href' => Yii::getAlias('@web/favicon-16x16.png'),
+]);
+$this->registerLinkTag([
+    'rel' => 'icon',
+    'type' => 'image/png',
+    'sizes' => '32x32',
+    'href' => Yii::getAlias('@web/favicon-32x32.png'),
+]);
+$this->registerLinkTag([
+    'rel' => 'apple-touch-icon',
+    'sizes' => '180x180',
+    'href' => Yii::getAlias('@web/apple-touch-icon.png'),
+]);
+$this->registerLinkTag([
+    'rel' => 'manifest',
+    'href' => Yii::getAlias('@web/site.webmanifest'),
+]);
+
+
+// Fuentes del portal público
+$this->registerCssFile(
+    'https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap',
+    ['rel' => 'stylesheet']
+);
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -29,93 +60,6 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <head>
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
-
-    <!-- Agregar el favicon -->
-
-    <style>
-        /* customize primary dark */
-        $primary: #001199;
-
-        [data-bs-theme="dark"] {
-            --bs-primary: #{$primary};
-            --bs-primary-bg-subtle: #{$primary};
-            --bs-primary-bg-subtle-dark: #{$primary};
-
-            .btn-primary {
-                --bs-btn-bg: #{$primary};
-            }
-        }
-    </style>
-
-    <link href="css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const themeButtons = document.querySelectorAll("[data-bs-theme-value]");
-            const rootElement = document.documentElement;
-            const themeToggleButton = document.querySelector("#bd-theme .theme-icon-active");
-            const savedTheme = localStorage.getItem("theme") || "auto";
-            const buttons = document.querySelectorAll(".theme-menu-item button");
-
-            // Mapeo de iconos según el tema
-            const themeIcons = {
-                light: "bi-sun-fill", // ☀️ Icono para claro
-                dark: "bi-moon-stars-fill", // 🌙 Icono para oscuro
-                auto: "bi-circle-half" // ⚡ Icono para automático
-            };
-
-            // Función para cambiar el tema, el icono y resaltar el ítem del menú
-            function setTheme(theme) {
-                rootElement.setAttribute("data-bs-theme", theme);
-                localStorage.setItem("theme", theme);
-
-                // Cambiar el icono del botón
-                if (themeToggleButton) {
-                    themeToggleButton.className = `bi ${themeIcons[theme]} my-1 theme-icon-active`;
-                }
-
-                // Remover clase active de todos los botones
-                buttons.forEach(button => {
-                    button.classList.remove("active");
-                });
-
-                // Agregar la clase active solo al botón seleccionado
-                const selectedButton = document.querySelector(`[data-bs-theme-value="${theme}"] button`);
-                if (selectedButton) {
-                    selectedButton.classList.add("active");
-                }
-            }
-
-            // Aplicar el tema guardado y actualizar el icono
-            setTheme(savedTheme);
-
-            // Agregar evento a los botones del menú
-            themeButtons.forEach(button => {
-                button.addEventListener("click", function () {
-                    const selectedTheme = this.getAttribute("data-bs-theme-value");
-                    setTheme(selectedTheme);
-                });
-            });
-
-            // Seleccionar todos los dropdown-toggle dentro de un dropdown
-            document.querySelectorAll('.dropdown-menu .dropdown-toggle').forEach(function (element) {
-                element.addEventListener('click', function (e) {
-                    e.stopPropagation(); // Evita que se cierre el menú al hacer clic
-                });
-            });
-        });
-
-
-
-
-    </script>
-
-
-
-
-
 </head>
 
 <body class="d-flex flex-column h-100">
@@ -124,90 +68,68 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
     <header id="header">
         <?php
 
-
-
         NavBar::begin([
-            /*
-            'brandLabel' => Html::img(Empresas::getMyConfig(
-                'images',
-                'brandLabel'
-            ), ["width" => "70px"]),
-            */
+            'brandLabel' => Html::a(
+                Html::img(Yii::getAlias('@web') . '/images/logos/logo1.png', [
+                    'class' => 'dh-navbar-logo me-2',
+                    'alt' => 'Cabañas Dina Huapi',
+                ])
+                ,
+                Yii::$app->homeUrl,
+                ['class' => 'navbar-brand d-flex align-items-center']
+            ),
             'brandUrl' => Yii::$app->homeUrl,
-            'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
+            'options' => [
+                // IMPORTANTE: nada de bg-dark ni navbar-dark
+                'class' => 'navbar navbar-expand-md dh-navbar fixed-top',
+            ],
         ]);
 
-
-
-        if (Yii::$app->user->isGuest) {
-            $items = [
-                ['label' => 'Home', 'url' => ['/site/index']],
-                ['label' => 'Acerca de', 'url' => ['/site/about']],
-                ['label' => 'Contacto', 'url' => ['/site/contact']],
-            ];
-
-
-
-            echo Nav::widget([
-                'options' => ['class' => 'navbar-nav'],
-                'items' => $items,
-            ]);
-
-
-        } else {
-
-
-            echo app\models\Menu::getMenu([RootMenu::OTHER], Yii::$app->user->identity);
-
-
-
-        }
-
-
-        echo '<ul class="navbar-nav ms-auto">'; // 'ms-auto' alinea a la derecha
-        if (Yii::$app->user->isGuest) {
-            echo app\models\Menu::getcustomMenu("Ingresar", '<i class="bi bi-box-arrow-in-right"></i>', '/site/login');
-        } else {
-            $items = [
-                Yii::$app->user->isGuest ?
-                ['label' => 'Login', 'url' => ['/site/login']] :
+        // Menú izquierdo (público)
+        echo Nav::widget([
+            'options' => ['class' => 'navbar-nav me-auto'],
+            'items' => [
                 [
-                    'label' => 'Salir (' . Yii::$app->user->identity->username() . ')<i class="bi bi-box-arrow-right ms-2"></i>',
+                    'label' => '<i class="bi bi-telephone me-1"></i> Contacto',
+                    'url' => ['/site/contact'],
                     'encode' => false,
-                    'url' => ['/site/logout'],
-                    'active' => true,
-                    'linkOptions' => ['data-method' => 'post']
-                ]
-            ];
+                ],
+                [
+                    'label' => '<i class="bi bi-geo-alt-fill me-1"></i> ' . Yii::t('app', 'Cómo llegar'),
+                    'url' => ['/site/como-llegar'],
+                    'encode' => false,
+                ],
+                [
+                    'label' => '<i class="bi bi-images me-1"></i> Imágenes',
+                    'url' => ['/site/imagenes'],
+                    'encode' => false,
+                ],
+            ],
+        ]);
 
-            echo Nav::widget([
-                'options' => ['class' => 'navbar-nav'],
-                'items' => $items,
-            ]);
+        echo '<ul class="navbar-nav ms-auto align-items-center">';
 
-            echo app\models\Menu::getNotificacionesMenu('/notificaciones/index', Yii::$app->user->identity);
+        // Botón "Ingresar" (área admin / login)
+        echo '<li class="nav-item me-2">'
+            . Html::a(
+                '<i class="bi bi-box-arrow-in-right me-1"></i><span>Ingresar</span>',
+                ['/site/login'],
+                ['class' => 'nav-link d-flex align-items-center', 'encode' => false]
+            )
+            . '</li>';
 
-        }
-
-
-        //echo app\models\Menu::getColSeparator();
-        echo app\models\Menu::getDarkModeMenu();
-
-        // ---- Language Switcher (dropdown) ----
+        // Language switcher
         $supported = Yii::$app->params['supportedLanguages'] ?? ['es' => 'Español', 'en' => 'English'];
         $currentLang = Yii::$app->language;
 
-        // Item dropdown al final del navbar-right
         echo '<li class="nav-item dropdown">';
-
-        echo '<a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">';
-        echo '<i class="bi bi-translate me-1"></i>' . Html::encode($supported[$currentLang] ?? strtoupper($currentLang));
+        echo '<a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">';
+        echo '<i class="bi bi-translate me-1"></i>';
+        echo Html::encode($supported[$currentLang] ?? strtoupper($currentLang));
         echo '</a>';
 
         echo '<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">';
-
         foreach ($supported as $code => $label) {
-            // Mantiene la ruta actual y agrega/reemplaza ?lang=<code>
             $url = Url::current(['lang' => $code]);
             $active = $code === $currentLang ? ' active' : '';
             echo '<li>';
@@ -217,44 +139,95 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                 . '</a>';
             echo '</li>';
         }
-
         echo '</ul>';
         echo '</li>';
-        // ---- /Language Switcher ----
-        
-
 
         echo '</ul>';
 
         NavBar::end();
-
-
         ?>
     </header>
 
     <main id="main" class="flex-shrink-0" role="main">
-        <div class="container">
-            <?php if (!empty($this->params['breadcrumbs'])): ?>
-                <?= Breadcrumbs::widget(['links' => $this->params['breadcrumbs']]) ?>
-            <?php endif ?>
-            <?= Alert::widget() ?>
-
-
-            <?= $content ?>
-        </div>
+        <?= Alert::widget() ?>
+        <?= $content ?>
     </main>
 
-
-    <footer id="footer" class="mt-auto py-3 bg-dark">
+    <footer id="footer" class="mt-auto py-4 dh-footer">
         <div class="container">
-            <div class="row text-muted">
-                <div class="col-md-6 text-center text-md-start">&copy; LMH <?= date('Y') ?></div>
-                <div class="col-md-6 text-center text-md-end"><?= Yii::powered() ?></div>
+
+            <div class="row justify-content-between align-items-center text-muted">
+
+                <!-- Izquierda -->
+                <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+                    &copy; LMH <?= date('Y') ?>
+                </div>
+
+                <!-- Centro: Redes sociales -->
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+
+                    <span class="me-2 fw-semibold">
+                        <?= Yii::t('app', 'Seguinos en') ?>:
+                    </span>
+
+                    <!-- Facebook -->
+                    <a href="https://www.facebook.com/milly.hormasntorfer" target="_blank" rel="noopener"
+                        class="footer-social-link">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+
+                    <!-- Instagram -->
+                    <a href="https://www.instagram.com/alojamientosdinahuapi/?igsh=MWExajAzaGxzZmxjYQ%3D%3D#"
+                        target="_blank" rel="noopener" class="footer-social-link">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+
+                    <!-- WhatsApp -->
+                    <a href="https://wa.me/5492944557891" target="_blank" rel="noopener" class="footer-social-link">
+                        <i class="bi bi-whatsapp"></i>
+                    </a>
+
+                </div>
+                <!-- Derecha -->
+                <div class="col-md-4 text-center text-md-end">
+                    <?= Yii::powered() ?>
+                </div>
+
             </div>
         </div>
     </footer>
+
+
+
     <?php $this->endBody() ?>
+
+    <script>
+        document.addEventListener("scroll", function () {
+            const nav = document.querySelector(".dh-navbar");
+            if (!nav) return;
+
+            if (window.scrollY > 20) {
+                nav.classList.add("scrolled");
+            } else {
+                nav.classList.remove("scrolled");
+            }
+        });
+    </script>
+
 </body>
 
 </html>
 <?php $this->endPage() ?>
+
+<script>
+    document.addEventListener("scroll", function () {
+        const footer = document.querySelector(".dh-footer");
+        if (!footer) return;
+
+        if (window.scrollY > 80) {
+            footer.classList.add("scrolled");
+        } else {
+            footer.classList.remove("scrolled");
+        }
+    });
+</script>

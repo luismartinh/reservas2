@@ -1,5 +1,6 @@
 <?php
 
+use app\models\Cabana;
 use yii\bootstrap5\Html;
 use yii\helpers\Url;
 use kartik\grid\GridView;
@@ -101,10 +102,33 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'vAlign' => 'middle',
                 'hAlign' => 'middle',
-                //'label' => Yii::t('models', 'Nombre'),
                 'attribute' => 'descr',
+                'format' => 'raw',
                 'headerOptions' => ['style' => 'text-align:center'],
                 'contentOptions' => ['style' => 'text-align:left'],
+                'value' => function ($model) {
+                    /** @var Cabana $model */
+                    $texto = Html::encode($model->descr);
+
+                    $hex = $model->color_cabana; // viene del getter que lee config['color_cabana']
+                    if (!$hex) {
+                        // Si no tiene color configurado, solo mostramos el nombre
+                        return $texto;
+                    }
+
+                    // Nombre “humano” del color desde la paleta
+                    $nombreColor = Cabana::$PALETA[$hex] ?? $hex;
+
+                    // Píldora de color
+                    $pill = Html::tag('span', $nombreColor, [
+                        'class' => 'badge rounded-pill me-2',
+                        'style' => "background: {$hex}; color: #000; font-weight:bold;",
+                        'title' => $hex,
+                    ]);
+
+                    // Píldora + texto de la cabaña
+                    return $pill . $texto;
+                },
             ],
 
             [
@@ -115,6 +139,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'falseLabel' => 'NO',
                 'vAlign' => 'middle'
             ],
+            [
+                'vAlign' => 'middle',
+                'hAlign' => 'middle',
+                'attribute' => 'numero',
+                'headerOptions' => ['style' => 'text-align:center'],
+                'contentOptions' => ['style' => 'text-align:center'],
+            ],
+
 
             [
                 'vAlign' => 'middle',
@@ -151,7 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'hAlign' => 'middle',
                 'headerOptions' => ['style' => 'text-align:center'],
                 'contentOptions' => ['style' => 'text-align:center'],
-                'value' => function($model){
+                'value' => function ($model) {
                     return count($model->tarifas);
                 },
                 'filter' => false
