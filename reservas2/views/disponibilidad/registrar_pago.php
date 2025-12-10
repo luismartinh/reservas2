@@ -31,6 +31,7 @@ $this->title = Yii::t('app', 'Registrar Pago');
 <div class="alert alert-info">
     <strong><?= Yii::t('app', 'Estado') ?>:</strong>
     <?= Html::encode($reservaReq->estado->descr ?? Yii::t('app', 'Pendiente')) ?>
+    <h4><?= Yii::t('app', 'codigo de la reserva: ') ?><?= Html::encode($reservaReq->codigo_reserva) ?></h4>
 </div>
 
 <?php if (isset($fecha_confirmar_pago_expira) && $fecha_confirmar_pago_expira instanceof DateTime): ?>

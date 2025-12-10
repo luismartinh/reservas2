@@ -44,7 +44,12 @@ $frmAction = $esAdmin ? ['reserva/solicitar-reserva'] : ['disponibilidad/solicit
 ?>
 <div class="site-index container py-5 py-lg-5">
 
-    <?= $this->render('//partials/_dhBackground') ?>
+    <?php if (!$esAdmin){
+        echo $this->render('//partials/_dhBackground');
+    }
+    ?>
+
+
 
     <section class="dh-hero mb-5">
 

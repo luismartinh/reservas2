@@ -112,6 +112,7 @@ CREATE TABLE IF NOT EXISTS `request_reservas` (
   `pagado` DOUBLE NULL DEFAULT NULL,
   `email_token` varchar(64) DEFAULT NULL,
   `email_token_expira` datetime DEFAULT NULL,
+  `codigo_reserva` VARCHAR(45) NULL,
   `created_at` DATETIME NULL DEFAULT NULL,
   `created_by` INT(11) NULL DEFAULT NULL,
   `updated_at` DATETIME NULL DEFAULT NULL,
@@ -119,6 +120,7 @@ CREATE TABLE IF NOT EXISTS `request_reservas` (
   PRIMARY KEY (`id`),
   INDEX `fk_request_reservas_1_idx` (`id_reserva` ASC) ,
   INDEX `fk_request_reservas_2_idx` (`id_estado` ASC) ,
+  UNIQUE INDEX `uk_reques_reservas_3_idx` (`email` ASC, `codigo_reserva` ASC) ,
   CONSTRAINT `fk_request_reservas_1`
     FOREIGN KEY (`id_reserva`)
     REFERENCES `reservas` (`id`)

@@ -328,3 +328,39 @@
 .footer-social-link i.bi-whatsapp:hover {
     color: #25D366 !important;
 }
+
+
+
+/* ===================== MODAL ESTILO DH ===================== */
+
+.dh-modal .modal-content {
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.20);
+}
+
+.dh-modal .modal-header {
+    border-bottom: 1px solid rgba(255,255,255,0.45);
+}
+
+.dh-modal .modal-title {
+    font-family: 'League Spartan', sans-serif;
+    font-weight: 700;
+    color: #154CA6;
+}
+
+.dh-modal .form-control {
+    background: rgba(255,255,255,0.85);
+    border-radius: 0.8rem;
+}
+
+.dh-modal .btn-primary {
+    border-radius: 1rem;
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+}

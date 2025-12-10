@@ -29,6 +29,7 @@ use yii\behaviors\TimestampBehavior;
  * @property double $pagado
  * @property string $email_token
  * @property string $email_token_expira
+ * @property string $codigo_reserva 
  * @property string $created_at
  * @property integer $created_by
  * @property string $updated_at
@@ -81,9 +82,10 @@ abstract class RequestReserva extends \yii\db\ActiveRecord
             [['total', 'pagado'], 'number'],
             [['obs'], 'string', 'max' => 500],
             [['denominacion'], 'string', 'max' => 100],
-            [['email', 'hash'], 'string', 'max' => 45],
+            [['email', 'hash', 'codigo_reserva'], 'string', 'max' => 45],
             [['id_reserva'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Reserva::class, 'targetAttribute' => ['id_reserva' => 'id']],
-            [['id_estado'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Estado::class, 'targetAttribute' => ['id_estado' => 'id']]
+            [['id_estado'], 'exist', 'skipOnError' => true, 'targetClass' => \app\models\Estado::class, 'targetAttribute' => ['id_estado' => 'id']],
+            [['email', 'codigo_reserva'], 'unique', 'targetAttribute' => ['email', 'codigo_reserva']],
         ]);
     }
 
@@ -107,6 +109,7 @@ abstract class RequestReserva extends \yii\db\ActiveRecord
             'obs' => Yii::t('models', 'Obs'),
             'fecha_request_pago' => Yii::t('models', 'Fecha Request Pago'),
             'registro_pagos' => Yii::t('models', 'Registro Pagos'),
+            'codigo_reserva' => Yii::t('models', 'Codigo Reserva'),
             'pagado' => Yii::t('models', 'Pagado'),
             'created_at' => Yii::t('models', 'Created At'),
             'created_by' => Yii::t('models', 'Created By'),

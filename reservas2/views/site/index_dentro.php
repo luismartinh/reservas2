@@ -34,7 +34,9 @@ $url_images = Yii::getAlias('@web') . '/images/';
 
         <div class="row">
             <div class="col-12 text-start"> <!-- Asegura que ocupe toda la fila y alinee a la izquierda -->
-                <?= Html::a('<i class="bi bi-patch-question"></i> ' . Yii::t('cruds', 'Buscar disponibilidad'), ['disponibilidad/buscar'], ['class' => 'btn btn-link']) ?>
+                <?= Html::a('<i class="bi bi-patch-question"></i> '
+                 . Yii::t('cruds', 'Buscar disponibilidad'),
+                  ['reserva/reservar'], ['class' => 'btn btn-link']) ?>
             </div>
         </div>
 

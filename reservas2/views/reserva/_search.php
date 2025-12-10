@@ -63,7 +63,7 @@ use yii\bootstrap5\Html;
 
 
 	<div class="row">
-		<div class="col-md-8">
+		<div class="col-md-6">
 			<!-- attribute id_locador -->
 			<?php
 			// Usage with ActiveForm and model
@@ -82,7 +82,14 @@ use yii\bootstrap5\Html;
 			?>
 		</div>
 
-		<div class="col-md-4">
+		<div class="col-md-3">
+			<?php echo $form->field($model, 'codigo_reserva')->textInput(['maxlength' => true])
+				->label('Buscar por codigo de reserva')
+				->hint('Ingrese el texto filtrar') ?>
+		</div>
+
+
+		<div class="col-md-3">
 			<!-- attribute id_estado -->
 			<?php echo
 				$form->field($model, 'id_estado')->dropDownList(

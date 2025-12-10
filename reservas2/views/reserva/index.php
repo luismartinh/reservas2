@@ -216,13 +216,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($model) {
 
 
+                    $datos="";
+
                     if ($model->locador) {
                         $datos = '<span class="text-muted">' . Yii::t('app', 'Locador: ') . '</span ><b>' . yii\helpers\Html::encode($model->locador->denominacion) . '<b>';
                         $datos .= '<br><span class="text-muted">' . Yii::t('app', 'Email: ') . ' </span ><b>' . yii\helpers\Html::encode($model->locador->email) . '<b>';
-                        return $datos;
+                        
                     }
 
-                    return '';
+                    if ($model->requestReservas != null) {
+                        $datos .= '<br><span class="text-muted">' . Yii::t('app', 'Codigo: ') . ' </span ><b>' . yii\helpers\Html::encode($model->requestReservas[count($model->requestReservas)-1]->codigo_reserva) . '<b>';
+                    }
+
+
+                    return $datos;
                 },
                 'filter' => false,
                 'format' => 'raw',

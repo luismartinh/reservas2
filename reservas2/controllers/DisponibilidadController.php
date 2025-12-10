@@ -16,8 +16,11 @@ use Yii;
 use yii\base\DynamicModel;
 use yii\bootstrap5\Html;
 use yii\captcha\CaptchaAction;
+use yii\captcha\CaptchaValidator;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
+use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 
 class DisponibilidadController extends \yii\web\Controller
@@ -56,7 +59,7 @@ class DisponibilidadController extends \yii\web\Controller
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'totales' => $totales,     // 👈 pasamos los totales
-            'esAdmin'=>false
+            'esAdmin' => false
         ]);
 
 
@@ -68,14 +71,14 @@ class DisponibilidadController extends \yii\web\Controller
 
         $this->layout = 'main';
 
-        $cabana=Cabana::findOne($id_cabana);
+        $cabana = Cabana::findOne($id_cabana);
 
-        if(!$cabana){
+        if (!$cabana) {
             throw new \yii\web\NotFoundHttpException();
         }
-        
+
         $searchModel = Yii::createObject(DisponibilidadSearch::class);
-        $dataProvider = $searchModel->searchEnCabana($id_cabana,$this->request->get());
+        $dataProvider = $searchModel->searchEnCabana($id_cabana, $this->request->get());
 
         // calcular totales solo si hay rango
         $totales = [];
@@ -90,8 +93,8 @@ class DisponibilidadController extends \yii\web\Controller
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
             'totales' => $totales,     // 👈 pasamos los totales
-            'esAdmin'=>false,
-            'cabana'=>$cabana
+            'esAdmin' => false,
+            'cabana' => $cabana
         ]);
 
 
@@ -122,7 +125,7 @@ class DisponibilidadController extends \yii\web\Controller
     {
 
         $this->layout = 'main';
-        
+
         $ids = Yii::$app->request->post('seleccionadas', []);
         $desde = Yii::$app->request->post('desde');
         $hasta = Yii::$app->request->post('hasta');
@@ -182,7 +185,7 @@ class DisponibilidadController extends \yii\web\Controller
             Yii::$app->session->setFlash('error', Yii::t('app', 'Por favor corrija los errores del formulario.'));
 
             // Volver a mostrar formulario con errores
-            $cabanas = \app\models\Cabana::findAll($ids);
+            $cabanas = Cabana::findAll($ids);
             return $this->render('solicitar_reserva', [
                 'cabanas' => $cabanas,
                 'desde' => $desdeIn,
@@ -217,10 +220,6 @@ class DisponibilidadController extends \yii\web\Controller
         }
 
         // 📅 Normalizar fechas
-        /*
-        $desdeDate = $this->normalizarFechaReserva($desdeIn);
-        $hastaDate = $this->normalizarFechaReserva($hastaIn);
-        */
         $desdeDate = Utils::normalizarFechaReserva($desdeIn);
         $hastaDate = Utils::normalizarFechaReserva($hastaIn);
 
@@ -243,10 +242,10 @@ class DisponibilidadController extends \yii\web\Controller
         }
 
         // 🏡 Cabañas seleccionadas
-        $cabanas = \app\models\Cabana::findAll($ids);
+        $cabanas = Cabana::findAll($ids);
 
         // ⏱ Hora mínima de check-in entre cabañas
-       // [$minH, $minM] = $this->obtenerHoraMinimaCheckin($cabanas);
+        // [$minH, $minM] = $this->obtenerHoraMinimaCheckin($cabanas);
         [$minH, $minM] = Utils::obtenerHoraMinimaCheckin($cabanas);
 
         // Construir rango final desde/hasta con hora
@@ -320,6 +319,11 @@ class DisponibilidadController extends \yii\web\Controller
             ]);
             if (!$reserva->save()) {
                 throw new \Exception(Yii::t('app', 'Error al guardar la solicitud.'));
+            }
+
+            $reserva->codigo_reserva = RequestReserva::generateUniqueCodigoReserva($email);
+            if (!$reserva->save()) {
+                throw new \Exception(Yii::t('app', 'Error al guardar la solicitud.(1)'));
             }
 
             foreach ($ids as $idCabana) {
@@ -554,56 +558,39 @@ class DisponibilidadController extends \yii\web\Controller
         $fromEmail = Yii::$app->params['senderEmail'] ?? null;
         $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
 
+        
+
         if (!$fromEmail) {
             Yii::warning('senderEmail no configurado; no se envía correo de confirmación.', __METHOD__);
             return;
         }
 
-        $ok = Yii::$app->mailer->compose()
-            ->setFrom([$fromEmail => $fromName])
-            ->setTo($reserva->email)
-            ->setSubject(Yii::t('app', 'Confirmación de email - Solicitud de Reserva'))
-            ->setHtmlBody($body)
-            ->send();
+
+        $bccEmail = Yii::$app->params['bccEmail'] ?? null;
+
+        if(!$bccEmail){
+            $ok = Yii::$app->mailer->compose()
+                ->setFrom([$fromEmail => $fromName])
+                ->setTo($reserva->email)
+                ->setSubject(Yii::t('app', 'Confirmación de email - Solicitud de Reserva ') . $reserva->codigo_reserva)
+                ->setHtmlBody($body)
+                ->send();
+            
+        }else{
+            $ok = Yii::$app->mailer->compose()
+                ->setFrom([$fromEmail => $fromName])
+                ->setTo($reserva->email)
+                ->setBcc($bccEmail)
+                ->setSubject(Yii::t('app', 'Confirmación de email - Solicitud de Reserva ') . $reserva->codigo_reserva)
+                ->setHtmlBody($body)
+                ->send();
+        }
 
         if (!$ok) {
             Yii::warning('Fallo al enviar email de confirmación', __METHOD__);
         }
     }
 
-
-
-    public function actionProbarMail()
-    {
-
-
-        //array(1) { ["max_horas_venc"]=> array(2) { ["confirmar_pago"]=> int(48) ["request_reserva"]=> int(48) } }
-
-        //$p = ParametrosGenerales::getParametro('RESERVA_CFG')->valor;
-
-        //var_dump($p["max_horas_venc"]["request_reserva"]);
-
-
-
-
-        /*
-        $fromEmail = Yii::$app->params['senderEmail'] ?? null;
-        $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
-        if (!$fromEmail) {
-            return 'senderEmail no configurado en params.';
-        }
-
-        $ok = Yii::$app->mailer->compose()
-            ->setFrom([$fromEmail => $fromName])
-            ->setTo('destinatario@ejemplo.com')
-            ->setSubject('Prueba de correo')
-            ->setTextBody('Hola! Esto es una prueba.')
-            ->setHtmlBody('<b>Hola!</b> Esto es una prueba.')
-            ->send();
-
-        return $ok ? '✅ Enviado correctamente' : '❌ Error al enviar';
-        */
-    }
 
 
     public function actionConfirmarEmail($token)
@@ -644,6 +631,7 @@ class DisponibilidadController extends \yii\web\Controller
                 'ok' => false,
                 'msg' => Yii::t('app', 'No se pudo confirmar el email. Intente nuevamente.'),
                 'trackingUrl' => null,
+                'requestReserva' => $reserva
             ]);
         }
 
@@ -679,7 +667,7 @@ class DisponibilidadController extends \yii\web\Controller
     {
 
         $this->layout = 'main';
-        
+
         /** @var \app\models\RequestReserva|null $reserva */
         $reserva = RequestReserva::find()
             ->where(['hash' => $hash])
@@ -771,7 +759,7 @@ class DisponibilidadController extends \yii\web\Controller
         $estadosPermitidos = ['pendiente-email-contestado', 'pendiente-email-verificado'];
 
         if (!in_array($slug, $estadosPermitidos, true)) {
-            throw new \yii\web\ForbiddenHttpException(
+            throw new ForbiddenHttpException(
                 Yii::t('app', 'La solicitud no se encuentra en un estado que permita registrar el pago.')
             );
         }
@@ -802,10 +790,6 @@ class DisponibilidadController extends \yii\web\Controller
                 'hash' => $reservaReq->hash,
             ]);
 
-            // O si preferís ser más duro:
-            // throw new \yii\web\ForbiddenHttpException(
-            //     Yii::t('app', 'El plazo para registrar el pago ha vencido.')
-            // );
         }
         // Cabañas y totales
         $cabanas = [];
@@ -1142,6 +1126,10 @@ class DisponibilidadController extends \yii\web\Controller
                     }
                 }
 
+
+                $reservaReq->refresh();
+                RequestReserva::enviarMailCambioEstado($reservaReq);
+
                 $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl([
                     'disponibilidad/seguimiento',
                     'hash' => $reservaReq->hash
@@ -1296,5 +1284,83 @@ class DisponibilidadController extends \yii\web\Controller
             'html' => $html,
         ];
     }
+
+
+    public function actionMiReservaBuscar()
+    {
+        $request = Yii::$app->request;
+
+        // 🔒 Solo POST
+        if (!$request->isPost) {
+            throw new BadRequestHttpException('Método no permitido.');
+        }
+
+        // 🔒 Solo AJAX
+        if (!$request->isAjax) {
+            throw new ForbiddenHttpException('Acceso no permitidos.');
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $codigo = strtoupper(trim((string) $request->post('codigo_reserva')));
+        $email = trim((string) $request->post('email'));
+        $verifyCode = trim((string) $request->post('verifyCode'));
+
+        // Validaciones básicas
+        if ($codigo === '' || $email === '' || $verifyCode === '') {
+            return [
+                'success' => false,
+                'message' => Yii::t('app', 'Completá todos los campos, incluido el código de verificación.'),
+            ];
+        }
+
+        if (!preg_match('/^[A-Z0-9]{7}$/', $codigo)) {
+            return [
+                'success' => false,
+                'message' => Yii::t('app', 'El código de reserva no tiene un formato válido.'),
+            ];
+        }
+
+        // 🔐 Validar CAPTCHA
+        $validator = new CaptchaValidator([
+            'captchaAction' => 'disponibilidad/captcha',
+            'message' => Yii::t('app', 'El código de verificación es incorrecto.'),
+            'skipOnEmpty' => false,
+        ]);
+
+        $error = null;
+        if (!$validator->validate($verifyCode, $error)) {
+            return [
+                'success' => false,
+                'message' => $error ?: Yii::t('app', 'El código de verificación es incorrecto.'),
+            ];
+        }
+
+        // Buscar la reserva
+        $req = RequestReserva::find()
+            ->andWhere(['codigo_reserva' => $codigo])
+            ->andWhere(['email' => $email])
+            ->one();
+
+        if (!$req || empty($req->hash)) {
+            return [
+                'success' => false,
+                'message' => Yii::t(
+                    'app',
+                    'No encontramos una reserva con esos datos. Verificá el código y el email.'
+                ),
+            ];
+        }
+
+        // ✅ OK → devolvemos URL de redirección
+        return [
+            'success' => true,
+            'redirectUrl' => Url::to([
+                'disponibilidad/seguimiento',
+                'hash' => $req->hash,
+            ]),
+        ];
+    }
+
 
 }

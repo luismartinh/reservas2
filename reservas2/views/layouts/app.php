@@ -183,8 +183,6 @@ $this->registerCssFile(
 
         if (Yii::$app->user->isGuest) {
             $items = [
-                ['label' => 'Home', 'url' => ['/site/index']],
-                ['label' => 'Acerca de', 'url' => ['/site/about']],
                 ['label' => 'Contacto', 'url' => ['/site/contact']],
             ];
 

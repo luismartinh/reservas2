@@ -9,6 +9,7 @@ use app\widgets\Alert;
 use yii\bootstrap5\Html;
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
+use yii\captcha\Captcha;
 use yii\helpers\Url;
 
 
@@ -90,6 +91,15 @@ $this->registerCssFile(
             'options' => ['class' => 'navbar-nav me-auto'],
             'items' => [
                 [
+                    'label' => '<i class="bi bi-journal-check me-1"></i> ' . Yii::t('app', 'Mi reserva'),
+                    'url' => '#',
+                    'linkOptions' => [
+                        'data-bs-toggle' => 'modal',
+                        'data-bs-target' => '#miReservaModal', // ✅ mismo id que el modal
+                    ],
+                    'encode' => false,
+                ],
+                [
                     'label' => '<i class="bi bi-telephone me-1"></i> Contacto',
                     'url' => ['/site/contact'],
                     'encode' => false,
@@ -153,6 +163,9 @@ $this->registerCssFile(
         <?= $content ?>
     </main>
 
+    <?= $this->render('//partials/_miReservaModal') ?>
+
+
     <footer id="footer" class="mt-auto py-4 dh-footer">
         <div class="container">
 
@@ -170,22 +183,16 @@ $this->registerCssFile(
                         <?= Yii::t('app', 'Seguinos en') ?>:
                     </span>
 
-                    <!-- Facebook -->
-                    <a href="https://www.facebook.com/milly.hormasntorfer" target="_blank" rel="noopener"
-                        class="footer-social-link">
-                        <i class="bi bi-facebook"></i>
-                    </a>
+                    <?php
+                    $social = Yii::$app->params['social'] ?? [];
+                    ?>
 
-                    <!-- Instagram -->
-                    <a href="https://www.instagram.com/alojamientosdinahuapi/?igsh=MWExajAzaGxzZmxjYQ%3D%3D#"
-                        target="_blank" rel="noopener" class="footer-social-link">
-                        <i class="bi bi-instagram"></i>
-                    </a>
-
-                    <!-- WhatsApp -->
-                    <a href="https://wa.me/5492944557891" target="_blank" rel="noopener" class="footer-social-link">
-                        <i class="bi bi-whatsapp"></i>
-                    </a>
+                    <?php foreach ($social as $net): ?>
+                        <a href="<?= Html::encode($net['url']) ?>" target="_blank" rel="noopener"
+                            class="footer-social-link">
+                            <i class="<?= Html::encode($net['icon']) ?>"></i>
+                        </a>
+                    <?php endforeach; ?>
 
                 </div>
                 <!-- Derecha -->
@@ -198,11 +205,9 @@ $this->registerCssFile(
     </footer>
 
 
-
-    <?php $this->endBody() ?>
-
     <script>
         document.addEventListener("scroll", function () {
+
             const nav = document.querySelector(".dh-navbar");
             if (!nav) return;
 
@@ -211,23 +216,23 @@ $this->registerCssFile(
             } else {
                 nav.classList.remove("scrolled");
             }
+
+
+            const footer = document.querySelector(".dh-footer");
+            if (!footer) return;
+
+            if (window.scrollY > 80) {
+                footer.classList.add("scrolled");
+            } else {
+                footer.classList.remove("scrolled");
+            }
         });
     </script>
+
+
+    <?php $this->endBody() ?>
 
 </body>
 
 </html>
 <?php $this->endPage() ?>
-
-<script>
-    document.addEventListener("scroll", function () {
-        const footer = document.querySelector(".dh-footer");
-        if (!footer) return;
-
-        if (window.scrollY > 80) {
-            footer.classList.add("scrolled");
-        } else {
-            footer.classList.remove("scrolled");
-        }
-    });
-</script>

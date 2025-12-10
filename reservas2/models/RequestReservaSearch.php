@@ -40,7 +40,8 @@ class RequestReservaSearch extends RequestReserva
                     'created_at',
                     'updated_at',
                     'impagas',
-                    'vencidas'
+                    'vencidas',
+                    'codigo_reserva'
                 ],
                 'safe'
             ],
@@ -105,6 +106,7 @@ class RequestReservaSearch extends RequestReserva
             ->andFilterWhere(['like', 'hash', $this->hash])
             ->andFilterWhere(['like', 'obs', $this->obs])
             ->andFilterWhere(['like', 'registro_pagos', $this->registro_pagos])
+            ->andFilterWhere(['like', 'codigo_reserva', $this->codigo_reserva])
             ->andFilterWhere(['like', 'email_token', $this->email_token]);
 
         return $dataProvider;
@@ -157,6 +159,7 @@ class RequestReservaSearch extends RequestReserva
             ->andFilterWhere(['like', 'hash', $this->hash])
             ->andFilterWhere(['like', 'obs', $this->obs])
             ->andFilterWhere(['like', 'registro_pagos', $this->registro_pagos])
+            ->andFilterWhere(['like', 'codigo_reserva', $this->codigo_reserva])
             ->andFilterWhere(['like', 'email_token', $this->email_token]);
 
         if (!empty($this->fecha)) {

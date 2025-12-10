@@ -7,6 +7,8 @@
  * @var array|string $actionRoute
  * @var int|null $selectedLocadorId
  * @var string $selectedLocadorText
+ * @var string|null $codigo_reserva
+ * 
  */
 
 use kartik\select2\Select2;
@@ -100,7 +102,7 @@ $months = CalendarHelper::getMonthsForSelect();
         </div>
 
 
-        <div class="col-md-10 mt-4">
+        <div class="col-md-8 mt-4">
             <label class="form-label fw-bold">
                 <?= Yii::t('app', 'Pasajero / Locador') ?>
             </label>
@@ -152,6 +154,19 @@ $months = CalendarHelper::getMonthsForSelect();
             <small class="text-muted">
                 <?= Yii::t('app', 'Escriba nombre, documento o email y seleccione un locador.') ?>
             </small>
+        </div>
+
+        <div class="col-md-4 mt-4">
+
+            <?php
+                echo Html::label(Yii::t('app', 'Codigo de reserva'), 'codigo_reserva', ['class' => 'form-label']);
+                echo Html::input('text', 'codigo_reserva', $codigo_reserva, ['class' => 'form-control']);
+            ?>
+            <small class="text-muted">
+                <?= Yii::t('app', 'Escriba el texto a buscar.') ?>
+            </small>
+
+
         </div>
 
         <div class="col-12 d-flex justify-content-end mt-2">

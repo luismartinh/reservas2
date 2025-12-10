@@ -166,7 +166,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => false,
             ],
-
             [
                 'attribute' => 'desde',
                 'headerOptions' => ['style' => 'text-align:center'],
@@ -184,13 +183,6 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 },
 
-                /*
-                'filterInputOptions' => [
-                    'type' => 'date',
-                    'class' => 'form-control',
-                    'style' => 'min-width:120px;',
-                ],
-                */
                 'filter' => false,
             ],
             [
@@ -279,6 +271,9 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     $datos = '<span class="text-muted">' . Yii::t('app', 'Cliente: ') . '</span ><b>' . yii\helpers\Html::encode($model->denominacion) . '<b>';
                     $datos .= '<br><span class="text-muted">' . Yii::t('app', 'Email: ') . ' </span ><b>' . yii\helpers\Html::encode($model->email) . '<b>';
+                    if ($model->codigo_reserva != null) {
+                        $datos .= '<br><span class="text-muted">' . Yii::t('app', 'Codigo: ') . ' </span ><b>' . yii\helpers\Html::encode($model->codigo_reserva) . '<b>';
+                    }
 
                     if ($model->obs != null) {
                         $datos .= '<br><span class="text-info">' . Html::encode("TIENE OBSERVACIONES") . '</span>';

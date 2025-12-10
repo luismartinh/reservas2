@@ -65,13 +65,20 @@ use yii\bootstrap5\Html;
 
 
 	<div class="row">
-		<div class="col-md-8">
+		<div class="col-md-6">
 			<?php echo $form->field($model, 'denominacion')->textInput(['maxlength' => true])
 				->label('Buscar por cliente / email')
 				->hint('Ingrese el cliente o email para filtrar') ?>
 		</div>
 
-		<div class="col-md-4">
+		<div class="col-md-3">
+			<?php echo $form->field($model, 'codigo_reserva')->textInput(['maxlength' => true])
+				->label('Buscar por codigo de reserva')
+				->hint('Ingrese el texto filtrar') ?>
+		</div>
+
+
+		<div class="col-md-3">
 			<!-- attribute id_estado -->
 			<?php echo
 				$form->field($model, 'id_estado')->dropDownList(

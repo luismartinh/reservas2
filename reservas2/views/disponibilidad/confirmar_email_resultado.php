@@ -4,6 +4,7 @@ use yii\bootstrap5\Html;
 /** @var bool   $ok */
 /** @var string $msg */
 /** @var string|null $trackingUrl */
+/** @var \app\models\RequestReserva $requestReserva */
 
 $this->title = Yii::t('app', 'Confirmación de Email');
 ?>
@@ -15,6 +16,10 @@ $this->title = Yii::t('app', 'Confirmación de Email');
         <?= Html::encode($msg) ?>
     </div>
     <?php if ($trackingUrl): ?>
+
+        <!-- Mostrar codigo de seguimiento -->
+        <?= $this->render('//partials/_seguimiento_code',['requestReserva' => $requestReserva]) ?>
+
         <p>
             <?= Yii::t('app', 'Puede seguir el estado de su solicitud en el siguiente enlace') ?>:
             <br>

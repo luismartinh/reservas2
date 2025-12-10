@@ -23,8 +23,8 @@ $hastaTxt = $fmt->asDatetime($reserva->hasta, 'php:d/m/Y H:i');
             <td style="padding:6px 10px;"><?= Html::encode($reserva->denominacion) ?></td>
         </tr>
         <tr>
-            <td style="padding:6px 10px; color:#555;"><strong><?= Yii::t('app', 'Email') ?>:</strong></td>
-            <td style="padding:6px 10px;"><?= Html::encode($reserva->email) ?></td>
+            <td style="padding:6px 10px; color:#555;"><strong><?= Yii::t('app', 'Codigo de reserva') ?>:</strong></td>
+            <td style="padding:6px 10px;"><?= Html::encode($reserva->codigo_reserva) ?></td>
         </tr>
         <tr>
             <td style="padding:6px 10px; color:#555;"><strong><?= Yii::t('app', 'Período') ?>:</strong></td>

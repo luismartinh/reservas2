@@ -15,13 +15,11 @@ use app\models\Locador;
 use app\models\RequestReserva;
 use app\models\RequestResponse;
 use app\models\Reserva;
-use app\models\ReservaCabana;
 use app\models\ReservaSearch;
 use yii\base\DynamicModel;
 use yii\filters\AccessControl;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
-use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use Yii;
 
@@ -42,11 +40,27 @@ class ReservaController extends BaseReservaController
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['index', 'delete', 'cambiar-estado', 'reservar', 'solicitar-reserva', 'calendario-ocupacion', 'locador-autocomplete'],
+                    'only' => [
+                        'index',
+                        'delete',
+                        'cambiar-estado',
+                        'reservar',
+                        'solicitar-reserva',
+                        'calendario-ocupacion',
+                        'locador-autocomplete'
+                    ],
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => ['index', 'delete', 'cambiar-estado', 'reservar', 'solicitar-reserva', 'calendario-ocupacion', 'locador-autocomplete'],
+                            'actions' => [
+                                'index',
+                                'delete',
+                                'cambiar-estado',
+                                'reservar',
+                                'solicitar-reserva',
+                                'calendario-ocupacion',
+                                'locador-autocomplete'
+                            ],
                             'roles' => ['@'],
                             'matchCallback' => function ($rule, $action) {
                                 return true;
@@ -224,7 +238,7 @@ class ReservaController extends BaseReservaController
             return $this->redirect(['buscar']);
         }
 
-        $cabanas = \app\models\Cabana::findAll($ids);
+        $cabanas = Cabana::findAll($ids);
 
 
 
@@ -296,13 +310,6 @@ class ReservaController extends BaseReservaController
             }
             $val = (float) $formModel->$attribute;
 
-            /*
-            if ($val < $minMonto) {
-                $formModel->addError($attribute, Yii::t('app', 'El monto mínimo es {min}.', [
-                    'min' => '$ ' . number_format($minMonto, 2, ',', '.')
-                ]));
-            }
-            */
             if ($val > $maxMonto) {
                 $formModel->addError($attribute, Yii::t('app', 'El monto no puede superar el total {max}.', [
                     'max' => '$ ' . number_format($maxMonto, 2, ',', '.')
@@ -327,7 +334,7 @@ class ReservaController extends BaseReservaController
 
             // Validar documento único en Locador
             if (!empty($formModel->documento)) {
-                $docTaken = \app\models\Locador::find()->where(['documento' => $formModel->documento])->exists();
+                $docTaken = Locador::find()->where(['documento' => $formModel->documento])->exists();
                 if ($docTaken) {
                     $formModel->addError('documento', Yii::t('app', 'El documento ya está registrado.'));
                 }
@@ -374,14 +381,14 @@ class ReservaController extends BaseReservaController
             // -------------------------------------------------------------
             // Tomamos el email precargado (readonly en el form)
 
-            $locadorExistente = \app\models\Locador::findOne(['email' => $formModel->email]);
+            $locadorExistente = Locador::findOne(['email' => $formModel->email]);
 
             $emailFijo = $formModel->email;
 
 
             if ($locadorExistente === null) {
                 // No existe: crear nuevo
-                $locador = new \app\models\Locador();
+                $locador = new Locador();
                 $locador->email = $emailFijo; // set inicial
             } else {
                 $locador = $locadorExistente;
@@ -476,12 +483,19 @@ class ReservaController extends BaseReservaController
                         throw new \Exception(Yii::t('app', 'Error al guardar una cabaña.'));
                     }
 
+
                     if ($reqReserva->obs) {
                         $resp = RequestResponse::newMessage($reqReserva, $reqReserva->obs, true);
                         if (!$resp['success']) {
                             throw new \Exception(Yii::t('app', 'Error al guardar un mensaje.'));
                         }
                     }
+                }
+
+
+                $reqReserva->codigo_reserva = RequestReserva::generateUniqueCodigoReserva($emailFijo);
+                if (!$reqReserva->save()) {
+                    throw new \Exception(Yii::t('app', 'Error al guardar la solicitud.(1)'));
                 }
 
                 $reqReserva->refresh();
@@ -549,7 +563,8 @@ class ReservaController extends BaseReservaController
                     }
                 }
 
-                $this->enviarMailCambioEstado($reqReserva);
+
+                RequestReserva::enviarMailCambioEstado($reqReserva);
 
                 $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl([
                     'disponibilidad/seguimiento',
@@ -579,41 +594,6 @@ class ReservaController extends BaseReservaController
             'formModel' => $formModel,
         ]);
     }
-
-
-    /**
-     * Envía el mail de cambio de estado de la solicitud.
-     */
-    protected function enviarMailCambioEstado(RequestReserva $recReserva): void
-    {
-
-        $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl(['disponibilidad/seguimiento', 'hash' => $recReserva->hash]);
-
-        $body = $this->renderPartial('@app/views/request-reserva/mail_cambio_estado', [
-            'reqReserva' => $recReserva,
-            'trackingUrl' => $trackingUrl,
-        ]);
-
-        $fromEmail = Yii::$app->params['senderEmail'] ?? null;
-        $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
-
-        if (!$fromEmail) {
-            Yii::warning('senderEmail no configurado; no se envía correo.', __METHOD__);
-            return;
-        }
-
-        $ok = Yii::$app->mailer->compose()
-            ->setFrom([$fromEmail => $fromName])
-            ->setTo($recReserva->email)
-            ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') . $recReserva->estado->descr)
-            ->setHtmlBody($body)
-            ->send();
-
-        if (!$ok) {
-            Yii::warning('Fallo al enviar email', __METHOD__);
-        }
-    }
-
 
 
 
@@ -651,7 +631,7 @@ class ReservaController extends BaseReservaController
             CalendarHelper::buildTwoMonthRange($year, $month);
 
         // 2) Reservas + filtros (cabañas + locador) delegados al Search
-        list($reservas, $selectedCabanas, $idLocador, $locadorLabel) =
+        list($reservas, $selectedCabanas, $idLocador, $locadorLabel, $codigoReserva) =
             ReservaSearch::searchCalendario($request, $fromDate, $toDate);
 
         // 3) Cabañas para el filtro
@@ -676,6 +656,7 @@ class ReservaController extends BaseReservaController
             'selectedCabanas' => $selectedCabanas,
             'selectedLocadorId' => $idLocador,
             'selectedLocadorText' => $locadorLabel,
+            'codigo_reserva' => $codigoReserva
         ]);
     }
 

@@ -196,10 +196,10 @@ class CalendarHelper
         $hash = $res['hash'];
 
 
-        // TEMP: para verificar
-        $tooltip = $hash ?: 'SIN HASH';
+        $reserva_cod = $res['codigo_reserva'] ?? '#' . $res['reserva_id'];
 
-        $title = $res['cabana_nombre'] . ' ' . $res['locador'] . ' (#' . $res['reserva_id'] . ')';
+        
+        $title = $res['cabana_nombre'] . ' ' . $res['locador'] . ' (' . $reserva_cod . ')';
 
         $color = $res['color'] ?? '#0d6efd';
         $slug = $res['estado_slug'] ?? null;
@@ -304,12 +304,15 @@ class CalendarHelper
 
                 $hash = $reserva->requestReservas[count($reserva->requestReservas) - 1]->hash ?? null;
 
+                $codigo_reserva = $reserva->requestReservas[count($reserva->requestReservas) - 1]->codigo_reserva ?? null;
+
                 for ($d = clone $resDesde; $d <= $resHasta; $d->modify('+1 day')) {
                     $key = $d->format('Y-m-d');
 
                     $calendarData[$key][] = [
                         'reserva_id' => $reserva->id,
                         'cabana_id' => $cabId,
+                        'codigo_reserva' => $codigo_reserva,
                         'cabana_nombre' => $cabana->descr ?: ('Cabana #' . $cabId),
                         'color' => $color,
                         'hash' => $hash,

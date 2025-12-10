@@ -25,7 +25,9 @@ if (is_dir($heroDir)) {
     sort($heroImages);
 }
 
-$whatsAppNumber = '5492944000000'; // 👉 poné acá tu número con código de país, sin "+" ni espacios
+$contact = Yii::$app->params['contact'] ?? [];
+$whatsAppNumber = $contact['whatsapp_number_link'] ?? '5492944000000';
+//$whatsAppNumber = '5492944000000'; // 👉 poné acá tu número con código de país, sin "+" ni espacios
 $whatsAppMessage = Yii::t('app', 'Hola, quiero consultar por las cabañas en Dina Huapi.');
 $whatsAppUrl = 'https://wa.me/' . $whatsAppNumber . '?text=' . urlencode($whatsAppMessage);
 
@@ -275,7 +277,7 @@ $whatsAppUrl = 'https://wa.me/' . $whatsAppNumber . '?text=' . urlencode($whatsA
         <h2 class="dh-heading h4 mb-2">
             <?= Yii::t('app', '¿Listo para tu próxima escapada a la Patagonia?') ?>
         </h2>
-        <p class="text-muted mb-3">
+        <p class="mb-3">
             <?= Yii::t('app', 'Consultá la disponibilidad de nuestras cabañas y empezá a planificar tu viaje.') ?>
         </p>
         <a href="<?= $actionBuscar ?>" class="btn btn-dh-primary btn-lg">

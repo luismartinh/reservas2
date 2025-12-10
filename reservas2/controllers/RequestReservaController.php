@@ -195,6 +195,8 @@ class RequestReservaController extends BaseRequestReservaController
     /**
      * Envía el mail de cambio de estado de la solicitud.
      */
+
+    /*
     protected function enviarMailCambioEstado(RequestReserva $recReserva): void
     {
 
@@ -213,18 +215,35 @@ class RequestReservaController extends BaseRequestReservaController
             return;
         }
 
+        $bccEmail = Yii::$app->params['bccEmail'] ?? null;
+
+        if (!$bccEmail) {
+            $ok = Yii::$app->mailer->compose()
+                ->setFrom([$fromEmail => $fromName])
+                ->setTo($recReserva->email)
+                ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') 
+                . $recReserva->estado->descr ." ". $recReserva->codigo_reserva)
+                ->setHtmlBody($body)
+                ->send();
+        }else{
         $ok = Yii::$app->mailer->compose()
             ->setFrom([$fromEmail => $fromName])
             ->setTo($recReserva->email)
-            ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') . $recReserva->estado->descr)
+            ->setBcc($bccEmail)
+                ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') 
+                . $recReserva->estado->descr ." ". $recReserva->codigo_reserva)
             ->setHtmlBody($body)
             ->send();
+
+
+        }       
+
 
         if (!$ok) {
             Yii::warning('Fallo al enviar email', __METHOD__);
         }
     }
-
+    */
 
     public function actionCambiarEstado()
     {
@@ -307,7 +326,8 @@ class RequestReservaController extends BaseRequestReservaController
                 case 'pendiente-email-verificado':
                 case 'rechazado':
                     $this->eliminarReservaAsociada($model);
-                    $this->enviarMailCambioEstado($model);
+                    //$this->enviarMailCambioEstado($model);
+                    RequestReserva::enviarMailCambioEstado($model);
                     break;
 
                 // Nada extra
@@ -319,7 +339,8 @@ class RequestReservaController extends BaseRequestReservaController
                 case 'confirmado-verificar-pago':
                 case 'confirmado':
                     $this->sincronizarReservaDesdeRequest($model, $nuevoSlug);
-                    $this->enviarMailCambioEstado($model);
+                    //$this->enviarMailCambioEstado($model);
+                    RequestReserva::enviarMailCambioEstado($model);
                     break;
 
                 default:
@@ -647,6 +668,9 @@ class RequestReservaController extends BaseRequestReservaController
 
                     $tx->commit();
 
+                    $reservaReq->refresh();
+                    RequestReserva::enviarMailCambioEstado($reservaReq);
+
                     // === mover archivo a carpeta privada y actualizar registro_pagos ===
                     if ($tempPathFs && $archivoPublicWeb) {
                         $privateDir = Yii::getAlias('@runtime/priv_comprobantes');
@@ -797,18 +821,6 @@ class RequestReservaController extends BaseRequestReservaController
                 // Actualizar montos
                 $reservaReq->pagado = max(0, (float) $reservaReq->pagado - $montoAEliminar);
                 $reservaReq->registro_pagos = $regPagos;
-
-                // (Opcional) Ajustar estado según pagado / total
-                /*
-                if ($reservaReq->pagado < $reservaReq->total) {
-                    $estadoConfVerif = \app\models\Estado::find()
-                        ->where(['slug' => 'confirmado-verificar-pago'])
-                        ->one();
-                    if ($estadoConfVerif) {
-                        $reservaReq->id_estado = $estadoConfVerif->id;
-                    }
-                }
-                */
 
                 if (!$reservaReq->save()) {
                     throw new \Exception(Yii::t('app', 'No se pudo actualizar la solicitud de reserva.'));

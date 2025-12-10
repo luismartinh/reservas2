@@ -29,21 +29,6 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= Yii::t('app', 'Gracias por contactarnos. Te responderemos a la brevedad.') ?>
         </div>
 
-        <p>
-            <?= Yii::t('app', 'Si tenés habilitado el Yii Debugger, podés ver el mensaje enviado en el panel de emails del debugger.') ?>
-            <?php if (Yii::$app->mailer->useFileTransport): ?>
-                <br>
-                <?= Yii::t('app', 'Como la aplicación está en modo desarrollo, el email no se envía realmente, sino que se guarda como un archivo en') ?>
-                <code><?= Yii::getAlias(Yii::$app->mailer->fileTransportPath) ?></code>.
-                <br>
-                <?= Yii::t('app', 'Configurá la propiedad') ?>
-                <code>useFileTransport</code>
-                <?= Yii::t('app', 'del componente') ?>
-                <code>mail</code>
-                <?= Yii::t('app', 'para habilitar el envío real de correos.') ?>
-            <?php endif; ?>
-        </p>
-
     <?php else: ?>
 
         <p>
@@ -139,6 +124,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php ActiveForm::end(); ?>
 
             </div>
+
+            <div class="col-lg-5">
+                <div class="card border-info shadow-sm">
+                    <div class="card-body">
+
+                        <?= $this->render('//partials/_contactCard') ?>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     <?php endif; ?>

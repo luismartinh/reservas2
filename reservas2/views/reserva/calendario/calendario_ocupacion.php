@@ -8,6 +8,7 @@
 /** @var array $selectedCabanas */
 /** @var int|null $selectedLocadorId */
 /** @var string $selectedLocadorText */
+/** @var string $codigo_reserva */
 
 
 
@@ -65,6 +66,7 @@ $nextStart = $start1->modify('+1 month');
         'actionRoute' => ['calendario-ocupacion'],
         'selectedLocadorId' => $selectedLocadorId ?? null,
         'selectedLocadorText' => $selectedLocadorText ?? '',
+        'codigo_reserva' =>$codigo_reserva ?? null,
     ]) ?>
 
     <!-- Leyenda de colores -->

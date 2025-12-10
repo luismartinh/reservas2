@@ -78,6 +78,48 @@ $pago_pendiente = (float) $reserva->pagado < (float) $reserva->total;
         </div>
 
 
+
+
+        <?php if ($slug === 'pendiente-email-verificar'): ?>
+            <!-- ⚠️ Estado (warning) -->
+            <div id="alert-vencimiento" class="alert alert-warning"
+                data-expira="<?= Html::encode($fecha_expira->format('c')) ?>">
+                <strong><?= Yii::t('app', 'Vencimiento de esta solicitud') ?>:</strong>
+                <?= Yii::t('app', 'El ') ?>     <?= $fecha_expira->format('d/m/Y H:i') ?> (<?= $email_token_expira_hr ?> hs.)
+                <br>
+                <?= Yii::t('app', 'Tiempo restante') ?>:
+                <span id="vencimiento-countdown" class="fw-bold"></span>
+                <br>
+                <?= Yii::t('app', 'Una vez vencida, si el email no fue confirmado, se elimina automáticamente') ?>
+            </div>
+
+            <!-- 🚨 Alerta cuando ya está vencida (se muestra sólo por JS) -->
+            <div id="alert-vencida" class="alert alert-danger d-none">
+                <strong><?= Yii::t('app', 'Solicitud vencida') ?>:</strong>
+                <?= Yii::t('app', 'El tiempo para confirmar el email ha expirado. Si la solicitud aún no fue procesada, puede haber sido eliminada automáticamente.') ?>
+            </div>
+
+        <?php else: ?>
+            <!-- Mostrar codigo de seguimiento -->
+            <?= $this->render('//partials/_seguimiento_code', ['requestReserva' => $reserva]) ?>
+
+        <?php endif; ?>
+
+        <?php if ($slug !== 'pendiente-email-verificar' && $showChatButton): ?>
+            <div class="my-3">
+                <?= Html::button(
+                    '<i class="bi bi-chat-dots"></i> ' . Yii::t('app', 'Ver / realizar consulta'),
+                    [
+                        'class' => 'btn btn-primary',
+                        'id' => 'btn-consulta-chat',
+                        'data-url' => Url::to(['disponibilidad/consulta-chat', 'hash' => $reserva->hash]),
+                    ]
+                ) ?>
+            </div>
+        <?php endif; ?>
+
+
+
         <?php
         $slug = $reserva->estado->slug ?? null;
 
@@ -110,40 +152,6 @@ $pago_pendiente = (float) $reserva->pagado < (float) $reserva->total;
                     '<i class="bi bi-cash-coin"></i> ' . Yii::t('app', 'Hacer el pago de reserva'),
                     ['disponibilidad/registrar-pago', 'hash' => $reserva->hash],
                     ['class' => 'btn btn-success btn-lg']
-                ) ?>
-            </div>
-        <?php endif; ?>
-
-
-        <?php if ($slug === 'pendiente-email-verificar'): ?>
-            <!-- ⚠️ Estado (warning) -->
-            <div id="alert-vencimiento" class="alert alert-warning"
-                data-expira="<?= Html::encode($fecha_expira->format('c')) ?>">
-                <strong><?= Yii::t('app', 'Vencimiento de esta solicitud') ?>:</strong>
-                <?= Yii::t('app', 'El ') ?>     <?= $fecha_expira->format('d/m/Y H:i') ?> (<?= $email_token_expira_hr ?> hs.)
-                <br>
-                <?= Yii::t('app', 'Tiempo restante') ?>:
-                <span id="vencimiento-countdown" class="fw-bold"></span>
-                <br>
-                <?= Yii::t('app', 'Una vez vencida, si el email no fue confirmado, se elimina automáticamente') ?>
-            </div>
-
-            <!-- 🚨 Alerta cuando ya está vencida (se muestra sólo por JS) -->
-            <div id="alert-vencida" class="alert alert-danger d-none">
-                <strong><?= Yii::t('app', 'Solicitud vencida') ?>:</strong>
-                <?= Yii::t('app', 'El tiempo para confirmar el email ha expirado. Si la solicitud aún no fue procesada, puede haber sido eliminada automáticamente.') ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($slug !== 'pendiente-email-verificar' && $showChatButton): ?>
-            <div class="my-3">
-                <?= Html::button(
-                    '<i class="bi bi-chat-dots"></i> ' . Yii::t('app', 'Ver / realizar consulta'),
-                    [
-                        'class' => 'btn btn-primary',
-                        'id' => 'btn-consulta-chat',
-                        'data-url' => Url::to(['disponibilidad/consulta-chat', 'hash' => $reserva->hash]),
-                    ]
                 ) ?>
             </div>
         <?php endif; ?>

@@ -16,6 +16,7 @@ use app\models\RequestReserva;
 class ReservaSearch extends Reserva
 {
     public $denominacion;
+    public $codigo_reserva;
     /**
      * @inheritdoc
      */
@@ -23,7 +24,7 @@ class ReservaSearch extends Reserva
     {
         return [
             [['id', 'id_locador', 'pax', 'id_estado', 'created_by', 'updated_by'], 'integer'],
-            [['fecha', 'desde', 'hasta', 'obs', 'created_at', 'updated_at', 'denominacion'], 'safe'],
+            [['fecha', 'desde', 'hasta', 'obs', 'created_at', 'updated_at', 'denominacion', 'codigo_reserva'], 'safe'],
         ];
     }
 
@@ -153,7 +154,13 @@ class ReservaSearch extends Reserva
             ]);
         }
 
-
+        // 🔍 Nuevo: filtro por código de reserva en RequestReserva
+        if (!empty($this->codigo_reserva)) {
+            $query
+                ->joinWith(['requestReservas rr'])
+                ->andFilterWhere(['like', 'rr.codigo_reserva', $this->codigo_reserva])
+                ->groupBy('reservas.id');  // evita duplicados si hay varios requests por reserva
+        }
 
         return $dataProvider;
     }
@@ -197,7 +204,7 @@ class ReservaSearch extends Reserva
      * @param \yii\web\Request $request
      * @param string $fromDate Y-m-d H:i:s
      * @param string $toDate   Y-m-d H:i:s
-     * @return array [Reserva[] $reservas, array $selectedCabanas, int $idLocador, string $locadorLabel]
+     * @return array [Reserva[] $reservas, array $selectedCabanas, int $idLocador, string $locadorLabel, string $codigoReserva]
      */
     public static function searchCalendario(\yii\web\Request $request, $fromDate, $toDate)
     {
@@ -241,6 +248,17 @@ class ReservaSearch extends Reserva
             $query->andWhere(["$reservaTable.id_locador" => $idLocador]);
         }
 
+        // Filtro de codigo de reserva
+        $codigoReserva = $request->get('codigo_reserva',null );
+
+        // 🔍 Nuevo: filtro por código de reserva en RequestReserva
+        if (!empty($codigoReserva)) {
+            $query
+                ->joinWith(['requestReservas rr'])
+                ->andFilterWhere(['like', 'rr.codigo_reserva', $codigoReserva])
+                ->groupBy('reservas.id');  // evita duplicados si hay varios requests por reserva
+        }
+
         /** @var Reserva[] $reservas */
         $reservas = $query->all();
 
@@ -263,7 +281,7 @@ class ReservaSearch extends Reserva
             }
         }
 
-        return [$reservas, $selectedCabanas, $idLocador, $locadorLabel];
+        return [$reservas, $selectedCabanas, $idLocador, $locadorLabel,$codigoReserva];
     }
 
 

@@ -156,7 +156,7 @@ class SiteController extends Controller
      */
     public function actionContact()
     {
-        $model = new \app\models\ContactForm();
+        $model = new ContactForm();
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
 
@@ -164,6 +164,7 @@ class SiteController extends Controller
             $fromEmail = Yii::$app->params['senderEmail'] ?? null;
             $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
             $toEmail = Yii::$app->params['adminEmail'] ?? $fromEmail;
+            
 
             if (!$fromEmail || !$toEmail) {
                 Yii::warning('senderEmail o adminEmail no configurados; no se envía correo de contacto.', __METHOD__);
@@ -172,6 +173,7 @@ class SiteController extends Controller
                     Yii::t('app', 'Ocurrió un problema al enviar tu mensaje. Intentalo más tarde.')
                 );
             } else {
+                
                 // cuerpo del mail usando una vista parcial, igual que en tus otros controladores
                 $body = $this->renderPartial('@app/views/site/mail_contact', [
                     'model' => $model,
@@ -181,13 +183,28 @@ class SiteController extends Controller
                     'asunto' => $model->subject,
                 ]);
 
-                $ok = Yii::$app->mailer->compose()
-                    ->setFrom([$fromEmail => $fromName])
-                    ->setTo($toEmail)
-                    ->setReplyTo([$model->email => $model->name]) // útil para responder directo
-                    ->setSubject($subject)
-                    ->setHtmlBody($body)
-                    ->send();
+                $bccEmail = Yii::$app->params['bccEmail'] ?? null;
+
+                if ($bccEmail) {
+                    $ok = Yii::$app->mailer->compose()
+                        ->setFrom([$fromEmail => $fromName])
+                        ->setTo($toEmail)
+                        ->setBcc($bccEmail)
+                        ->setReplyTo([$model->email => $model->name]) // útil para responder directo
+                        ->setSubject($subject)
+                        ->setHtmlBody($body)
+                        ->send();
+                }else{
+                    $ok = Yii::$app->mailer->compose()
+                        ->setFrom([$fromEmail => $fromName])
+                        ->setTo($toEmail)
+                        ->setReplyTo([$model->email => $model->name]) // útil para responder directo
+                        ->setSubject($subject)
+                        ->setHtmlBody($body)
+                        ->send();
+                    
+                }
+
 
                 if ($ok) {
                     Yii::$app->session->setFlash(
@@ -318,6 +335,13 @@ class SiteController extends Controller
         // URL especial para iframe (embed)
         $embedAddress = 'Cabañas Dina Huapi, Los Cohiues 375, Dina Huapi, Río Negro, Argentina';
         $googleMapsEmbedUrl = 'https://www.google.com/maps?q=' . urlencode($embedAddress) . '&output=embed';
+
+
+        // URL especial para iframe (embed) usando lat/lon
+        $lat = -41.0812574;
+        $lng = -71.1849619;
+
+        //$googleMapsEmbedUrl = "https://www.google.com/maps?q={$lat},{$lng}&hl=es&z=16&output=embed";
 
         return $this->render('como-llegar', [
             'googleMapsUrl' => $googleMapsUrl,
