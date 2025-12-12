@@ -20,8 +20,53 @@ $this->registerCssFile('@web/css/cabana.css', [
 
 
 
-$this->title = Yii::t('app', 'Solicitar reserva');
+/*
+$totales = \app\models\CabanaTarifa::calcularTotalesParaCabanas(
+    array_map(fn($c) => $c->id, $cabanas),
+    $desde,
+    $hasta
+);
+*/
+// --- Calcular totales, fechas y resumen ---
+$totales = \app\models\CabanaTarifa::calcularTotalesParaCabanas(
+    array_map(function ($c) {
+        return $c->id;
+    }, $cabanas),
+    $desde,
+    $hasta
+);
 
+
+$totalGeneral = 0;
+$paxAcumulado = 0;
+$dias = 0;
+$fechaIngreso = null;
+$fechaEgreso = null;
+
+// --- Calcular días y fechas de ingreso/egreso ---
+$d = \DateTime::createFromFormat('d/m/Y', $desde)
+    ?: \DateTime::createFromFormat('d-m-Y', $desde)
+    ?: \DateTime::createFromFormat('Y-m-d', $desde);
+
+$h = \DateTime::createFromFormat('d/m/Y', $hasta)
+    ?: \DateTime::createFromFormat('d-m-Y', $hasta)
+    ?: \DateTime::createFromFormat('Y-m-d', $hasta);
+
+if ($d && $h) {
+    $dias = $d->diff($h)->days + 1;
+    $fechaIngreso = (clone $d)->setTime(14, 0); // ejemplo checkin
+    $fechaEgreso = (clone $h)->modify('+1 day')->setTime(11, 0); // ejemplo checkout
+}
+
+foreach ($cabanas as $cabana) {
+    $valor = $totales[$cabana->id] ?? 0;
+    $totalGeneral += $valor;
+    $paxAcumulado += (int) $cabana->max_pax;
+}
+
+
+
+$this->title = Yii::t('app', 'Solicitar reserva');
 
 ?>
 <div class="site-index container py-5 py-lg-5">
@@ -38,54 +83,6 @@ $this->title = Yii::t('app', 'Solicitar reserva');
                 <?= Yii::t('app', 'Por favor, verifique los datos antes de continuar:') ?>
             </div>
         </div>
-
-        <?php
-        // --- Calcular totales, fechas y resumen ---
-        $totales = \app\models\CabanaTarifa::calcularTotalesParaCabanas(
-            array_map(fn($c) => $c->id, $cabanas),
-            $desde,
-            $hasta
-        );
-
-        $totalGeneral = 0;
-        $paxAcumulado = 0;
-        $dias = 0;
-        $fechaIngreso = null;
-        $fechaEgreso = null;
-
-        // --- Calcular días y fechas de ingreso/egreso ---
-        $d = \DateTime::createFromFormat('d/m/Y', $desde)
-            ?: \DateTime::createFromFormat('d-m-Y', $desde)
-            ?: \DateTime::createFromFormat('Y-m-d', $desde);
-
-        $h = \DateTime::createFromFormat('d/m/Y', $hasta)
-            ?: \DateTime::createFromFormat('d-m-Y', $hasta)
-            ?: \DateTime::createFromFormat('Y-m-d', $hasta);
-
-        if ($d && $h) {
-            $dias = $d->diff($h)->days + 1;
-            $fechaIngreso = (clone $d)->setTime(14, 0); // ejemplo checkin
-            $fechaEgreso = (clone $h)->modify('+1 day')->setTime(11, 0); // ejemplo checkout
-        }
-        ?>
-
-        <h2><?= count($cabanas) > 1 ? Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' :
-            Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' ?> </h2>
-        <?php foreach ($cabanas as $cabana): ?>
-            <?= $this->render('_cabana_card', [
-                'model' => $cabana,
-                'totales' => $totales,
-                'desde' => $desde,
-                'hasta' => $hasta,
-                'mostrarSwitch' => false, // no mostrar switch
-            ]) ?>
-
-            <?php
-            $valor = $totales[$cabana->id] ?? 0;
-            $totalGeneral += $valor;
-            $paxAcumulado += (int) $cabana->max_pax;
-            ?>
-        <?php endforeach; ?>
 
 
         <!-- 🔹 Renderizar el partial reutilizable -->
@@ -203,5 +200,19 @@ $this->title = Yii::t('app', 'Solicitar reserva');
 
             <?php ActiveForm::end(); ?>
         </div>
+
+
+        <h2><?= count($cabanas) > 1 ? Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' :
+            Yii::t('app', 'Cabañas seleccionadas') . ' (' . count($cabanas) . ')' ?> </h2>
+        <?php foreach ($cabanas as $cabana): ?>
+            <?= $this->render('_cabana_card', [
+                'model' => $cabana,
+                'totales' => $totales,
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'mostrarSwitch' => false, // no mostrar switch
+            ]) ?>
+        <?php endforeach; ?>
+
     </section>
 </div>

@@ -164,7 +164,6 @@ class SiteController extends Controller
             $fromEmail = Yii::$app->params['senderEmail'] ?? null;
             $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
             $toEmail = Yii::$app->params['adminEmail'] ?? $fromEmail;
-            
 
             if (!$fromEmail || !$toEmail) {
                 Yii::warning('senderEmail o adminEmail no configurados; no se envía correo de contacto.', __METHOD__);
@@ -173,8 +172,8 @@ class SiteController extends Controller
                     Yii::t('app', 'Ocurrió un problema al enviar tu mensaje. Intentalo más tarde.')
                 );
             } else {
-                
-                // cuerpo del mail usando una vista parcial, igual que en tus otros controladores
+
+                // cuerpo del mail usando una vista parcial
                 $body = $this->renderPartial('@app/views/site/mail_contact', [
                     'model' => $model,
                 ]);
@@ -185,26 +184,28 @@ class SiteController extends Controller
 
                 $bccEmail = Yii::$app->params['bccEmail'] ?? null;
 
+                // Armamos el mensaje UNA sola vez
+                $message = Yii::$app->mailer->compose()
+                    ->setFrom([$fromEmail => $fromName])
+                    ->setTo($toEmail)
+                    ->setReplyTo([$model->email => $model->name]) // útil para responder directo
+                    ->setSubject($subject)
+                    ->setHtmlBody($body);
+
                 if ($bccEmail) {
-                    $ok = Yii::$app->mailer->compose()
-                        ->setFrom([$fromEmail => $fromName])
-                        ->setTo($toEmail)
-                        ->setBcc($bccEmail)
-                        ->setReplyTo([$model->email => $model->name]) // útil para responder directo
-                        ->setSubject($subject)
-                        ->setHtmlBody($body)
-                        ->send();
-                }else{
-                    $ok = Yii::$app->mailer->compose()
-                        ->setFrom([$fromEmail => $fromName])
-                        ->setTo($toEmail)
-                        ->setReplyTo([$model->email => $model->name]) // útil para responder directo
-                        ->setSubject($subject)
-                        ->setHtmlBody($body)
-                        ->send();
-                    
+                    $message->setBcc($bccEmail);
                 }
 
+                try {
+                    $ok = $message->send();
+                } catch (\Throwable $e) {
+                    // Error técnico: timeout, auth, etc.
+                    Yii::error(
+                        'Error técnico al enviar email de contacto: ' . $e->getMessage(),
+                        __METHOD__
+                    );
+                    $ok = false;
+                }
 
                 if ($ok) {
                     Yii::$app->session->setFlash(
@@ -212,7 +213,7 @@ class SiteController extends Controller
                         Yii::t('app', 'Gracias por tu mensaje. Te responderemos a la brevedad.')
                     );
                 } else {
-                    Yii::warning('Fallo al enviar email de contacto', __METHOD__);
+                    Yii::warning('Fallo al enviar email de contacto (send() == false o excepción).', __METHOD__);
                     Yii::$app->session->setFlash(
                         'error',
                         Yii::t('app', 'No se pudo enviar tu mensaje. Intentalo nuevamente más tarde.')

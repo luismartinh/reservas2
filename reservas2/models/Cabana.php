@@ -13,6 +13,11 @@ class Cabana extends BaseCabana
 {
     public $color_cabana;
 
+    // Campos virtuales para traducciones de "caracteristicas"
+    public $caracteristicas_es;
+    public $caracteristicas_en;
+    public $caracteristicas_pt_br;
+
     // PALETA DE 16 COLORES
     public static $PALETA = [
         '#e6194B' => 'Rojo',
@@ -43,6 +48,93 @@ class Cabana extends BaseCabana
         return $resultado;
     }
 
+    /**
+     * Devuelve un array de líneas de características según el idioma actual.
+     * - Soporta formato viejo: JSON que contiene un string (solo ES).
+     * - Soporta formato nuevo: JSON con claves por idioma: ['es' => '...', 'en' => '...', 'pt-BR' => '...'].
+     */
+    public static function buildFeaturesLines($caracteristicas, ?string $descr = null): array
+    {
+        $featuresRaw = '';
+
+        // 1) Si ya viene como array (JsonBehavior u otro)
+        if (is_array($caracteristicas)) {
+            $lang = Yii::$app->language;
+            $defaultLang = 'es';
+            $baseLang = substr($lang, 0, 2);
+
+            if (isset($caracteristicas[$lang]) && is_string($caracteristicas[$lang])) {
+                $featuresRaw = $caracteristicas[$lang];
+            } elseif (isset($caracteristicas[$baseLang]) && is_string($caracteristicas[$baseLang])) {
+                $featuresRaw = $caracteristicas[$baseLang];
+            } elseif (isset($caracteristicas[$defaultLang]) && is_string($caracteristicas[$defaultLang])) {
+                $featuresRaw = $caracteristicas[$defaultLang];
+            } else {
+                $first = reset($caracteristicas);
+                if (is_string($first)) {
+                    $featuresRaw = $first;
+                }
+            }
+
+            // 2) Si viene como string (texto plano o JSON)
+        } elseif (is_string($caracteristicas) && $caracteristicas !== '') {
+
+            $decoded = json_decode($caracteristicas, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if (is_string($decoded)) {
+                    // Formato viejo: JSON que contiene un string (solo ES)
+                    $featuresRaw = $decoded;
+                } elseif (is_array($decoded)) {
+                    // Formato nuevo: ['es' => '...', 'en' => '...', 'pt-BR' => '...']
+                    $lang = Yii::$app->language;
+                    $defaultLang = 'es';
+                    $baseLang = substr($lang, 0, 2);
+
+                    if (isset($decoded[$lang]) && is_string($decoded[$lang])) {
+                        $featuresRaw = $decoded[$lang];
+                    } elseif (isset($decoded[$baseLang]) && is_string($decoded[$baseLang])) {
+                        $featuresRaw = $decoded[$baseLang];
+                    } elseif (isset($decoded[$defaultLang]) && is_string($decoded[$defaultLang])) {
+                        $featuresRaw = $decoded[$defaultLang];
+                    } else {
+                        $first = reset($decoded);
+                        if (is_string($first)) {
+                            $featuresRaw = $first;
+                        }
+                    }
+                }
+            } else {
+                // No es JSON válido, lo usamos tal cual
+                $featuresRaw = $caracteristicas;
+            }
+
+            // 3) Fallback: usar descr si no hay características
+        } elseif (is_string($descr) && $descr !== '') {
+            $featuresRaw = $descr;
+        }
+
+        if ($featuresRaw === '' || $featuresRaw === null) {
+            return [];
+        }
+
+        // Partir en líneas y limpiar
+        $lines = array_filter(
+            array_map('trim', preg_split('/\R/', (string) $featuresRaw))
+        );
+
+        return $lines;
+    }
+
+    /**
+     * Conveniencia de instancia: $cabana->featuresLines.
+     */
+    public function getFeaturesLines(): array
+    {
+        return self::buildFeaturesLines($this->caracteristicas, $this->descr);
+    }
+
+
 
     /**
      * @inheritdoc
@@ -56,6 +148,8 @@ class Cabana extends BaseCabana
         return ArrayHelper::merge($parentRules, [
             ['color_cabana', 'required'],
             ['color_cabana', 'string', 'max' => 20],
+            // Campos virtuales de características traducidas
+            [['caracteristicas_es', 'caracteristicas_en', 'caracteristicas_pt_br'], 'safe'],
         ]);
     }
 
@@ -64,8 +158,59 @@ class Cabana extends BaseCabana
     {
         parent::afterFind();
 
+        // ======================
+        // Color de cabaña (config)
+        // ======================
         if (is_array($this->config)) {
             $this->color_cabana = $this->config['color_cabana'] ?? null;
+        }
+
+        // ======================
+        // Características traducidas
+        // ======================
+        $value = $this->caracteristicas;
+
+        if ($value === null || $value === '') {
+            return;
+        }
+
+        // Si ya viene como array (lo más probable con JsonBehavior)
+        if (is_array($value)) {
+            // Caso multi-idioma directo
+            if (isset($value['es']) || isset($value['en']) || isset($value['pt-BR'])) {
+                $this->caracteristicas_es = $value['es'] ?? '';
+                $this->caracteristicas_en = $value['en'] ?? '';
+                $this->caracteristicas_pt_br = $value['pt-BR'] ?? '';
+            } else {
+                // Algún otro formato: tomamos el primero como español
+                $first = reset($value);
+                if (is_string($first)) {
+                    $this->caracteristicas_es = $first;
+                }
+            }
+
+            return;
+        }
+
+        // Si es string, puede ser JSON o texto plano
+        if (!is_string($value)) {
+            return;
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (is_string($decoded)) {
+                // Formato viejo: JSON con string en ES
+                $this->caracteristicas_es = $decoded;
+            } elseif (is_array($decoded)) {
+                $this->caracteristicas_es = $decoded['es'] ?? '';
+                $this->caracteristicas_en = $decoded['en'] ?? '';
+                $this->caracteristicas_pt_br = $decoded['pt-BR'] ?? '';
+            }
+        } else {
+            // Texto plano
+            $this->caracteristicas_es = $value;
         }
     }
 
@@ -76,13 +221,30 @@ class Cabana extends BaseCabana
             return false;
         }
 
-        // Asegurar array JSON
-        $car = is_array($this->config) ? $this->config : [];
+        // ==========================
+        // CONFIG: color_cabana
+        // ==========================
+        $config = is_array($this->config) ? $this->config : [];
+        $config['color_cabana'] = $this->color_cabana;
+        $this->config = $config;
 
-        // Guardar color dentro del JSON
-        $car['color_cabana'] = $this->color_cabana;
+        // ==========================
+        // CARACTERISTICAS traducidas
+        // ==========================
+        $data = [];
 
-        $this->config = $car;
+        if (trim((string) $this->caracteristicas_es) !== '') {
+            $data['es'] = $this->caracteristicas_es;
+        }
+        if (trim((string) $this->caracteristicas_en) !== '') {
+            $data['en'] = $this->caracteristicas_en;
+        }
+        if (trim((string) $this->caracteristicas_pt_br) !== '') {
+            $data['pt-BR'] = $this->caracteristicas_pt_br;
+        }
+
+        // Guardamos como array; el behavior (JsonBehavior, etc.) se encarga de convertir a JSON
+        $this->caracteristicas = !empty($data) ? $data : null;
 
         return true;
     }

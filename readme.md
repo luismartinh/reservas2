@@ -182,4 +182,8 @@ idiomas:
 
 actualizar mensajes:
 
+docker compose run php bash
 php yii message @app/messages.php
+
+php:
+reservas2/vendor/composer/platform_check.php

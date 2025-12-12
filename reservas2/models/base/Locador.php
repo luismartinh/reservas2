@@ -77,13 +77,30 @@ abstract class Locador extends \yii\db\ActiveRecord
     {
         return ArrayHelper::merge(parent::attributeLabels(), [
             'id' => Yii::t('models', 'ID'),
-            'denominacion' => Yii::t('models', 'Denominacion'),
+            'denominacion' => Yii::t('models', 'Nombre y apellido'),
             'documento' => Yii::t('models', 'Documento'),
             'email' => Yii::t('models', 'Email'),
             'telefono' => Yii::t('models', 'Telefono'),
             'domicilio' => Yii::t('models', 'Domicilio'),
             'documentos' => Yii::t('models', 'Documentos'),
-            'created_at' => Yii::t('models', 'Created At'),
+            'created_at' => Yii::t('models', 'Creado'),
+            'created_by' => Yii::t('models', 'Created By'),
+            'updated_at' => Yii::t('models', 'Updated At'),
+            'updated_by' => Yii::t('models', 'Updated By'),
+        ]);
+    }
+
+    public function attributeHints()
+    {
+        return ArrayHelper::merge(parent::attributeHints(), [
+            'id' => Yii::t('models', 'ID'),
+            'denominacion' => Yii::t('models', 'Ingrese el Nombre y apellido'),
+            'documento' => Yii::t('models', 'Ingrese el Documento (DNI/CUIT/PASAPORTE) no debe estar utilizado'),
+            'email' => Yii::t('models', 'Ingrese el Email no debe estar utilizado'),
+            'telefono' => Yii::t('models', 'Ingrese el Telefono'),
+            'domicilio' => Yii::t('models', 'Ingrese el Domicilio'),
+            'documentos' => Yii::t('models', 'Documentos'),
+            'created_at' => Yii::t('models', 'Creado'),
             'created_by' => Yii::t('models', 'Created By'),
             'updated_at' => Yii::t('models', 'Updated At'),
             'updated_by' => Yii::t('models', 'Updated By'),

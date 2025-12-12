@@ -157,7 +157,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'checkin',
-                'value' => fn($model) => $model->checkin ? date('H:i', strtotime($model->checkin)) : null,
+                //'value' => fn($model) => $model->checkin ? date('H:i', strtotime($model->checkin)) : null,
+                'value' => function ($model) {
+                    return $model->checkin
+                        ? date('H:i', strtotime($model->checkin))
+                        : null;
+                },
+
                 'filterInputOptions' => [
                     'type' => 'time',
                     'class' => 'form-control',
@@ -167,7 +173,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'checkout',
-                'value' => fn($model) => $model->checkout ? date('H:i', strtotime($model->checkout)) : null,
+                //'value' => fn($model) => $model->checkout ? date('H:i', strtotime($model->checkout)) : null,
+                'value' => function ($model) {
+                    return $model->checkout ? date('H:i', strtotime($model->checkout)) : null;
+                },
                 'filterInputOptions' => [
                     'type' => 'time',
                     'class' => 'form-control',

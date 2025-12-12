@@ -120,50 +120,63 @@ class RequestReserva extends BaseRequestReserva
 
     /**
      * Envía el mail de cambio de estado de la solicitud.
+     *
+     * @throws \RuntimeException si falla el envío del correo
      */
     public static function enviarMailCambioEstado(RequestReserva $recReserva): void
     {
-
-        $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl(['disponibilidad/seguimiento', 'hash' => $recReserva->hash]);
-
-        $body = Yii::$app->controller->renderPartial('@app/views/request-reserva/mail_cambio_estado', [
-            'reqReserva' => $recReserva,
-            'trackingUrl' => $trackingUrl,
+        $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl([
+            'disponibilidad/seguimiento',
+            'hash' => $recReserva->hash,
         ]);
+
+        $body = Yii::$app->controller->renderPartial(
+            '@app/views/request-reserva/mail_cambio_estado',
+            [
+                'reqReserva' => $recReserva,
+                'trackingUrl' => $trackingUrl,
+            ]
+        );
 
         $fromEmail = Yii::$app->params['senderEmail'] ?? null;
         $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
 
         if (!$fromEmail) {
-            Yii::warning('senderEmail no configurado; no se envía correo.', __METHOD__);
-            return;
+            Yii::warning('senderEmail no configurado; no se envía correo de cambio de estado.', __METHOD__);
+            throw new \RuntimeException('Email del remitente no configurado.');
         }
-
 
         $bccEmail = Yii::$app->params['bccEmail'] ?? null;
 
+        // Armamos el mensaje una sola vez
+        $message = Yii::$app->mailer->compose()
+            ->setFrom([$fromEmail => $fromName])
+            ->setTo($recReserva->email)
+            ->setSubject(
+                Yii::t('app', 'Estado de su Solicitud de Reserva a: ')
+                . $recReserva->estado->descr
+                . ' '
+                . $recReserva->codigo_reserva
+            )
+            ->setHtmlBody($body);
 
-        if (!$bccEmail) {
-            $ok = Yii::$app->mailer->compose()
-                ->setFrom([$fromEmail => $fromName])
-                ->setTo($recReserva->email)
-                ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') . $recReserva->estado->descr . " " . $recReserva->codigo_reserva)
-                ->setHtmlBody($body)
-                ->send();
-        } else {
-            $ok = Yii::$app->mailer->compose()
-                ->setFrom([$fromEmail => $fromName])
-                ->setTo($recReserva->email)
-                ->setBcc($bccEmail)
-                ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') . $recReserva->estado->descr . " " . $recReserva->codigo_reserva)
-                ->setHtmlBody($body)
-                ->send();
-
+        if ($bccEmail) {
+            $message->setBcc($bccEmail);
         }
 
+        try {
+            $ok = $message->send();
+        } catch (\Throwable $e) {
+            Yii::error(
+                'Error técnico al enviar mail de cambio de estado: ' . $e->getMessage(),
+                __METHOD__
+            );
+            throw new \RuntimeException(Yii::t('app', 'No se pudo enviar el email de cambio de estado.'));
+        }
 
         if (!$ok) {
-            Yii::warning('Fallo al enviar email', __METHOD__);
+            Yii::error('send() devolvió false al enviar mail de cambio de estado.', __METHOD__);
+            throw new \RuntimeException(Yii::t('app', 'No se pudo enviar el email de cambio de estado.'));
         }
     }
 

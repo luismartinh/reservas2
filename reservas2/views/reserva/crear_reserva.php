@@ -23,9 +23,18 @@ $this->title = Yii::t('app', 'Crear reserva');
 </div>
 
 <?php
-// --- Calcular totales, fechas y resumen ---
+/*
 $totales = \app\models\CabanaTarifa::calcularTotalesParaCabanas(
     array_map(fn($c) => $c->id, $cabanas),
+    $desde,
+    $hasta
+);
+*/
+// --- Calcular totales, fechas y resumen ---
+$totales = \app\models\CabanaTarifa::calcularTotalesParaCabanas(
+    array_map(function ($c) {
+        return $c->id;
+    }, $cabanas),
     $desde,
     $hasta
 );

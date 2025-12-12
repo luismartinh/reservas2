@@ -1,5 +1,6 @@
 <?php
 return [
+    
     /*
     'smtp.host' => 'sandbox.smtp.mailtrap.io',
     'smtp.user' => '2ae2b0f72ef658',
@@ -7,11 +8,14 @@ return [
     'smtp.port' => 2525,
     'smtp.encryption' => 'tls',
     */
+    
+    
     'smtp.host' => 'mail.dinasis.com.es',
     'smtp.user' => 'cabanas@dinasis.com.es',
     'smtp.pass' => 'Pnsm{uof%7lgjr%(',
     'smtp.port' => 465,
-    'smtp.encryption' => 'tls',
+    'smtp.encryption' => 'ssl',
+    
     'bank' => [
         'banco' => 'Brubank',
         'titular' => 'Luis Martín Hormanstorfer',

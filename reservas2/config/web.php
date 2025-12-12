@@ -76,6 +76,7 @@ $config = [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
+        /*
         'mailer' => [
             'class' => yii\symfonymailer\Mailer::class,
             // En dev: deja true para NO enviar mails y guardarlos como archivos
@@ -102,6 +103,40 @@ $config = [
                 ],
             ],
         ],
+        */
+        'mailer' => [
+            'class' => \yii\swiftmailer\Mailer::class,
+            // En dev: true para NO enviar mails (se guardan como archivos en runtime/mail)
+            // En prod: false para enviar realmente
+            'useFileTransport' => false,
+
+            // Configuración de transporte SMTP (equivalente a tu config anterior)
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => $params['smtp.host'],
+                'username' => $params['smtp.user'],
+                'password' => $params['smtp.pass'],
+                'port' => (int) $params['smtp.port'],
+                'encryption' => $params['smtp.encryption'], // ej: 'tls' o 'ssl'
+
+                // Opcional: certificados self-signed
+                'streamOptions' => [
+                    'ssl' => [
+                        'allow_self_signed' => true,
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                    ],
+                ],
+            ],
+
+            // 👇 Ojo: en SwiftMailer esto va al mismo nivel que transport, no adentro
+            'messageConfig' => [
+                'from' => [$params['senderEmail'] => $params['senderName']],
+            ],
+        ],
+
+
+
         'queue' => [
             'class' => yii\queue\db\Queue::class,  // o el tipo de cola que estés utilizando
             'db' => 'db',  // o el componente de base de datos que estés utilizando

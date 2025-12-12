@@ -11,7 +11,11 @@ use yii\bootstrap5\Html;
  * @var string|null $hasta        // fecha fin (string)
  */
 
-$fmtDateTime = fn($dt) => Yii::$app->formatter->asDatetime($dt, 'php:d/m/Y H:i');
+//$fmtDateTime = fn($dt) => Yii::$app->formatter->asDatetime($dt, 'php:d/m/Y H:i');
+$fmtDateTime = function ($dt) {
+    return Yii::$app->formatter->asDatetime($dt, 'php:d/m/Y H:i');
+};
+
 
 // --- Parseo seguro de hora (checkin / checkout) ---
 $parseTime = function ($t) {

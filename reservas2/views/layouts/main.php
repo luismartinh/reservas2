@@ -100,7 +100,7 @@ $this->registerCssFile(
                     'encode' => false,
                 ],
                 [
-                    'label' => '<i class="bi bi-telephone me-1"></i> Contacto',
+                    'label' => '<i class="bi bi-telephone me-1"></i> '.Yii::t('app', 'Contacto'),
                     'url' => ['/site/contact'],
                     'encode' => false,
                 ],
@@ -110,7 +110,7 @@ $this->registerCssFile(
                     'encode' => false,
                 ],
                 [
-                    'label' => '<i class="bi bi-images me-1"></i> Imágenes',
+                    'label' => '<i class="bi bi-images me-1"></i> '.Yii::t('app', 'Imágenes'),
                     'url' => ['/site/imagenes'],
                     'encode' => false,
                 ],

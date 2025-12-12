@@ -1,5 +1,6 @@
 <?php
 
+use app\widgets\Alert;
 use yii\bootstrap5\Html;
 use yii\widgets\ListView;
 use yii\widgets\Pjax;
@@ -44,7 +45,7 @@ $frmAction = $esAdmin ? ['reserva/solicitar-reserva'] : ['disponibilidad/solicit
 ?>
 <div class="site-index container py-5 py-lg-5">
 
-    <?php if (!$esAdmin){
+    <?php if (!$esAdmin) {
         echo $this->render('//partials/_dhBackground');
     }
     ?>
@@ -53,6 +54,9 @@ $frmAction = $esAdmin ? ['reserva/solicitar-reserva'] : ['disponibilidad/solicit
 
     <section class="dh-hero mb-5">
 
+        <div class="mb-3">
+            <?= Alert::widget() ?>
+        </div>
         <h1 class="dh-heading dh-cabana-main-title mb-1"><?= $this->title ?></h1>
 
         <?php

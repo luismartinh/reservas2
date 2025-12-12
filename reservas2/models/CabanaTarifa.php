@@ -109,7 +109,11 @@ class CabanaTarifa extends BaseCabanaTarifa
         }
 
         // Ordenar por inicio
-        usort($intervalos, fn($a, $b) => $a[0] <=> $b[0]);
+        //usort($intervalos, fn($a, $b) => $a[0] <=> $b[0]);
+        usort($intervalos, function ($a, $b) {
+            return $a[0] <=> $b[0];
+        });
+
 
         // Recorrer cubriendo desde $cursor = d; si aparece un hueco, no hay cobertura completa.
         $cursor = clone $d;
@@ -286,14 +290,26 @@ class CabanaTarifa extends BaseCabanaTarifa
     private static function elegirPorMinDias(array $tarifas, int $dias): Tarifa
     {
         // 1️⃣ Coincidencia exacta
-        $exactas = array_filter($tarifas, fn($t) => (int) $t->min_dias === $dias);
+        //$exactas = array_filter($tarifas, fn($t) => (int) $t->min_dias === $dias);
+        $exactas = array_filter($tarifas, function ($t) use ($dias) {
+            return (int) $t->min_dias === $dias;
+        });
+
         if (!empty($exactas)) {
-            usort($exactas, fn($a, $b) => $a->valor_dia <=> $b->valor_dia);
+            //usort($exactas, fn($a, $b) => $a->valor_dia <=> $b->valor_dia);
+            usort($exactas, function ($a, $b) {
+                return $a->valor_dia <=> $b->valor_dia;
+            });
+
             return $exactas[0];
         }
 
         // 2️⃣ Menor o igual (la más grande posible sin pasarse)
-        $menores = array_filter($tarifas, fn($t) => (int) $t->min_dias <= $dias);
+        //$menores = array_filter($tarifas, fn($t) => (int) $t->min_dias <= $dias);
+        $menores = array_filter($tarifas, function ($t) use ($dias) {
+            return (int) $t->min_dias <= $dias;
+        });
+
         if (!empty($menores)) {
             usort($menores, function ($a, $b) {
                 // si empatan, preferir menor valor_dia

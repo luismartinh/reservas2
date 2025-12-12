@@ -106,18 +106,31 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     [
                         'label' => Yii::t('models', 'Inicio'),
-                        'value' => fn($m) => $m->tarifa ? (new \DateTime($m->tarifa->inicio))->format('d-m-Y H:i') : null,
+                        //'value' => fn($m) => $m->tarifa ? (new \DateTime($m->tarifa->inicio))->format('d-m-Y H:i') : null,
+                        'value' => function ($m) {
+                                return $m->tarifa
+                                    ? (new \DateTime($m->tarifa->inicio))->format('d-m-Y H:i')
+                                    : null;
+                            },
                         'hAlign' => 'center',
                         'headerOptions' => ['style' => 'text-align:center'],
                     ],
                     [
                         'label' => Yii::t('models', 'Fin'),
-                        'value' => fn($m) => $m->tarifa ? (new \DateTime($m->tarifa->fin))->format('d-m-Y H:i') : null,
+                        //'value' => fn($m) => $m->tarifa ? (new \DateTime($m->tarifa->fin))->format('d-m-Y H:i') : null,
+                        'value' => function ($m) {
+                                return $m->tarifa
+                                    ? (new \DateTime($m->tarifa->fin))->format('d-m-Y H:i')
+                                    : null;
+                            },
                         'hAlign' => 'center',
                     ],
                     [
                         'label' => Yii::t('models', 'Valor del Dia'),
-                        'value' => fn($m) => $m->tarifa ? $m->tarifa->valor_dia : null,
+                        //'value' => fn($m) => $m->tarifa ? $m->tarifa->valor_dia : null,
+                        'value' => function ($m) {
+                                return $m->tarifa ? $m->tarifa->valor_dia : null;
+                            },
                         'hAlign' => 'right',
                         'format' => ['decimal', 2],
                         'headerOptions' => ['style' => 'text-align:center'],
@@ -125,7 +138,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     [
                         'label' => Yii::t('models', 'Min. Dias'),
-                        'value' => fn($m) => $m->tarifa ? $m->tarifa->min_dias : null,
+                        //'value' => fn($m) => $m->tarifa ? $m->tarifa->min_dias : null,
+                        'value' => function ($m) {
+                                return $m->tarifa ? $m->tarifa->min_dias : null;
+                            },
                         'hAlign' => 'center',
                         'headerOptions' => ['style' => 'text-align:center'],
                     ],
@@ -162,7 +178,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'bsVersion' => '5.x',
                     //'theme' => Select2::THEME_KRAJEE,
-                     'language' => Yii::$app->language,
+                    'language' => Yii::$app->language,
                     'pluginOptions' => [
                         'allowClear' => true,
                         'width' => '100%',

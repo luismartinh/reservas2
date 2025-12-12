@@ -7,12 +7,16 @@ use yii\bootstrap5\Html;
  * @var \app\models\Cabana $cabana
  */
 
+
+
 // ================== CAPACIDAD ==================
 $capacidadTexto = !empty($cabana->max_pax)
     ? Yii::t('app', 'Hasta {n} personas', ['n' => $cabana->max_pax])
     : Yii::t('app', 'Capacidad cómoda para tu estadía');
 
 // ================== CARACTERÍSTICAS ==================
+
+/*
 $featuresRaw = $cabana->caracteristicas ?? $cabana->descr ?? '';
 
 if (!empty($featuresRaw)) {
@@ -29,6 +33,8 @@ if (!empty($featuresRaw)) {
 $featuresLines = array_filter(
     array_map('trim', preg_split('/\R/', (string) $featuresRaw))
 );
+*/
+$featuresLines = $cabana->featuresLines;
 
 ?>
 

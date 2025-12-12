@@ -196,7 +196,11 @@ class ReservaController extends BaseReservaController
         // calcular totales solo si hay rango
         $totales = [];
         if (!empty($searchModel->desde) && !empty($searchModel->hasta)) {
-            $ids = array_map(fn($m) => (int) $m->id, $dataProvider->getModels());
+
+            $ids = array_map(function ($m) {
+                return (int) $m->id;
+            }, $dataProvider->getModels());
+
             if ($ids) {
                 $totales = CabanaTarifa::calcularTotalesParaCabanas($ids, $searchModel->desde, $searchModel->hasta);
             }

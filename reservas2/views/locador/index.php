@@ -14,12 +14,12 @@ FontAwesomeAsset::register($this);
  * @var app\models\TarifaSearch $searchModel
  */
 
-$this->title = Yii::t('models', 'Administrar Tarifas');
+$this->title = Yii::t('models', 'Administrar Pasajeros');
 $this->params['breadcrumbs'][] = $this->title;
 
 
 ?>
-<div class="giiant-crud tarifa-index">
+<div class="giiant-crud locador-index">
 
 
 
@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </h1>
     <div class="clearfix crud-navigation">
         <div class="pull-left">
-            <?= Html::a('<i class="bi bi-currency-dollar""></i> ' . Yii::t('cruds', 'Nueva Tarifa'), ['create'], ['class' => 'btn btn-success']) ?>
+            <?= Html::a('<i class="bi bi-person-add"></i> ' . Yii::t('cruds', 'Nuevo Pasajero'), ['create'], ['class' => 'btn btn-success']) ?>
         </div>
     </div>
 
@@ -85,64 +85,52 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['nowrap' => 'nowrap']
             ],
             [
+                'attribute' => 'created_at',
+                'value' => function ($model) {
+                    return $model->created_at
+                        ? date('d-m-Y H:i', strtotime($model->created_at))
+                        : null;
+                },
+                'filterInputOptions' => [
+                    'type' => 'date',
+                    'class' => 'form-control',
+                    'style' => 'min-width:120px;',
+                ],
+            ],
+
+            [
                 'vAlign' => 'middle',
                 'hAlign' => 'middle',
-                'attribute' => 'descr',
+                'attribute' => 'denominacion',
                 'headerOptions' => ['style' => 'text-align:center'],
                 'contentOptions' => ['style' => 'text-align:left'],
             ],
-
-            [
-                'class' => 'kartik\grid\BooleanColumn',
-                'attribute' => 'activa',
-                'trueLabel' => 'SI',
-                'falseLabel' => 'NO',
-                'vAlign' => 'middle'
-            ],
-            [
-                'attribute' => 'inicio',
-                //'value' => fn($model) => $model->inicio ? date('d-m-Y H:i', strtotime($model->inicio)) : null,
-                'value' => function ($model) {
-                    return $model->inicio
-                        ? date('d-m-Y H:i', strtotime($model->inicio))
-                        : null;
-                },
-                'filterInputOptions' => [
-                    'type' => 'date',
-                    'class' => 'form-control',
-                    'style' => 'min-width:120px;',
-                ],
-            ],
-            [
-                'attribute' => 'fin',
-                //'value' => fn($model) => $model->inicio ? date('d-m-Y H:i', strtotime($model->fin)) : null,
-                'value' => function ($model) {
-                    return $model->fin
-                        ? date('d-m-Y H:i', strtotime($model->fin))
-                        : null;
-                },
-                'filterInputOptions' => [
-                    'type' => 'date',
-                    'class' => 'form-control',
-                    'style' => 'min-width:120px;',
-                ],
-            ],
-
             [
                 'vAlign' => 'middle',
                 'hAlign' => 'middle',
-                'attribute' => 'min_dias',
+                'attribute' => 'documento',
+                'headerOptions' => ['style' => 'text-align:center'],
+                'contentOptions' => ['style' => 'text-align:center'],
+            ],
+            'email:email',
+            [
+                'vAlign' => 'middle',
+                'hAlign' => 'middle',
+                'attribute' => 'telefono',
                 'headerOptions' => ['style' => 'text-align:center'],
                 'contentOptions' => ['style' => 'text-align:center'],
             ],
             [
                 'vAlign' => 'middle',
-                'hAlign' => 'right',
-                'attribute' => 'valor_dia',
-                'format' => ['decimal', 2],
+                'hAlign' => 'middle',
+                'attribute' => 'domicilio',
                 'headerOptions' => ['style' => 'text-align:center'],
-                'contentOptions' => ['style' => 'text-align:right'],
+                'contentOptions' => ['style' => 'text-align:left'],
             ],
+
+
+
+
 
         ];
 
@@ -157,14 +145,14 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
         echo GridView::widget([
-            'id' => 'cabana_grid',
+            'id' => 'locador_grid',
             'dataProvider' => $dataProvider,
             'pjax' => true,
             'filterModel' => $searchModel,
             'columns' => $columns,
             'panel' => [
                 'before' => $ind,
-                'heading' => '<i class="bi bi-currency-dollar"></i>  ' . Yii::t('cruds', 'Tarifas Registradas'),
+                'heading' => '<i class="bi bi-people-fill"></i>  ' . Yii::t('cruds', 'Pasajeros Registrados'),
                 'type' => 'info',
             ],
             'export' => false,

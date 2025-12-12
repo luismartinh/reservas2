@@ -103,10 +103,15 @@ use yii\bootstrap5\Html;
 
 
 <!-- attribute caracteristicas -->
-<?= $form->field($model, 'caracteristicas')->textarea([
-    'maxlength' => true,
-    'disabled' => (isset($relAttributes) && isset($relAttributes['caracteristicas'])),
-]) ?>
+<?= $form->field($model, 'caracteristicas_es')->textarea(['rows' => 6])
+    ->label('Características (Español)') ?>
+
+<?= $form->field($model, 'caracteristicas_en')->textarea(['rows' => 6])
+    ->label('Características (English)') ?>
+
+<?= $form->field($model, 'caracteristicas_pt_br')->textarea(['rows' => 6])
+    ->label('Características (Português - Brasil)') ?>
+
 
 
 <?php

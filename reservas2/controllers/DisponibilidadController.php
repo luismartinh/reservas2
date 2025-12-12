@@ -49,7 +49,10 @@ class DisponibilidadController extends \yii\web\Controller
         // calcular totales solo si hay rango
         $totales = [];
         if (!empty($searchModel->desde) && !empty($searchModel->hasta)) {
-            $ids = array_map(fn($m) => (int) $m->id, $dataProvider->getModels());
+            //$ids = array_map(fn($m) => (int) $m->id, $dataProvider->getModels());
+            $ids = array_map(function ($m) {
+                return (int) $m->id;
+            }, $dataProvider->getModels());
             if ($ids) {
                 $totales = CabanaTarifa::calcularTotalesParaCabanas($ids, $searchModel->desde, $searchModel->hasta);
             }
@@ -83,7 +86,10 @@ class DisponibilidadController extends \yii\web\Controller
         // calcular totales solo si hay rango
         $totales = [];
         if (!empty($searchModel->desde) && !empty($searchModel->hasta)) {
-            $ids = array_map(fn($m) => (int) $m->id, $dataProvider->getModels());
+            //$ids = array_map(fn($m) => (int) $m->id, $dataProvider->getModels());
+            $ids = array_map(function ($m) {
+                return (int) $m->id;
+            }, $dataProvider->getModels());
             if ($ids) {
                 $totales = CabanaTarifa::calcularTotalesParaCabanas($ids, $searchModel->desde, $searchModel->hasta);
             }
@@ -362,6 +368,10 @@ class DisponibilidadController extends \yii\web\Controller
 
         } catch (\Throwable $e) {
             $tx->rollBack();
+            // Log técnico completo para vos
+            Yii::error('Error al crear solicitud: ' . $e->getMessage(), __METHOD__);
+
+            // Mensaje para el usuario
             Yii::$app->session->setFlash(
                 'error',
                 Yii::t('app', 'No se pudo crear la solicitud: {m}', ['m' => $e->getMessage()])
@@ -543,11 +553,19 @@ class DisponibilidadController extends \yii\web\Controller
 
     /**
      * Envía el mail de confirmación usando la vista mail_confirmacion.
+     *
+     * @throws \RuntimeException si falla el envío del correo
      */
     protected function enviarMailConfirmacion(RequestReserva $reserva, string $token): void
     {
-        $confirmUrl = Yii::$app->urlManager->createAbsoluteUrl(['disponibilidad/confirmar-email', 'token' => $token]);
-        $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl(['disponibilidad/seguimiento', 'hash' => $reserva->hash]);
+        $confirmUrl = Yii::$app->urlManager->createAbsoluteUrl([
+            'disponibilidad/confirmar-email',
+            'token' => $token,
+        ]);
+        $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl([
+            'disponibilidad/seguimiento',
+            'hash' => $reserva->hash,
+        ]);
 
         $body = $this->renderPartial('mail_confirmacion', [
             'reserva' => $reserva,
@@ -558,39 +576,39 @@ class DisponibilidadController extends \yii\web\Controller
         $fromEmail = Yii::$app->params['senderEmail'] ?? null;
         $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
 
-        
-
         if (!$fromEmail) {
             Yii::warning('senderEmail no configurado; no se envía correo de confirmación.', __METHOD__);
-            return;
+            throw new \RuntimeException('Email del remitente no configurado.');
         }
-
 
         $bccEmail = Yii::$app->params['bccEmail'] ?? null;
 
-        if(!$bccEmail){
-            $ok = Yii::$app->mailer->compose()
-                ->setFrom([$fromEmail => $fromName])
-                ->setTo($reserva->email)
-                ->setSubject(Yii::t('app', 'Confirmación de email - Solicitud de Reserva ') . $reserva->codigo_reserva)
-                ->setHtmlBody($body)
-                ->send();
-            
-        }else{
-            $ok = Yii::$app->mailer->compose()
-                ->setFrom([$fromEmail => $fromName])
-                ->setTo($reserva->email)
-                ->setBcc($bccEmail)
-                ->setSubject(Yii::t('app', 'Confirmación de email - Solicitud de Reserva ') . $reserva->codigo_reserva)
-                ->setHtmlBody($body)
-                ->send();
+        $message = Yii::$app->mailer->compose()
+            ->setFrom([$fromEmail => $fromName])
+            ->setTo($reserva->email)
+            ->setSubject(
+                Yii::t('app', 'Confirmación de email - Solicitud de Reserva ') . $reserva->codigo_reserva
+            )
+            ->setHtmlBody($body);
+
+        if ($bccEmail) {
+            $message->setBcc($bccEmail);
+        }
+
+        try {
+            $ok = $message->send();
+        } catch (\Throwable $e) {
+            // Log técnico para vos
+            Yii::error('Error técnico al enviar mail de confirmación: ' . $e->getMessage(), __METHOD__);
+            // Excepción “limpia” hacia arriba
+            throw new \RuntimeException(Yii::t('app', 'No se pudo enviar el email de confirmación.'));
         }
 
         if (!$ok) {
-            Yii::warning('Fallo al enviar email de confirmación', __METHOD__);
+            Yii::error('send() devolvió false al enviar mail de confirmación.', __METHOD__);
+            throw new \RuntimeException(Yii::t('app', 'No se pudo enviar el email de confirmación.'));
         }
     }
-
 
 
     public function actionConfirmarEmail($token)
@@ -659,6 +677,7 @@ class DisponibilidadController extends \yii\web\Controller
             'ok' => true,
             'msg' => Yii::t('app', 'Su email fue verificado correctamente.'),
             'trackingUrl' => $trackingUrl,
+            'requestReserva' => $reserva
         ]);
     }
 

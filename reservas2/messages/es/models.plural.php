@@ -19,9 +19,11 @@
 return [
     'Auditoria' => '',
     'Auditoria Tabla' => '',
+    'Cabañas' => '',
     'Grupos de acceso' => '',
     'Notif Tablas' => '',
     'Notificaciones' => '',
     'Parametros Generales' => '',
+    'Tarifas' => '',
     'Usuario' => '',
 ];
