@@ -127,7 +127,7 @@ if ($d && $h) {
         <?= $af->field($formModel, 'email')
             ->input('email', [
                 'maxlength' => 45,
-                'required' => true,
+                //'required' => true,
                 'value' => $formModel->email,
             ])->label(Yii::t('app', 'Email')) ?>
     </div>

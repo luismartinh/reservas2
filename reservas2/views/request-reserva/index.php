@@ -485,6 +485,14 @@ Modal::begin([
     'size' => Modal::SIZE_DEFAULT,
 ]);
 echo '<div id="modal-agregar-pago-content"></div>';
+
+echo '<div class="modal-loading-overlay" id="modal-agregar-pago-loading">
+        <div class="text-center">
+            <div class="spinner-border" role="status" aria-hidden="true"></div>
+            <div class="mt-2"><small>'.Yii::t('app','Procesando...').'</small></div>
+        </div>
+      </div>';
+
 Modal::end();
 
 
@@ -537,6 +545,36 @@ $msgErrorGenerico = Yii::t('app', 'Error');
 $js = <<<JS
 (function() {
 
+
+    function setAgregarPagoLoading(isLoading) {
+        var modalEl = document.getElementById('modal-agregar-pago');
+        if (!modalEl) return;
+
+        var overlay = document.getElementById('modal-agregar-pago-loading');
+        if (overlay) {
+            overlay.style.display = isLoading ? 'flex' : 'none';
+        }
+
+        // deshabilitar inputs/botones dentro del modal
+        $('#modal-agregar-pago')
+            .find('input, textarea, select, button')
+            .prop('disabled', isLoading);
+
+        // bloquear cierre (backdrop + ESC) mientras carga
+        var bsModal = bootstrap.Modal.getInstance(modalEl);
+        if (bsModal) {
+            if (isLoading) {
+                // Bootstrap 5.3+: setear opciones dinámicas
+                bsModal._config.backdrop = 'static';
+                bsModal._config.keyboard = false;
+            } else {
+                bsModal._config.backdrop = true;
+                bsModal._config.keyboard = true;
+            }
+        }
+    }
+
+
     // Abrir modal y cargar el form por AJAX
     $(document).on('click', '.btn-agregar-pago', function(e) {
         e.preventDefault();
@@ -548,7 +586,13 @@ $js = <<<JS
             success: function(resp) {
                 if (resp.success && resp.html) {
                     $('#modal-agregar-pago-content').html(resp.html);
-                    $('#modal-agregar-pago').modal('show');
+                    //$('#modal-agregar-pago').modal('show');
+                    var modalEl = document.getElementById('modal-agregar-pago');
+                    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+
+                    // por si quedó algo “trabado” de un intento anterior
+                    setAgregarPagoLoading(false);                    
                 } else if (resp.message) {
                     alert(resp.message);
                 } else {
@@ -567,6 +611,8 @@ $js = <<<JS
         var form = this;
         var formData = new FormData(form);
 
+        setAgregarPagoLoading(true);
+
         $.ajax({
             url: $(form).attr('action'),
             type: 'POST',
@@ -575,25 +621,39 @@ $js = <<<JS
             contentType: false,
             success: function(resp) {
                 if (resp.success) {
-                    $('#modal-agregar-pago').modal('hide');
+                    //$('#modal-agregar-pago').modal('hide');
+                   // cerrar modal
+                    var modalEl = document.getElementById('modal-agregar-pago');
+                    var modal   = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();                    
                     // Recargar la grilla (Kartik GridView con pjax=true)
                     $.pjax.reload({container: '#pjax-main'});
                 } else if (resp.html) {
                     // Errores de validación: refrescamos el contenido del modal
                     $('#modal-agregar-pago-content').html(resp.html);
+                    setAgregarPagoLoading(false);
                 } else if (resp.message) {
                     alert(resp.message);
+                    setAgregarPagoLoading(false);
                 } else {
                     alert("{$msgErrorProcesarPago}");
+                    setAgregarPagoLoading(false);
                 }
             },
             error: function() {
                 alert("{$msgErrorProcesarPago}");
+                setAgregarPagoLoading(false);
             }
         });
 
         return false;
     });
+
+    // Si el modal se cierra por cualquier cosa, aseguramos estado normal
+    document.getElementById('modal-agregar-pago')?.addEventListener('hidden.bs.modal', function(){
+        setAgregarPagoLoading(false);
+    })
+
 
 })();
 JS;
@@ -735,6 +795,32 @@ $css = <<<CSS
 .chat-modal-dialog .modal-content {
     max-height: 95vh;   /* casi toda la altura de la ventana */
 }
+
+
+/* Overlay de “cargando” para el modal */
+.modal-loading-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index: 1060; /* por encima del contenido del modal */
+    border-radius: .5rem;
+}
+
+.modal-loading-overlay .spinner-border{
+    width:3rem;
+    height:3rem;
+}
+
+/* asegura contexto para overlay */
+#modal-agregar-pago .modal-content{
+    position: relative;
+}
+
+
+
 CSS;
 $this->registerCss($css);
 ?>

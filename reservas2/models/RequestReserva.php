@@ -4,6 +4,7 @@ namespace app\models;
 
 use \app\models\base\RequestReserva as BaseRequestReserva;
 use Yii;
+use yii\helpers\FileHelper;
 
 /**
  * This is the model class for table "request_reservas".
@@ -117,6 +118,18 @@ class RequestReserva extends BaseRequestReserva
         return $result;
     }
 
+    /**
+     * Devuelve true si $texto contiene "@emailFalso" (sin importar mayúsculas/minúsculas).
+     */
+    public static function contieneEmailFalso(?string $texto): bool
+    {
+        if ($texto === null || $texto === '') {
+            return false;
+        }
+
+        return stripos($texto, '@emailFalso') !== false;
+    }
+
 
     /**
      * Envía el mail de cambio de estado de la solicitud.
@@ -125,6 +138,11 @@ class RequestReserva extends BaseRequestReserva
      */
     public static function enviarMailCambioEstado(RequestReserva $recReserva): void
     {
+
+        if (self::contieneEmailFalso($recReserva->email)) {
+            return;
+        }
+
         $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl([
             'disponibilidad/seguimiento',
             'hash' => $recReserva->hash,
@@ -177,6 +195,65 @@ class RequestReserva extends BaseRequestReserva
         if (!$ok) {
             Yii::error('send() devolvió false al enviar mail de cambio de estado.', __METHOD__);
             throw new \RuntimeException(Yii::t('app', 'No se pudo enviar el email de cambio de estado.'));
+        }
+    }
+
+
+    public function beforeDelete()
+    {
+        if (!parent::beforeDelete()) {
+            return false;
+        }
+
+        $this->eliminarComprobantesDePago();
+
+        return true;
+    }
+
+    private function eliminarComprobantesDePago(): void
+    {
+        $registros = is_array($this->registro_pagos) ? $this->registro_pagos : [];
+        if (empty($registros)) {
+            return;
+        }
+
+        // Directorios permitidos (seguridad)
+        $allowedPrivateDir = FileHelper::normalizePath(Yii::getAlias('@runtime/priv_comprobantes'));
+        $allowedTmpDir = FileHelper::normalizePath(Yii::getAlias('@webroot/uploads_tmp/comprobantes'));
+
+        foreach ($registros as $pago) {
+            $archivo = $pago['archivo'] ?? null;
+            if (!$archivo || !is_string($archivo)) {
+                continue;
+            }
+
+            // Si quedó como URL pública temporal
+            if (str_starts_with($archivo, '/uploads_tmp/comprobantes/')) {
+                $pathFs = Yii::getAlias('@webroot') . $archivo;
+            } else {
+                // En tu actionAgregarPago lo terminás guardando como ruta FS privada
+                $pathFs = $archivo;
+            }
+
+            if (!$pathFs) {
+                continue;
+            }
+
+            $pathFsNorm = FileHelper::normalizePath($pathFs);
+
+            // Seguridad: solo borramos dentro de los dirs esperados
+            $isAllowed =
+                str_starts_with($pathFsNorm, $allowedPrivateDir . DIRECTORY_SEPARATOR) ||
+                str_starts_with($pathFsNorm, $allowedTmpDir . DIRECTORY_SEPARATOR);
+
+            if (!$isAllowed) {
+                Yii::warning("Se evitó borrar archivo fuera de rutas permitidas: {$pathFsNorm}", __METHOD__);
+                continue;
+            }
+
+            if (is_file($pathFsNorm)) {
+                @unlink($pathFsNorm);
+            }
         }
     }
 

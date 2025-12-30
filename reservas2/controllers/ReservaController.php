@@ -298,7 +298,7 @@ class ReservaController extends BaseReservaController
 
 
         // Reglas
-        $formModel->addRule(['denominacion', 'documento', 'email', 'telefono'], 'required');
+        $formModel->addRule(['denominacion', 'documento','telefono'], 'required');// 'email', 
         $formModel->addRule(['denominacion', 'domicilio'], 'string', ['max' => 100]);
         $formModel->addRule(['documento', 'email', 'telefono'], 'string', ['max' => 45]);
         $formModel->addRule(['email'], 'email');
@@ -380,20 +380,40 @@ class ReservaController extends BaseReservaController
                 }
             }
 
-            // -------------------------------------------------------------
-            // LOCADOR: usar existente por email (del request) o crear nuevo
-            // -------------------------------------------------------------
-            // Tomamos el email precargado (readonly en el form)
+            if($formModel->email){
+                // -------------------------------------------------------------
+                // LOCADOR: usar existente por email (del request) o crear nuevo
+                // -------------------------------------------------------------
+                // Tomamos el email precargado (readonly en el form)
 
-            $locadorExistente = Locador::findOne(['email' => $formModel->email]);
 
-            $emailFijo = $formModel->email;
+                $locadorExistente = Locador::findOne(['email' => $formModel->email]);
+
+                $emailFijo = $formModel->email;
+
+            }else{
+                // carga de locado sin email
+                // -------------------------------------------------------------
+                // LOCADOR: usar existente por denominacion (del request) o crear nuevo
+                // -------------------------------------------------------------
+                // Tomamos el email precargado (readonly en el form)
+
+                $locadorExistente = Locador::find()->where(['denominacion' => $formModel->denominacion])->one();
+            
+                if ($locadorExistente === null) {
+                    $emailFijo = $formModel->denominacion . '@emailFalso' ;    
+                }else{
+                    $emailFijo = $locadorExistente->email;    
+                }    
+                
+            }
 
 
             if ($locadorExistente === null) {
                 // No existe: crear nuevo
                 $locador = new Locador();
                 $locador->email = $emailFijo; // set inicial
+                
             } else {
                 $locador = $locadorExistente;
             }

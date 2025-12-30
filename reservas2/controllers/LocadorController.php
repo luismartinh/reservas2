@@ -233,6 +233,28 @@ class LocadorController extends BaseLocadorController
 
         $modelOri = $this->findModel($id);
 
+        $now = new \DateTime();
+
+        foreach ($modelOri->reservas as $reserva) {
+            if ($reserva->estado->slug == "confirmado" || $reserva->estado->slug == "confirmado-verificar-pago") {
+
+
+                $fechaIngreso = new \DateTime($reserva->desde);
+                $fechaEgreso = new \DateTime($reserva->hasta);
+
+                // Verifica si NOW está entre Ingreso y Egreso (inclusive)
+                //$estaDentro = $now >= $fechaIngreso && $now <= $fechaEgreso;
+                $estaDentro = $now <= $fechaEgreso;
+
+                if ($estaDentro) {
+                    Yii::$app->session->setFlash('danger', Yii::t(
+                        "app",
+                        'No se puede eliminar una solicitud pendiente, la reserva esta en curso'
+                    ));
+                    return $this->redirect(['index']);
+                }
+            }
+        }
 
 
         try {

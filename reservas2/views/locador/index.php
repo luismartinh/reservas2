@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'aria-label' => Yii::t('cruds', 'Eliminar'),
                             'style' => 'margin-right: 3px;',
                             'data-pjax' => '0',
-                            'data-confirm' => Yii::t('cruds', 'Esta seguro de eliminar?'),
+                            'data-confirm' => Yii::t('cruds', 'Esta seguro de eliminar? (se eliminaran las reservas asociadas)'),
                         ];
                         return Html::a('<span class="fas fa-trash-alt" aria-hidden="true"></span>', $url, $options);
                     },
@@ -84,6 +84,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'contentOptions' => ['nowrap' => 'nowrap']
             ],
+            [
+                'class' => 'kartik\grid\ExpandRowColumn',
+                'width' => '50px',
+                'headerOptions' => ['style' => 'text-align:center'],
+                'contentOptions' => ['class' => 'text-center align-middle'],
+                'expandOneOnly' => true,
+                'value' => function ($model, $key, $index, $column) {
+                    // por defecto, filas colapsadas
+                    return GridView::ROW_COLLAPSED;
+                },
+                'detail' => function ($model, $key, $index, $column) {
+                    /** @var \app\models\ReservaCabana $model */
+                    return Yii::$app->controller->renderPartial('_reservas_locador', [
+                        'locador' => $model,
+                    ]);
+                },
+                'expandIcon' => '<i class="bi bi-chevron-right"></i>',
+                'collapseIcon' => '<i class="bi bi-chevron-down"></i>',
+            ],
+
             [
                 'attribute' => 'created_at',
                 'value' => function ($model) {
@@ -147,7 +167,7 @@ $this->params['breadcrumbs'][] = $this->title;
         echo GridView::widget([
             'id' => 'locador_grid',
             'dataProvider' => $dataProvider,
-            'pjax' => true,
+            'pjax' => false,
             'filterModel' => $searchModel,
             'columns' => $columns,
             'panel' => [
@@ -166,3 +186,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 <?php \yii\widgets\Pjax::end() ?>
+
+
+<?php
+$js = <<<JS
+// Evita que el ExpandRow del grid interno dispare el ExpandRow del grid padre
+$(document).on('click', '[id^="reservas_grid_"] .kv-expand-row, [id^="reservas_grid_"] .kv-expand-icon', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    return false;
+});
+JS;
+
+$this->registerJs($js);
+?>

@@ -118,7 +118,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return GridView::ROW_COLLAPSED;
                 },
                 'detail' => function ($model, $key, $index, $column) {
-                    /** @var \app\models\ReservaCabana $model */
+                    /** @var \app\models\Reserva $model */
                     return Yii::$app->controller->renderPartial('_reserva_cabanas', [
                         'model' => $model,
                     ]);

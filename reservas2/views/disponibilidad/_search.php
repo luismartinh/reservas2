@@ -53,7 +53,7 @@ if($cabana){
 						'pluginOptions' => [
 							'locale' => ['format' => 'd-m-Y'],
 							// 👇 ESTA ES LA CLAVE: solo desde hoy en adelante
-							'minDate' => new JsExpression('moment().startOf("day")'),							
+							'minDate' => !$esAdmin ? new JsExpression('moment().startOf("day")') : null,							
 						],
 						'language' => Yii::$app->language, // es, en, pt-BR
 						'options' => [

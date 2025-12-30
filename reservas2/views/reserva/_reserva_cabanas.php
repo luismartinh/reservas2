@@ -3,7 +3,7 @@
 use yii\bootstrap5\Html;
 
 /** @var \yii\web\View $this */
-/** @var \app\models\ReservaCabana $model */
+/** @var \app\models\Reserva $model */
 
 $items = is_array($model->reservaCabanas) ? $model->reservaCabanas : $model->reservaCabanas;
 

@@ -33,7 +33,7 @@ return [
 
     'social' => [
         'facebook' => [
-            'url' => 'https://www.facebook.com/milly.hormasntorfer',
+            'url' => 'https://www.facebook.com/cabanasDinaHuapi?rdid=HWamukUW73oj15xE&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1BnLmD8aGM%2F#',
             'icon' => 'bi bi-facebook',
         ],
         'instagram' => [

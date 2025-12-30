@@ -182,7 +182,8 @@ class RequestReservaController extends BaseRequestReservaController
         }
 
         try {
-            $this->findModel($id)->delete();
+            //$this->findModel($id)->delete();
+            $modelOri->delete(); // esto dispara beforeDelete() y elimina comprobantes
             Yii::$app->session->setFlash('success', Yii::t("app", 'Se elimino correctamente'));
         } catch (\Exception $e) {
             Yii::$app->getSession()->addFlash('error', $e->errorInfo[2] ?? $e->getMessage());
@@ -192,58 +193,6 @@ class RequestReservaController extends BaseRequestReservaController
         return $this->redirect(['index']);
     }
 
-    /**
-     * Envía el mail de cambio de estado de la solicitud.
-     */
-
-    /*
-    protected function enviarMailCambioEstado(RequestReserva $recReserva): void
-    {
-
-        $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl(['disponibilidad/seguimiento', 'hash' => $recReserva->hash]);
-
-        $body = $this->renderPartial('mail_cambio_estado', [
-            'reqReserva' => $recReserva,
-            'trackingUrl' => $trackingUrl,
-        ]);
-
-        $fromEmail = Yii::$app->params['senderEmail'] ?? null;
-        $fromName = Yii::$app->params['senderName'] ?? 'Reservas';
-
-        if (!$fromEmail) {
-            Yii::warning('senderEmail no configurado; no se envía correo.', __METHOD__);
-            return;
-        }
-
-        $bccEmail = Yii::$app->params['bccEmail'] ?? null;
-
-        if (!$bccEmail) {
-            $ok = Yii::$app->mailer->compose()
-                ->setFrom([$fromEmail => $fromName])
-                ->setTo($recReserva->email)
-                ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') 
-                . $recReserva->estado->descr ." ". $recReserva->codigo_reserva)
-                ->setHtmlBody($body)
-                ->send();
-        }else{
-        $ok = Yii::$app->mailer->compose()
-            ->setFrom([$fromEmail => $fromName])
-            ->setTo($recReserva->email)
-            ->setBcc($bccEmail)
-                ->setSubject(Yii::t('app', 'Estado de su Solicitud de Reserva a: ') 
-                . $recReserva->estado->descr ." ". $recReserva->codigo_reserva)
-            ->setHtmlBody($body)
-            ->send();
-
-
-        }       
-
-
-        if (!$ok) {
-            Yii::warning('Fallo al enviar email', __METHOD__);
-        }
-    }
-    */
 
     public function actionCambiarEstado()
     {
@@ -326,7 +275,6 @@ class RequestReservaController extends BaseRequestReservaController
                 case 'pendiente-email-verificado':
                 case 'rechazado':
                     $this->eliminarReservaAsociada($model);
-                    //$this->enviarMailCambioEstado($model);
                     RequestReserva::enviarMailCambioEstado($model);
                     break;
 
