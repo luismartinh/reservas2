@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'aria-label' => Yii::t('cruds', 'Eliminar'),
                             'style' => 'margin-right: 3px;',
                             'data-pjax' => '0',
-                            'data-confirm' => Yii::t('cruds', 'Esta seguro de eliminar?'),
+                            'data-confirm' => Yii::t('cruds', 'Esta seguro de eliminar? Se eliminaran los pagos asociados y la reserva correspomndiente.'),
                         ];
                         return Html::a('<span class="fas fa-trash-alt" aria-hidden="true"></span>', $url, $options);
                     },

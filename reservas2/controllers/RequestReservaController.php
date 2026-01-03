@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\controllers\base\RequestReservaController as BaseRequestReservaController;
 
 use app\config\RootMenu;
+use app\helpers\Utils;
 use app\models\Identificador;
 use app\models\RequestReserva;
 use app\models\RequestReservaSearch;
@@ -46,7 +47,8 @@ class RequestReservaController extends BaseRequestReservaController
                         ,
                         'eliminar-pagos',
                         'chat',
-                        'eliminar-mensaje-chat'
+                        'eliminar-mensaje-chat',
+                        'editar-rango'
 
                     ],
                     'rules' => [
@@ -59,7 +61,8 @@ class RequestReservaController extends BaseRequestReservaController
                                 'agregar-pago',
                                 'eliminar-pagos',
                                 'chat',
-                                'eliminar-mensaje-chat'
+                                'eliminar-mensaje-chat',
+                                'editar-rango'
                             ],
                             'roles' => ['@'],
                             'matchCallback' => function ($rule, $action) {
@@ -163,6 +166,7 @@ class RequestReservaController extends BaseRequestReservaController
                 $fechaIngreso = new \DateTime($reserva->desde);
                 $fechaEgreso = new \DateTime($reserva->hasta);
 
+                /*
                 // Verifica si NOW está entre Ingreso y Egreso (inclusive)
                 //$estaDentro = $now >= $fechaIngreso && $now <= $fechaEgreso;
                 $estaDentro = $now <= $fechaEgreso;
@@ -174,6 +178,7 @@ class RequestReservaController extends BaseRequestReservaController
                     ));
                     return $this->redirect(['index']);
                 }
+                */    
 
                 $reserva->delete();
 
@@ -955,5 +960,149 @@ class RequestReservaController extends BaseRequestReservaController
         ];
     }
 
+
+    /*
+    public function actionEditarRango($id)
+    {
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/editar-rango',
+            "Modificar Rango Solicitud",
+            null
+        );
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t("app", $permiso["msg"]));
+            return $this->redirect($permiso["redirect"]);
+        }
+
+        // @var RequestReserva $model 
+        $model = RequestReserva::find()
+            ->with(['estado', 'reserva', 'requestCabanas.cabana'])
+            ->where(['id' => $id])
+            ->one();
+
+        if (!$model) {
+            throw new NotFoundHttpException(Yii::t('app', 'La solicitud no existe.'));
+        }
+
+        if (!$model->reserva) {
+            Yii::$app->session->setFlash('danger', Yii::t('app', 'La solicitud no tiene una Reserva asociada.'));
+            return $this->redirect(['view', 'id' => $model->id]);
+        }
+
+        // Cabañas del request
+        $cabanas = [];
+        $cabanaIds = [];
+        foreach ($model->requestCabanas as $rc) {
+            if ($rc->cabana) {
+                $cabanas[] = $rc->cabana;
+            }
+            $cabanaIds[] = (int) $rc->id_cabana;
+        }
+        $cabanaIds = array_values(array_unique(array_filter($cabanaIds)));
+
+        // Hora mínima de check-in según cabañas (reuso exacto de tu lógica)
+        [$minH, $minM] = Utils::obtenerHoraMinimaCheckin($cabanas);
+
+        // Form: solo periodo/desde/hasta (fechas)
+        $form = new DynamicModel(['periodo', 'desde', 'hasta']);
+        // precargar desde/hasta en d-m-Y para el widget
+        $form->desde = $model->reserva->desde ? date('d-m-Y', strtotime($model->reserva->desde)) : null;
+        $form->hasta = $model->reserva->hasta ? date('d-m-Y', strtotime($model->reserva->hasta)) : null;
+        $form->periodo = ($form->desde && $form->hasta) ? ($form->desde . ' - ' . $form->hasta) : null;
+
+        $form->addRule(['desde', 'hasta'], 'required');
+        $form->addRule(['desde', 'hasta'], 'date', ['format' => 'php:d-m-Y']);
+
+        // desde <= hasta (comparando como DateTime)
+        $form->addRule('desde', function () use ($form) {
+            if (!$form->desde || !$form->hasta)
+                return;
+
+            $d = \DateTime::createFromFormat('d-m-Y', $form->desde);
+            $h = \DateTime::createFromFormat('d-m-Y', $form->hasta);
+            if ($d && $h && $d > $h) {
+                $form->addError('desde', Yii::t('app', 'La fecha "Desde" debe ser menor o igual a "Hasta".'));
+            }
+        });
+
+        // POST
+        if (Yii::$app->request->isPost && $form->load(Yii::$app->request->post())) {
+
+            // Normalizar fechas a Y-m-d (sin hora) como pediste
+            $desdeDate = Utils::normalizarFechaReserva($form->desde); // devuelve Y-m-d
+            $hastaDate = Utils::normalizarFechaReserva($form->hasta); // devuelve Y-m-d
+
+            // Reconstruir datetimes finales
+            $desdeDT = new \DateTime($desdeDate . ' 00:00:00');
+            $desdeDT->setTime($minH, $minM, 0);
+            $desdeFinal = $desdeDT->format('Y-m-d H:i:s');
+
+            $hastaFinal = $hastaDate . ' 23:59:59';
+
+            // Validación de solape (excluyendo esta reserva)
+            if (!empty($cabanaIds)) {
+                $haySolape = Reserva::estanYaReservadasExcluyendo(
+                    $desdeFinal,
+                    $hastaFinal,
+                    $cabanaIds,
+                    (int) $model->reserva->id
+                );
+                if ($haySolape) {
+                    $form->addError('desde', Yii::t('app', 'El nuevo período se superpone con otra reserva existente para alguna de las cabañas.'));
+                }
+            }
+
+            // Ahora sí: validar reglas del form (requeridos + formato + desde<=hasta)
+            if ($form->validate()) {
+                $tx = Yii::$app->db->beginTransaction();
+                try {
+                    // 1) Reserva
+                    $model->reserva->desde = $desdeFinal;
+                    $model->reserva->hasta = $hastaFinal;
+
+                    if (!$model->reserva->save(false, ['desde', 'hasta'])) {
+                        throw new \Exception(Yii::t('app', 'No se pudo actualizar la Reserva.'));
+                    }
+
+                    // 2) RequestReserva (consistencia)
+                    $model->desde = $desdeFinal;
+                    $model->hasta = $hastaFinal;
+                    if (!$model->save(false, ['desde', 'hasta'])) {
+                        throw new \Exception(Yii::t('app', 'No se pudo actualizar la Solicitud.'));
+                    }
+
+                    $tx->commit();
+                    Yii::$app->session->setFlash('success', Yii::t('app', 'Período actualizado correctamente.'));
+                    return $this->redirect(['disponibilidad/seguimiento', 'hash' => $model->hash]);
+                } catch (\Throwable $e) {
+                    $tx->rollBack();
+                    Yii::error('ERROR RequestReserva/editar-rango: ' . $e->getMessage(), __METHOD__);
+                    Yii::$app->session->setFlash('danger', Yii::t('app', 'No se pudo actualizar: {m}', ['m' => $e->getMessage()]));
+                }
+            }
+        }
+
+        // cabañas como modelos Cabana
+        $cabanas = [];
+        foreach ($model->requestCabanas as $rc) {
+            if ($rc->cabana)
+                $cabanas[] = $rc->cabana;
+        }
+
+        // fechas actuales SOLO fecha (Y-m-d)
+        $desde = $model->reserva->desde ? date('Y-m-d', strtotime($model->reserva->desde)) : null;
+        $hasta = $model->reserva->hasta ? date('Y-m-d', strtotime($model->reserva->hasta)) : null;
+
+        return $this->render('editar_rango', [
+            'model' => $model,
+            'formModel' => $form,
+            'cabanas' => $cabanas,
+            'desde' => $desde,
+            'hasta' => $hasta,
+        ]);
+
+    }
+        */
 
 }

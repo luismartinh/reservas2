@@ -20,6 +20,7 @@ use yii\base\DynamicModel;
 use yii\filters\AccessControl;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use Yii;
 
@@ -47,7 +48,8 @@ class ReservaController extends BaseReservaController
                         'reservar',
                         'solicitar-reserva',
                         'calendario-ocupacion',
-                        'locador-autocomplete'
+                        'locador-autocomplete',
+
                     ],
                     'rules' => [
                         [
@@ -59,7 +61,8 @@ class ReservaController extends BaseReservaController
                                 'reservar',
                                 'solicitar-reserva',
                                 'calendario-ocupacion',
-                                'locador-autocomplete'
+                                'locador-autocomplete',
+
                             ],
                             'roles' => ['@'],
                             'matchCallback' => function ($rule, $action) {
@@ -140,6 +143,7 @@ class ReservaController extends BaseReservaController
 
                 // Verifica si NOW está entre Ingreso y Egreso (inclusive)
                 //$estaDentro = $now >= $fechaIngreso && $now <= $fechaEgreso;
+                /*
                 $estaDentro = $now <= $fechaEgreso;
 
                 if ($estaDentro) {
@@ -149,6 +153,7 @@ class ReservaController extends BaseReservaController
                     ));
                     return $this->redirect(['index']);
                 }
+                */    
 
             }
 
@@ -298,7 +303,7 @@ class ReservaController extends BaseReservaController
 
 
         // Reglas
-        $formModel->addRule(['denominacion', 'documento','telefono'], 'required');// 'email', 
+        $formModel->addRule(['denominacion', 'documento', 'telefono'], 'required');// 'email', 
         $formModel->addRule(['denominacion', 'domicilio'], 'string', ['max' => 100]);
         $formModel->addRule(['documento', 'email', 'telefono'], 'string', ['max' => 45]);
         $formModel->addRule(['email'], 'email');
@@ -312,13 +317,16 @@ class ReservaController extends BaseReservaController
                 $formModel->addError($attribute, Yii::t('app', 'El monto debe ser numérico.'));
                 return;
             }
-            $val = (float) $formModel->$attribute;
 
+
+            /*
+            $val = (float) $formModel->$attribute;
             if ($val > $maxMonto) {
                 $formModel->addError($attribute, Yii::t('app', 'El monto no puede superar el total {max}.', [
                     'max' => '$ ' . number_format($maxMonto, 2, ',', '.')
                 ]));
             }
+            */
         });
 
         // archivo: 1 archivo, imágenes o pdf, máx 5MB 
@@ -380,7 +388,7 @@ class ReservaController extends BaseReservaController
                 }
             }
 
-            if($formModel->email){
+            if ($formModel->email) {
                 // -------------------------------------------------------------
                 // LOCADOR: usar existente por email (del request) o crear nuevo
                 // -------------------------------------------------------------
@@ -391,7 +399,7 @@ class ReservaController extends BaseReservaController
 
                 $emailFijo = $formModel->email;
 
-            }else{
+            } else {
                 // carga de locado sin email
                 // -------------------------------------------------------------
                 // LOCADOR: usar existente por denominacion (del request) o crear nuevo
@@ -399,13 +407,13 @@ class ReservaController extends BaseReservaController
                 // Tomamos el email precargado (readonly en el form)
 
                 $locadorExistente = Locador::find()->where(['denominacion' => $formModel->denominacion])->one();
-            
+
                 if ($locadorExistente === null) {
-                    $emailFijo = $formModel->denominacion . '@emailFalso' ;    
-                }else{
-                    $emailFijo = $locadorExistente->email;    
-                }    
-                
+                    $emailFijo = $formModel->denominacion . '@emailFalso';
+                } else {
+                    $emailFijo = $locadorExistente->email;
+                }
+
             }
 
 
@@ -413,7 +421,7 @@ class ReservaController extends BaseReservaController
                 // No existe: crear nuevo
                 $locador = new Locador();
                 $locador->email = $emailFijo; // set inicial
-                
+
             } else {
                 $locador = $locadorExistente;
             }
@@ -487,14 +495,15 @@ class ReservaController extends BaseReservaController
                     'hasta' => $hastaFinal,
                     'denominacion' => $formModel->denominacion,
                     'email' => $emailFijo,
-                    'total' => array_sum($totales),
+                    'total' => ((float) $formModel->monto) > array_sum($totales) ? (float) $formModel->monto : array_sum($totales),
                     'pax' => $paxAcumulado,
                     'hash' => Yii::$app->security->generateRandomString(32),
                     'id_estado' => $estadoIdConfirmando,
                     'obs' => $formModel->nota,
                 ]);
                 if (!$reqReserva->save()) {
-                    throw new \Exception(Yii::t('app', 'Error al guardar la solicitud.'));
+                    $errores = implode(",", $reqReserva->getErrorSummary(true));
+                    throw new \Exception(Yii::t('app', 'Error al guardar la solicitud. ' . $errores));
                 }
 
                 foreach ($ids as $idCabana) {
@@ -519,7 +528,8 @@ class ReservaController extends BaseReservaController
 
                 $reqReserva->codigo_reserva = RequestReserva::generateUniqueCodigoReserva($emailFijo);
                 if (!$reqReserva->save()) {
-                    throw new \Exception(Yii::t('app', 'Error al guardar la solicitud.(1)'));
+                    $errores = implode(",", $reqReserva->getErrorSummary(true));
+                    throw new \Exception(Yii::t('app', 'Error al guardar la solicitud.(1) ' . $errores));
                 }
 
                 $reqReserva->refresh();
@@ -739,4 +749,8 @@ class ReservaController extends BaseReservaController
 
         return ['results' => $results];
     }
+
+
+
+
 }

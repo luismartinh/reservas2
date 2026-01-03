@@ -151,8 +151,8 @@ if ($d && $h) {
         ?>
         <?= $af->field($formModel, 'monto')->input('number', [
             'step' => '0.01',
-            'min' => number_format($minMonto, 2, '.', ''),
-            'max' => number_format($maxMonto, 2, '.', ''),
+            //'min' => number_format($minMonto, 2, '.', ''),
+            //'max' => number_format($maxMonto, 2, '.', ''),
             'required' => true
         ])->hint(
                 Yii::t('app', 'Mínimo {min} / Máximo {max}', [

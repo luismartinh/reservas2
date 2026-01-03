@@ -38,7 +38,7 @@ class Reserva extends BaseReserva
             ->andWhere(new Expression('NOT (:hasta <= r.desde OR :desde >= r.hasta)'))
             ->params([
                 ':desde' => $desdeYmd,
-                ':hasta' => $hastaYmd.' 23:59:59',
+                ':hasta' => $hastaYmd . ' 23:59:59',
             ]);
 
         // Mantener SOLO cabañas para las cuales NO exista una reserva solapada
@@ -67,7 +67,7 @@ class Reserva extends BaseReserva
             ->andWhere(new Expression('NOT (:hasta <= r.desde OR :desde >= r.hasta)'))
             ->params([
                 ':desde' => $desdeYmd,
-                ':hasta' => $hastaYmd.' 23:59:59',
+                ':hasta' => $hastaYmd . ' 23:59:59',
                 ':id_cabana' => $id_cabana
             ]);
 
@@ -176,6 +176,38 @@ class Reserva extends BaseReserva
 
         return false;
 
+    }
+
+
+    public static function estanYaReservadasExcluyendo($desdeYmdHis, $hastaYmdHis, $idsCabanas, $excludeReservaId)
+    {
+        $nuevoDesde = $desdeYmdHis;
+        $nuevoHasta = $hastaYmdHis;
+
+        foreach ($idsCabanas as $idCabana) {
+
+            $q = \app\models\ReservaCabana::find()
+                ->alias('rca')
+                ->joinWith(['reserva r'])
+                ->where(['rca.id_cabana' => $idCabana])
+                ->andWhere(['<>', 'r.id', (int) $excludeReservaId]) // 👈 excluir la misma reserva
+                ->andWhere([
+                    'or',
+                    ['between', 'r.desde', $nuevoDesde, $nuevoHasta],
+                    ['between', 'r.hasta', $nuevoDesde, $nuevoHasta],
+                    [
+                        'and',
+                        ['<=', 'r.desde', $nuevoDesde],
+                        ['>=', 'r.hasta', $nuevoHasta],
+                    ],
+                ]);
+
+            if ($q->exists()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

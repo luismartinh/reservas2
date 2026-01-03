@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => 'kartik\grid\ActionColumn',
                 'header' => '',
-                'template' => "{view} {chat} {delete}",
+                'template' => "{view} {chat} {delete} ",//{editar-rango}
                 'buttons' => [
                     'chat' => function ($url, $model, $key) {
                         $url = Url::to(['request-reserva/chat', 'id' => $model->id]);
@@ -90,10 +90,25 @@ $this->params['breadcrumbs'][] = $this->title;
                             'aria-label' => Yii::t('cruds', 'Eliminar'),
                             'style' => 'margin-right: 3px;',
                             'data-pjax' => '0',
-                            'data-confirm' => Yii::t('cruds', 'Esta seguro de eliminar?'),
+                            'data-confirm' => Yii::t('cruds', 'Esta seguro de eliminar? Se eliminaran los pagos asociados y la reserva correspomndiente.'),
                         ];
                         return Html::a('<span class="fas fa-trash-alt" aria-hidden="true"></span>', $url, $options);
                     },
+
+                    /*
+                    'editar-rango' => function ($url, $model, $key) {
+                       
+
+                        $options = [
+                            'title' => Yii::t('cruds', 'Cambiar rango'),
+                            'aria-label' => Yii::t('cruds', 'Cambiar rango'),
+                            'style' => 'margin-right: 3px;',
+                            'data-pjax' => '0',
+
+                        ];
+                        return Html::a('<span class="fas fa-pen" aria-hidden="true"></span>', $url, $options);
+                    },
+                    */
 
                 ],
                 'urlCreator' => function ($action, $model, $key, $index) {
