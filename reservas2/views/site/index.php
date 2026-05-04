@@ -26,8 +26,7 @@ if (is_dir($heroDir)) {
 }
 
 $contact = Yii::$app->params['contact'] ?? [];
-$whatsAppNumber = $contact['whatsapp_number_link'] ?? '5492944000000';
-//$whatsAppNumber = '5492944000000'; // 👉 poné acá tu número con código de país, sin "+" ni espacios
+$whatsAppNumber = $contact['whatsapp_number_link'] ?? ' 5492944597081 ';
 $whatsAppMessage = Yii::t('app', 'Hola, quiero consultar por las cabañas en Dina Huapi.');
 $whatsAppUrl = 'https://wa.me/' . $whatsAppNumber . '?text=' . urlencode($whatsAppMessage);
 
@@ -48,7 +47,7 @@ $whatsAppUrl = 'https://wa.me/' . $whatsAppNumber . '?text=' . urlencode($whatsA
 
                 <!-- Logo redondeado con fondo -->
                 <div class="dh-logo-box mb-4">
-                    <img src="<?= Yii::getAlias('@web') ?>/images/logos/logo1.png" alt="Cabañas Dina Huapi"
+                    <img src="<?= Yii::getAlias('@web') ?>/images/logos/logo1_transparente.png" alt="Cabañas Dina Huapi"
                         class="dh-hero-logo">
                 </div>
 
@@ -382,7 +381,6 @@ $css = <<<CSS
 
 /* Caja del logo: recuadro redondeado que recorta la imagen */
 .dh-logo-box {
-    background: rgba(255, 255, 255, 0.85);
     border-radius: 1.5rem;
     box-shadow: 0 8px 24px rgba(0,0,0,0.10);
     overflow: hidden;

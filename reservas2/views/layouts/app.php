@@ -167,7 +167,7 @@ $this->registerCssFile(
 
         NavBar::begin([
             'brandLabel' => Html::a(
-                Html::img(Yii::getAlias('@web') . '/images/logos/logo1.png', [
+                Html::img(Yii::getAlias('@web') . '/images/logos/logo1_transparente.png', [
                     'class' => 'dh-navbar-logo me-2',
                     'alt' => 'Cabañas Dina Huapi',
                 ])
