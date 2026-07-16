@@ -20,6 +20,16 @@ if($cabana){
 	$frmAction = $esAdmin ? ['reserva/reservar'] : ['disponibilidad/buscar'];
 }
 
+$pluginOptions = [
+	'locale' => ['format' => 'd-m-Y'],
+];
+
+// DateRangePicker interpreta minDate => null como la fecha actual.
+// Por eso la opción solo debe existir para los visitantes.
+if (Yii::$app->user->isGuest) {
+	$pluginOptions['minDate'] = new JsExpression('moment().startOf("day")');
+}
+
 ?>
 
 <div class="disponibilidad-search">
@@ -50,11 +60,7 @@ if($cabana){
 						'convertFormat' => true,
 						'includeMonthsFilter' => true,
 						'bsVersion' => '5.x',
-						'pluginOptions' => [
-							'locale' => ['format' => 'd-m-Y'],
-							// 👇 ESTA ES LA CLAVE: solo desde hoy en adelante
-							'minDate' => !$esAdmin ? new JsExpression('moment().startOf("day")') : null,							
-						],
+						'pluginOptions' => $pluginOptions,
 						'language' => Yii::$app->language, // es, en, pt-BR
 						'options' => [
 							//'data-pjax' => '0',

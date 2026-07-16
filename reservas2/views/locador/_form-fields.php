@@ -21,3 +21,6 @@
 
 <!-- attribute domicilio -->
 <?php echo $form->field($model, 'domicilio')->textInput(['maxlength' => true]) ?>
+
+<!-- attribute obs -->
+<?php echo $form->field($model, 'obs')->textarea(['rows' => 4]) ?>

@@ -1,6 +1,8 @@
 <?php
 
+use yii\bootstrap5\ActiveForm;
 use yii\bootstrap5\Html;
+use yii\bootstrap5\Tabs;
 use yii\helpers\Url;
 use kartik\grid\GridView;
 
@@ -35,6 +37,44 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <hr />
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <?php $form = ActiveForm::begin([
+                'method' => 'get',
+                'action' => ['index'],
+                'options' => ['class' => 'row g-3 align-items-end'],
+            ]); ?>
+
+            <div class="col-md-5">
+                <?= $form->field($searchModel, 'domicilio')
+                    ->textInput(['maxlength' => true])
+                    ->label(Yii::t('app', 'Buscar en domicilio')) ?>
+            </div>
+
+            <div class="col-md-5">
+                <?= $form->field($searchModel, 'obs')
+                    ->textInput(['maxlength' => true])
+                    ->label(Yii::t('app', 'Buscar en observaciones')) ?>
+            </div>
+
+            <div class="col-md-2">
+                <div class="d-grid gap-2">
+                    <?= Html::submitButton(
+                        '<i class="bi bi-search me-2"></i>' . Yii::t('cruds', 'Buscar'),
+                        ['class' => 'btn btn-primary']
+                    ) ?>
+                    <?= Html::a(
+                        '<i class="bi bi-arrow-counterclockwise me-2"></i>' . Yii::t('cruds', 'Reset'),
+                        ['index'],
+                        ['class' => 'btn btn-outline-secondary', 'data-pjax' => '0']
+                    ) ?>
+                </div>
+            </div>
+
+            <?php ActiveForm::end(); ?>
+        </div>
+    </div>
 
     <div class="table-responsive">
         <?php
@@ -95,9 +135,46 @@ $this->params['breadcrumbs'][] = $this->title;
                     return GridView::ROW_COLLAPSED;
                 },
                 'detail' => function ($model, $key, $index, $column) {
-                    /** @var \app\models\ReservaCabana $model */
-                    return Yii::$app->controller->renderPartial('_reservas_locador', [
-                        'locador' => $model,
+                    /** @var \app\models\Locador $model */
+                    return Tabs::widget([
+                        'encodeLabels' => false,
+                        'items' => [
+                            [
+                                'label' => Yii::t('app', 'Reservas Registradas'),
+                                'content' => Yii::$app->controller->renderPartial('_reservas_locador', [
+                                    'locador' => $model,
+                                ]),
+                                'active' => true,
+                            ],
+                            [
+                                'label' => Yii::t('app', 'Mas Info:'),
+                                'content' =>
+                                    '<div class="mb-3">' .
+                                    Html::label(Yii::t('app', 'Domicilio'), null, ['class' => 'form-label fw-bold']) .
+                                    Html::textarea(
+                                        null,
+                                        (string) ($model->domicilio ?? ''),
+                                        [
+                                            'class' => 'form-control',
+                                            'rows' => 3,
+                                            'readonly' => true,
+                                        ]
+                                    ) .
+                                    '</div>' .
+                                    '<div>' .
+                                    Html::label(Yii::t('app', 'Observaciones'), null, ['class' => 'form-label fw-bold']) .
+                                    Html::textarea(
+                                        null,
+                                        (string) ($model->obs ?? ''),
+                                        [
+                                            'class' => 'form-control',
+                                            'rows' => 6,
+                                            'readonly' => true,
+                                        ]
+                                    ) .
+                                    '</div>',
+                            ],
+                        ],
                     ]);
                 },
                 'expandIcon' => '<i class="bi bi-chevron-right"></i>',
@@ -140,29 +217,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'headerOptions' => ['style' => 'text-align:center'],
                 'contentOptions' => ['style' => 'text-align:center'],
             ],
-            [
-                'vAlign' => 'middle',
-                'hAlign' => 'middle',
-                'attribute' => 'domicilio',
-                'headerOptions' => ['style' => 'text-align:center'],
-                'contentOptions' => ['style' => 'text-align:left'],
-            ],
-
-
-
-
-
         ];
-
-        $ind = Html::a(
-            '<i class="bi bi-arrow-counterclockwise me-2"></i>' . Yii::t('cruds', 'Reset'),
-            ['index'],
-            [
-                'class' => 'btn btn-outline-secondary btn-default float-end me-2',
-                'data-pjax' => '0',
-            ]
-        );
-
 
         echo GridView::widget([
             'id' => 'locador_grid',
@@ -171,7 +226,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'filterModel' => $searchModel,
             'columns' => $columns,
             'panel' => [
-                'before' => $ind,
                 'heading' => '<i class="bi bi-people-fill"></i>  ' . Yii::t('cruds', 'Pasajeros Registrados'),
                 'type' => 'info',
             ],

@@ -132,4 +132,85 @@ body {
     background-color: #F5F7FF;
 }
 
+/* DateRangePicker en modo oscuro */
+[data-bs-theme="dark"] .daterangepicker {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .35);
+}
+
+[data-bs-theme="dark"] .daterangepicker::before {
+    border-bottom-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .daterangepicker::after {
+    border-bottom-color: var(--bs-body-bg);
+}
+
+[data-bs-theme="dark"] .daterangepicker.drop-up::before {
+    border-top-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .daterangepicker.drop-up::after {
+    border-top-color: var(--bs-body-bg);
+}
+
+[data-bs-theme="dark"] .daterangepicker .calendar-table {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-body-bg);
+}
+
+[data-bs-theme="dark"] .daterangepicker .calendar-table .next span,
+[data-bs-theme="dark"] .daterangepicker .calendar-table .prev span {
+    border-color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .daterangepicker td.off,
+[data-bs-theme="dark"] .daterangepicker td.off.in-range,
+[data-bs-theme="dark"] .daterangepicker td.off.start-date,
+[data-bs-theme="dark"] .daterangepicker td.off.end-date {
+    color: var(--bs-tertiary-color);
+    background-color: var(--bs-body-bg);
+}
+
+[data-bs-theme="dark"] .daterangepicker td.available:hover,
+[data-bs-theme="dark"] .daterangepicker th.available:hover,
+[data-bs-theme="dark"] .daterangepicker .ranges li:hover {
+    color: var(--bs-body-color);
+    background-color: var(--bs-tertiary-bg);
+}
+
+[data-bs-theme="dark"] .daterangepicker td.in-range {
+    color: var(--bs-primary-text-emphasis);
+    background-color: var(--bs-primary-bg-subtle);
+}
+
+[data-bs-theme="dark"] .daterangepicker td.active,
+[data-bs-theme="dark"] .daterangepicker td.active:hover,
+[data-bs-theme="dark"] .daterangepicker .ranges li.active {
+    color: #fff;
+    background-color: var(--bs-primary);
+}
+
+[data-bs-theme="dark"] .daterangepicker td.disabled,
+[data-bs-theme="dark"] .daterangepicker option.disabled {
+    color: var(--bs-secondary-color);
+}
+
+[data-bs-theme="dark"] .daterangepicker select {
+    color: var(--bs-body-color);
+    background-color: var(--bs-tertiary-bg);
+    border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .daterangepicker .drp-buttons,
+[data-bs-theme="dark"] .daterangepicker.show-ranges .drp-calendar.left {
+    border-color: var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .daterangepicker .drp-selected {
+    color: var(--bs-primary-text-emphasis);
+}
 

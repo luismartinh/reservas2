@@ -19,7 +19,7 @@ class LocadorSearch extends Locador
     {
         return [
             [['id', 'created_by', 'updated_by'], 'integer'],
-            [['denominacion', 'documento', 'email', 'telefono', 'domicilio', 'documentos', 'created_at', 'updated_at'], 'safe'],
+            [['denominacion', 'documento', 'email', 'telefono', 'domicilio', 'documentos', 'obs', 'created_at', 'updated_at'], 'safe'],
         ];
     }
 
@@ -47,6 +47,9 @@ class LocadorSearch extends Locador
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['created_at' => SORT_DESC],
+            ],
         ]);
 
         $this->load($params);
@@ -70,7 +73,8 @@ class LocadorSearch extends Locador
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'telefono', $this->telefono])
             ->andFilterWhere(['like', 'domicilio', $this->domicilio])
-            ->andFilterWhere(['like', 'documentos', $this->documentos]);
+            ->andFilterWhere(['like', 'documentos', $this->documentos])
+            ->andFilterWhere(['like', 'obs', $this->obs]);
 
         return $dataProvider;
     }
@@ -91,6 +95,9 @@ class LocadorSearch extends Locador
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['created_at' => SORT_DESC],
+            ],
         ]);
 
         $this->load($params);
@@ -114,7 +121,8 @@ class LocadorSearch extends Locador
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'telefono', $this->telefono])
             ->andFilterWhere(['like', 'domicilio', $this->domicilio])
-            ->andFilterWhere(['like', 'documentos', $this->documentos]);
+            ->andFilterWhere(['like', 'documentos', $this->documentos])
+            ->andFilterWhere(['like', 'obs', $this->obs]);
 
         return $dataProvider;
     }    

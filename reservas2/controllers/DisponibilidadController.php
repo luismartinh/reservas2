@@ -841,6 +841,7 @@ class DisponibilidadController extends \yii\web\Controller
             'email',
             'telefono',
             'domicilio',
+            'obs',
             'monto',
             'comprobante',
             'verifyCode', // 👈 nuevo campo para captcha
@@ -862,12 +863,14 @@ class DisponibilidadController extends \yii\web\Controller
             $form->documento = $locadorExistente->documento;
             $form->telefono = $locadorExistente->telefono;
             $form->domicilio = $locadorExistente->domicilio;
+            $form->obs = $locadorExistente->obs;
         }
 
         // Reglas
         $form->addRule(['denominacion', 'documento', 'email', 'telefono'], 'required');
         $form->addRule(['denominacion', 'domicilio'], 'string', ['max' => 100]);
         $form->addRule(['documento', 'email', 'telefono'], 'string', ['max' => 45]);
+        $form->addRule(['obs'], 'string');
         $form->addRule(['email'], 'email');
 
         // Regla de monto: entre 10% y 100% del total
@@ -996,6 +999,7 @@ class DisponibilidadController extends \yii\web\Controller
             $locador->documento = $form->documento;
             $locador->telefono = $form->telefono;
             $locador->domicilio = $form->domicilio;
+            $locador->obs = $form->obs;
 
             // Usar validadores del modelo (unique documento, unique email, longitudes, etc.)
             if (!$locador->validate()) {

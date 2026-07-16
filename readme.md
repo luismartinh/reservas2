@@ -187,3 +187,20 @@ php yii message @app/messages.php
 
 php:
 reservas2/vendor/composer/platform_check.php
+
+
+pasar campos mediumblobtext a json
+
+ALTER TABLE `parametros_generales` CHANGE COLUMN `valor` `valor` JSON NOT NULL ;
+
+ALTER TABLE `cabanas` CHANGE COLUMN `caracteristicas` `caracteristicas` JSON NULL DEFAULT NULL ,CHANGE COLUMN `config` `config` JSON NULL DEFAULT NULL ;
+
+ALTER TABLE `acceso` CHANGE COLUMN `config` `config` JSON NULL DEFAULT NULL ;
+
+ALTER TABLE `auditorias` CHANGE COLUMN `changes` `changes` JSON NOT NULL ,CHANGE COLUMN `pkId` `pkId` JSON NOT NULL ;
+
+ALTER TABLE `locadores` CHANGE COLUMN `documentos` `documentos` JSON NULL DEFAULT NULL ;
+
+ALTER TABLE `request_reservas` CHANGE COLUMN `registro_pagos` `registro_pagos` JSON NULL DEFAULT NULL ;
+
+

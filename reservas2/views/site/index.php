@@ -47,7 +47,7 @@ $whatsAppUrl = 'https://wa.me/' . $whatsAppNumber . '?text=' . urlencode($whatsA
 
                 <!-- Logo redondeado con fondo -->
                 <div class="dh-logo-box mb-4">
-                    <img src="<?= Yii::getAlias('@web') ?>/images/logos/logo1_transparente.png" alt="Cabañas Dina Huapi"
+                    <img src="<?= Yii::getAlias('@web') ?>/images/logos/logo2.png" alt="Cabañas Dina Huapi"
                         class="dh-hero-logo">
                 </div>
 

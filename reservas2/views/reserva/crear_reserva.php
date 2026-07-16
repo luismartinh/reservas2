@@ -141,6 +141,11 @@ if ($d && $h) {
             ->textInput(['maxlength' => 100])
             ->label(Yii::t('app', 'Domicilio')) ?>
     </div>
+    <div class="col-md-12">
+        <?= $af->field($formModel, 'obs')
+            ->textarea(['rows' => 4])
+            ->label(Yii::t('app', 'Observaciones')) ?>
+    </div>
 </div>
 
 <div class="row g-3 mt-2">

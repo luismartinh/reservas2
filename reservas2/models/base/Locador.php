@@ -19,6 +19,7 @@ use yii\behaviors\TimestampBehavior;
  * @property string $telefono
  * @property string $domicilio
  * @property array $documentos
+ * @property string $obs
  * @property string $created_at
  * @property integer $created_by
  * @property string $updated_at
@@ -63,6 +64,7 @@ abstract class Locador extends \yii\db\ActiveRecord
         return ArrayHelper::merge($parentRules, [
             [['denominacion', 'documento', 'email', 'telefono'], 'required'],
             [['documentos'], 'safe'],
+            [['obs'], 'string'],
             [['denominacion', 'domicilio'], 'string', 'max' => 100],
             [['documento', 'email', 'telefono'], 'string', 'max' => 45],
             [['documento'], 'unique'],
@@ -83,6 +85,7 @@ abstract class Locador extends \yii\db\ActiveRecord
             'telefono' => Yii::t('models', 'Telefono'),
             'domicilio' => Yii::t('models', 'Domicilio'),
             'documentos' => Yii::t('models', 'Documentos'),
+            'obs' => Yii::t('models', 'Observaciones'),
             'created_at' => Yii::t('models', 'Creado'),
             'created_by' => Yii::t('models', 'Created By'),
             'updated_at' => Yii::t('models', 'Updated At'),
@@ -100,6 +103,7 @@ abstract class Locador extends \yii\db\ActiveRecord
             'telefono' => Yii::t('models', 'Ingrese el Telefono'),
             'domicilio' => Yii::t('models', 'Ingrese el Domicilio'),
             'documentos' => Yii::t('models', 'Documentos'),
+            'obs' => Yii::t('models', 'Ingrese observaciones internas o comentarios relevantes'),
             'created_at' => Yii::t('models', 'Creado'),
             'created_by' => Yii::t('models', 'Created By'),
             'updated_at' => Yii::t('models', 'Updated At'),

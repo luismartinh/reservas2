@@ -296,6 +296,7 @@ class ReservaController extends BaseReservaController
             'email',
             'telefono',
             'domicilio',
+            'obs',
             'monto',
             'nota',
             'comprobante',
@@ -306,6 +307,7 @@ class ReservaController extends BaseReservaController
         $formModel->addRule(['denominacion', 'documento', 'telefono'], 'required');// 'email', 
         $formModel->addRule(['denominacion', 'domicilio'], 'string', ['max' => 100]);
         $formModel->addRule(['documento', 'email', 'telefono'], 'string', ['max' => 45]);
+        $formModel->addRule(['obs'], 'string');
         $formModel->addRule(['email'], 'email');
         $formModel->addRule(['nota'], 'string', ['max' => 500]);
 
@@ -431,6 +433,7 @@ class ReservaController extends BaseReservaController
             $locador->documento = $formModel->documento;
             $locador->telefono = $formModel->telefono;
             $locador->domicilio = $formModel->domicilio;
+            $locador->obs = $formModel->obs;
 
             // Usar validadores del modelo (unique documento, unique email, longitudes, etc.)
             if (!$locador->validate()) {

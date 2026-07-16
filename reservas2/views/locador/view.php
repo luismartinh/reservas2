@@ -49,6 +49,7 @@ $this->params['breadcrumbs'][] = Yii::t('cruds', 'Ver');
 			'telefono',
 			'documentos',
 			'domicilio',
+            'obs:ntext',
 
         ],
     ]);
