@@ -144,6 +144,7 @@ if ($d && $h) {
     <div class="col-md-12">
         <?= $af->field($formModel, 'obs')
             ->textarea(['rows' => 4])
+            ->hint(Yii::t('app', 'Lo que se escriba aqui es una nota que solo vera el administrador.'))
             ->label(Yii::t('app', 'Observaciones')) ?>
     </div>
 </div>
@@ -176,8 +177,23 @@ if ($d && $h) {
 <div class="row">
     <?= $af->field($formModel, 'nota')
         ->textarea(['rows' => 4, 'maxlength' => 500])
-        ->label(Yii::t('app', 'Nota (opcional)')) ?>
+        ->hint(Yii::t('app', 'Lo que escriba aqui sera visto por el pasajero cuando vea el estado de su reserva.'))
+        ->label(Yii::t('app', 'Enviar mensaje al pasajero:')) ?>
 
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <?= $af->field($formModel, 'send_email', [
+            'options' => ['class' => 'mb-0'],
+        ])->checkbox([
+            'label' => Yii::t('app', 'Enviar email al pasajero:'),
+            'class' => 'form-check-input',
+            'labelOptions' => ['class' => 'form-check-label fs-4 fw-semibold'],
+            'uncheck' => 0,
+            'value' => 1,
+        ]) ?>
+    </div>
 </div>
 
 

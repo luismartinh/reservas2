@@ -297,10 +297,12 @@ class ReservaController extends BaseReservaController
             'telefono',
             'domicilio',
             'obs',
+            'send_email',
             'monto',
             'nota',
             'comprobante',
         ]);
+        $formModel->send_email = 0;
 
 
         // Reglas
@@ -308,6 +310,7 @@ class ReservaController extends BaseReservaController
         $formModel->addRule(['denominacion', 'domicilio'], 'string', ['max' => 100]);
         $formModel->addRule(['documento', 'email', 'telefono'], 'string', ['max' => 45]);
         $formModel->addRule(['obs'], 'string');
+        $formModel->addRule(['send_email'], 'boolean');
         $formModel->addRule(['email'], 'email');
         $formModel->addRule(['nota'], 'string', ['max' => 500]);
 
@@ -502,11 +505,18 @@ class ReservaController extends BaseReservaController
                     'pax' => $paxAcumulado,
                     'hash' => Yii::$app->security->generateRandomString(32),
                     'id_estado' => $estadoIdConfirmando,
-                    'obs' => $formModel->nota,
+                    'obs' => $formModel->obs,
                 ]);
                 if (!$reqReserva->save()) {
                     $errores = implode(",", $reqReserva->getErrorSummary(true));
                     throw new \Exception(Yii::t('app', 'Error al guardar la solicitud. ' . $errores));
+                }
+
+                if (!empty(trim((string) $formModel->nota))) {
+                    $resp = RequestResponse::newMessage($reqReserva, trim((string) $formModel->nota), true);
+                    if (!$resp['success']) {
+                        throw new \Exception(Yii::t('app', 'Error al guardar el mensaje para el pasajero.'));
+                    }
                 }
 
                 foreach ($ids as $idCabana) {
@@ -517,14 +527,6 @@ class ReservaController extends BaseReservaController
                     ]);
                     if (!$reqCab->save()) {
                         throw new \Exception(Yii::t('app', 'Error al guardar una cabaña.'));
-                    }
-
-
-                    if ($reqReserva->obs) {
-                        $resp = RequestResponse::newMessage($reqReserva, $reqReserva->obs, true);
-                        if (!$resp['success']) {
-                            throw new \Exception(Yii::t('app', 'Error al guardar un mensaje.'));
-                        }
                     }
                 }
 
@@ -601,7 +603,9 @@ class ReservaController extends BaseReservaController
                 }
 
 
-                RequestReserva::enviarMailCambioEstado($reqReserva);
+                if ((bool) $formModel->send_email) {
+                    RequestReserva::enviarMailCambioEstado($reqReserva);
+                }
 
                 $trackingUrl = Yii::$app->urlManager->createAbsoluteUrl([
                     'disponibilidad/seguimiento',

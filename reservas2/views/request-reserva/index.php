@@ -156,7 +156,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'detail' => function ($model, $key, $index, $column) {
                     /** @var \app\models\RequestReserva $model */
-                    return Yii::$app->controller->renderPartial('_request_cabanas', [
+                    return Yii::$app->controller->renderPartial('_expand_detail', [
                         'model' => $model,
                     ]);
                 },
@@ -288,10 +288,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     $datos .= '<br><span class="text-muted">' . Yii::t('app', 'Email: ') . ' </span ><b>' . yii\helpers\Html::encode($model->email) . '<b>';
                     if ($model->codigo_reserva != null) {
                         $datos .= '<br><span class="text-muted">' . Yii::t('app', 'Codigo: ') . ' </span ><b>' . yii\helpers\Html::encode($model->codigo_reserva) . '<b>';
-                    }
-
-                    if ($model->obs != null) {
-                        $datos .= '<br><span class="text-info">' . Html::encode("TIENE OBSERVACIONES") . '</span>';
                     }
 
                     return $datos;
@@ -796,6 +792,38 @@ $(document).on('submit', '#form-chat-consultas', function(e) {
         }
     }).fail(function() {
         alert("{$msgErrorComunicacion}");
+    });
+
+    return false;
+});
+JS;
+
+$this->registerJs($js);
+?>
+
+<?php
+$msgErrorGuardarObs = Yii::t('app', 'No se pudieron guardar las observaciones.');
+$js = <<<JS
+$(document).on('submit', '.form-request-obs', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var msgId = form.data('msg-id');
+    var msgEl = $('#' + msgId);
+    var submitBtn = form.find('button[type="submit"]');
+
+    msgEl.removeClass('text-danger text-success').text('');
+    submitBtn.prop('disabled', true);
+
+    $.post(form.attr('action'), form.serialize(), function(resp) {
+        if (resp && resp.success) {
+            msgEl.addClass('text-success').text(resp.message || '');
+        } else {
+            msgEl.addClass('text-danger').text((resp && resp.message) ? resp.message : "{$msgErrorGuardarObs}");
+        }
+    }).fail(function() {
+        msgEl.addClass('text-danger').text("{$msgErrorGuardarObs}");
+    }).always(function() {
+        submitBtn.prop('disabled', false);
     });
 
     return false;

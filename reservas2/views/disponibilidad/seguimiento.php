@@ -449,17 +449,25 @@ $pago_pendiente = (float) $reserva->pagado < (float) $reserva->total;
             </div>
         <?php endif; ?>
 
-
-        <?php if (!empty($reserva->obs)): ?>
+        <?php
+        $mensajePasajero = null;
+        foreach ($reserva->requestResponses as $msg) {
+            if ((int) $msg->is_response === 1 && trim((string) $msg->response) !== '') {
+                $mensajePasajero = $msg->response;
+                break;
+            }
+        }
+        ?>
+        <?php if ($mensajePasajero !== null): ?>
             <h4 class="mt-4 mb-3"><?= Yii::t('app', 'Notas / Observaciones') ?></h4>
 
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="text-muted small mb-1">
-                        <?= Yii::t('app', 'Estas notas fueron registradas al momento de crear o gestionar la solicitud.') ?>
+                        <?= Yii::t('app', 'Este mensaje fue enviado para que pueda verlo al consultar el estado de su reserva.') ?>
                     </div>
                     <div class="fw-semibold">
-                        <?= nl2br(Html::encode($reserva->obs)) ?>
+                        <?= nl2br(Html::encode($mensajePasajero)) ?>
                     </div>
                 </div>
             </div>

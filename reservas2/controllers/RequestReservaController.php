@@ -48,7 +48,8 @@ class RequestReservaController extends BaseRequestReservaController
                         'eliminar-pagos',
                         'chat',
                         'eliminar-mensaje-chat',
-                        'editar-rango'
+                        'editar-rango',
+                        'guardar-obs'
 
                     ],
                     'rules' => [
@@ -62,7 +63,8 @@ class RequestReservaController extends BaseRequestReservaController
                                 'eliminar-pagos',
                                 'chat',
                                 'eliminar-mensaje-chat',
-                                'editar-rango'
+                                'editar-rango',
+                                'guardar-obs'
                             ],
                             'roles' => ['@'],
                             'matchCallback' => function ($rule, $action) {
@@ -114,6 +116,56 @@ class RequestReservaController extends BaseRequestReservaController
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
         ]);
+    }
+
+    public function actionGuardarObs($id)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $permiso = Identificador::autorizar(
+            Yii::$app->user->identity,
+            Yii::$app->controller->id . '/update',
+            "Modificar Solicitud",
+            null
+        );
+        if (!$permiso['auth']) {
+            return [
+                'success' => false,
+                'message' => Yii::t("app", $permiso["msg"]),
+            ];
+        }
+
+        /** @var RequestReserva|null $model */
+        $model = RequestReserva::findOne($id);
+        if ($model === null) {
+            return [
+                'success' => false,
+                'message' => Yii::t('app', 'La solicitud no existe.'),
+            ];
+        }
+
+        $obs = Yii::$app->request->post('obs', '');
+        $model->obs = is_string($obs) ? trim($obs) : '';
+
+        if (!$model->validate(['obs'])) {
+            $errores = $model->getFirstErrors();
+            return [
+                'success' => false,
+                'message' => reset($errores) ?: Yii::t('app', 'No se pudo guardar la observación.'),
+            ];
+        }
+
+        if (!$model->save(false, ['obs'])) {
+            return [
+                'success' => false,
+                'message' => Yii::t('app', 'No se pudo guardar la observación.'),
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => Yii::t('app', 'Observaciones guardadas correctamente.'),
+        ];
     }
 
 
