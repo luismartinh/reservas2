@@ -24,10 +24,10 @@ class Menu extends BaseMenu
         $me = <<<HTML
                         <!-- Dropdown anidado -->
                         <li class="dropend">
-                            <a class="dropdown-item dropdown-toggle" href="#" id="nestedDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="dropdown-item dropdown-toggle js-submenu-toggle" href="#" role="button" aria-expanded="false">
                                 $label
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="nestedDropdown">
+                            <ul class="dropdown-menu">
                                 $acitems
                             </ul>
                         </li>
