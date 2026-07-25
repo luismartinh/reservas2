@@ -125,7 +125,7 @@ class CalendarHelper
             </div>
 
             <div class="card-body p-2">
-                <table class="table table-bordered table-sm mb-0 calendar-table">
+                <table class="table table-sm mb-0 calendar-table calendar-table-tarifas">
                     <thead>
                         <tr class="text-center small text-muted">
                             <?php foreach (self::getDaysTranslated() as $dName): ?>
@@ -186,6 +186,79 @@ class CalendarHelper
         return ob_get_clean();
     }
 
+    public static function renderTarifaMonth(\DateTimeImmutable $startOfMonth, array $tarifaItems)
+    {
+        ob_start();
+
+        $monthStart = $startOfMonth->setTime(0, 0, 0);
+        $monthEnd = $startOfMonth->modify('last day of this month')->setTime(0, 0, 0);
+        $year = (int) $monthStart->format('Y');
+        $month = (int) $monthStart->format('m');
+
+        $monthTitle = Yii::t('app', self::$monthsTranslated[(int) $monthStart->format('n')]) . ' ' . $year;
+        $weeks = self::buildMonthWeeks($monthStart, $monthEnd);
+        ?>
+
+        <div class="card shadow-sm mb-4 calendario-mes">
+            <div class="card-header bg-primary text-white text-center fw-bold text-capitalize">
+                <?= Html::encode($monthTitle) ?>
+            </div>
+
+            <div class="card-body p-2">
+                <table class="table table-bordered table-sm mb-0 calendar-table">
+                    <thead>
+                        <tr class="text-center small text-muted">
+                            <?php foreach (self::getDaysTranslated() as $dName): ?>
+                                <th style="width:14%;"><?= Html::encode(Yii::t('app', $dName)) ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <?php foreach ($weeks as $week): ?>
+                            <?php
+                            $segments = self::buildTarifaWeekSegments($week, $tarifaItems, $monthStart, $monthEnd);
+                            $lanes = self::assignSegmentsToLanes($segments);
+                            ?>
+                            <tr class="week-days-row <?= !empty($lanes) ? 'with-tarifa-lanes' : '' ?>">
+                                <?php foreach ($week as $col => $day): ?>
+                                    <?php if ($day === null): ?>
+                                        <td class="calendar-day empty"></td>
+                                    <?php else: ?>
+                                        <td class="calendar-day align-top">
+                                            <div class="day-number fw-bold small"><?= (int) $day->format('j') ?></div>
+                                            <?php if (!empty($lanes)): ?>
+                                                <div class="calendar-day-lanes">
+                                                    <?php foreach ($lanes as $lane): ?>
+                                                        <?php
+                                                        $segment = self::findLaneSegmentForColumn($lane, $col);
+                                                        ?>
+                                                        <div class="calendar-lane-slot">
+                                                            <?php if ($segment !== null): ?>
+                                                                <?= self::renderTarifaSegmentCell(
+                                                                    $segment['item'],
+                                                                    $segment,
+                                                                    $col
+                                                                ) ?>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php
+
+        return ob_get_clean();
+    }
+
 
     /**
      * Renderiza un badge de reserva
@@ -233,6 +306,82 @@ class CalendarHelper
             Html::encode($label),
             $options
         );
+    }
+
+    public static function renderTarifaBadge(array $tarifaData)
+    {
+        return self::renderTarifaRange($tarifaData, true);
+    }
+
+    public static function renderTarifaSegmentCell(array $tarifaData, array $segment, int $currentCol)
+    {
+        $isSingleDay = $segment['span'] === 1;
+        $isStart = $currentCol === $segment['start_col'];
+        $isEnd = $currentCol === $segment['end_col'];
+        $visibleLabel = trim(((string) ($tarifaData['id'] ?? '')) . ' ' . ($tarifaData['descr'] ?? ''));
+
+        if ($isSingleDay) {
+            return self::renderTarifaRange($tarifaData, true);
+        }
+
+        $label = $isStart ? $visibleLabel : "\u{00A0}";
+        $tooltip = sprintf(
+            '%s | %s al %s | %s días | $%s',
+            $tarifaData['descr'],
+            $tarifaData['inicio'],
+            $tarifaData['fin'],
+            $tarifaData['min_dias'],
+            $tarifaData['valor_dia']
+        );
+
+        $classes = ['tarifa-range-piece', 'js-tarifa-detalle'];
+        if ($isStart) {
+            $classes[] = 'is-start';
+        }
+        if ($isEnd) {
+            $classes[] = 'is-end';
+        }
+
+        return Html::tag('button', Html::encode($label), [
+            'type' => 'button',
+            'class' => implode(' ', $classes),
+            'style' => 'color:black;background-color:' . ($tarifaData['color'] ?? '#a7d8ff') . ';',
+            'title' => $tooltip,
+            'data-tarifa-id' => (int) ($tarifaData['id'] ?? 0),
+            'data-tarifa-descr' => $tarifaData['descr'] ?? '',
+            'data-tarifa-inicio' => $tarifaData['inicio'] ?? '',
+            'data-tarifa-fin' => $tarifaData['fin'] ?? '',
+            'data-tarifa-valor-dia' => $tarifaData['valor_dia'] ?? '',
+            'data-tarifa-min-dias' => (string) ($tarifaData['min_dias'] ?? ''),
+            'data-tarifa-activa' => !empty($tarifaData['activa']) ? 'Sí' : 'No',
+        ]);
+    }
+
+    public static function renderTarifaRange(array $tarifaData, bool $singleDay = false)
+    {
+        $label = trim(((string) ($tarifaData['id'] ?? '')) . ' ' . ($tarifaData['descr'] ?? ''));
+        $tooltip = sprintf(
+            '%s | %s al %s | %s días | $%s',
+            $tarifaData['descr'],
+            $tarifaData['inicio'],
+            $tarifaData['fin'],
+            $tarifaData['min_dias'],
+            $tarifaData['valor_dia']
+        );
+
+        return Html::tag('button', Html::encode($label), [
+            'type' => 'button',
+            'class' => ($singleDay ? 'badge tarifa-badge' : 'tarifa-range-bar') . ' text-start text-truncate border-0 js-tarifa-detalle',
+            'style' => 'color:black;background-color:' . ($tarifaData['color'] ?? '#a7d8ff') . ';',
+            'title' => $tooltip,
+            'data-tarifa-id' => (int) ($tarifaData['id'] ?? 0),
+            'data-tarifa-descr' => $tarifaData['descr'] ?? '',
+            'data-tarifa-inicio' => $tarifaData['inicio'] ?? '',
+            'data-tarifa-fin' => $tarifaData['fin'] ?? '',
+            'data-tarifa-valor-dia' => $tarifaData['valor_dia'] ?? '',
+            'data-tarifa-min-dias' => (string) ($tarifaData['min_dias'] ?? ''),
+            'data-tarifa-activa' => !empty($tarifaData['activa']) ? 'Sí' : 'No',
+        ]);
     }
 
 
@@ -324,6 +473,157 @@ class CalendarHelper
         }
 
         return [$calendarData, $cabanaColors];
+    }
+
+    public static function buildTarifaCalendarItems(array $tarifas): array
+    {
+        $colors = [
+            '#5dade2',
+            '#f5b041',
+            '#58d68d',
+            '#f7dc6f',
+            '#ec87c0',
+            '#af7ac5',
+            '#48c9b0',
+            '#f1948a',
+            '#85c1e9',
+            '#73c6b6',
+            '#f8c471',
+            '#c39bd3',
+        ];
+        $items = [];
+
+        foreach (array_values($tarifas) as $index => $tarifa) {
+            $items[] = [
+                'id' => (int) $tarifa->id,
+                'descr' => $tarifa->descr,
+                'inicio' => date('d-m-Y', strtotime($tarifa->inicio)),
+                'fin' => date('d-m-Y', strtotime($tarifa->fin)),
+                'inicio_obj' => new \DateTimeImmutable(substr($tarifa->inicio, 0, 10)),
+                'fin_obj' => new \DateTimeImmutable(substr($tarifa->fin, 0, 10)),
+                'valor_dia' => number_format((float) $tarifa->valor_dia, 2, ',', '.'),
+                'min_dias' => (int) $tarifa->min_dias,
+                'activa' => (int) $tarifa->activa,
+                'color' => $colors[$index % count($colors)],
+            ];
+        }
+
+        return $items;
+    }
+
+    private static function buildMonthWeeks(\DateTimeImmutable $monthStart, \DateTimeImmutable $monthEnd): array
+    {
+        $weeks = [];
+        $weekStart = $monthStart->modify('-' . ((int) $monthStart->format('N') - 1) . ' days');
+
+        while ($weekStart <= $monthEnd) {
+            $week = [];
+            for ($i = 0; $i < 7; $i++) {
+                $day = $weekStart->modify('+' . $i . ' days');
+                $week[] = $day->format('m') === $monthStart->format('m') ? $day : null;
+            }
+            $weeks[] = $week;
+            $weekStart = $weekStart->modify('+7 days');
+        }
+
+        return $weeks;
+    }
+
+    private static function buildTarifaWeekSegments(array $week, array $tarifaItems, \DateTimeImmutable $monthStart, \DateTimeImmutable $monthEnd): array
+    {
+        $firstRealDay = null;
+        $lastRealDay = null;
+
+        foreach ($week as $day) {
+            if ($day !== null) {
+                if ($firstRealDay === null) {
+                    $firstRealDay = $day;
+                }
+                $lastRealDay = $day;
+            }
+        }
+
+        if ($firstRealDay === null || $lastRealDay === null) {
+            return [];
+        }
+
+        $segments = [];
+        foreach ($tarifaItems as $item) {
+            $start = $item['inicio_obj'] > $firstRealDay ? $item['inicio_obj'] : $firstRealDay;
+            $end = $item['fin_obj'] < $lastRealDay ? $item['fin_obj'] : $lastRealDay;
+
+            if ($start > $end || $end < $monthStart || $start > $monthEnd) {
+                continue;
+            }
+
+            $startCol = null;
+            $endCol = null;
+            foreach ($week as $idx => $day) {
+                if ($day === null) {
+                    continue;
+                }
+                if ($day >= $start && $startCol === null) {
+                    $startCol = $idx;
+                }
+                if ($day <= $end) {
+                    $endCol = $idx;
+                }
+            }
+
+            if ($startCol === null || $endCol === null) {
+                continue;
+            }
+
+            $segments[] = [
+                'start_col' => $startCol,
+                'end_col' => $endCol,
+                'span' => $endCol - $startCol + 1,
+                'item' => $item,
+            ];
+        }
+
+        usort($segments, function ($a, $b) {
+            if ($a['start_col'] === $b['start_col']) {
+                return $b['span'] <=> $a['span'];
+            }
+            return $a['start_col'] <=> $b['start_col'];
+        });
+
+        return $segments;
+    }
+
+    private static function assignSegmentsToLanes(array $segments): array
+    {
+        $lanes = [];
+
+        foreach ($segments as $segment) {
+            $placed = false;
+            foreach ($lanes as $laneIndex => $lane) {
+                $last = end($lane);
+                if ($segment['start_col'] > $last['end_col']) {
+                    $lanes[$laneIndex][] = $segment;
+                    $placed = true;
+                    break;
+                }
+            }
+
+            if (!$placed) {
+                $lanes[] = [$segment];
+            }
+        }
+
+        return $lanes;
+    }
+
+    private static function findLaneSegmentForColumn(array $lane, int $col): ?array
+    {
+        foreach ($lane as $segment) {
+            if ($col >= $segment['start_col'] && $col <= $segment['end_col']) {
+                return $segment;
+            }
+        }
+
+        return null;
     }
 
 }

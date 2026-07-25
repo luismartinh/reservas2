@@ -2,7 +2,7 @@
 
 return [
     'class' => 'yii\db\Connection',
-    'dsn' => 'mysql:host=db;dbname=reservas2_1',
+    'dsn' => getenv('DB_DSN') ?: 'mysql:host=db;dbname=reservas2_1',
     'username' => 'root',
     'password' => 'userbt51234',
     'charset' => 'utf8',

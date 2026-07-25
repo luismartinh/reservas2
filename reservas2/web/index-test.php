@@ -1,7 +1,20 @@
 <?php
 
 // NOTE: Make sure this file is not accessible when deployed to production
-if (!in_array(@$_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
+function isAllowedTestRemoteAddr($remoteAddr)
+{
+    if (in_array($remoteAddr, ['127.0.0.1', '::1'], true)) {
+        return true;
+    }
+
+    if (!filter_var($remoteAddr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        return false;
+    }
+
+    return preg_match('/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/', $remoteAddr) === 1;
+}
+
+if (!isAllowedTestRemoteAddr(@$_SERVER['REMOTE_ADDR'])) {
     die('You are not allowed to access this file.');
 }
 

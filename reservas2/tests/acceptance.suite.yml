@@ -1,0 +1,14 @@
+actor: AcceptanceTester
+modules:
+    enabled:
+        - WebDriver:
+            host: selenium
+            port: 4444
+            path: /wd/hub
+            url: http://php
+            browser: firefox
+        - Yii2:
+            part: orm
+            entryScript: index-test.php
+            transaction: false
+            cleanup: false
