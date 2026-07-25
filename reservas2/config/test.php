@@ -29,7 +29,7 @@ return [
             'showScriptName' => true,
         ],
         'user' => [
-            'identityClass' => 'app\models\User',
+            'identityClass' => 'app\models\Identificador',
         ],
         'request' => [
             'cookieValidationKey' => 'test',
@@ -40,6 +40,47 @@ return [
                 'domain' => 'localhost',
             ],
             */
+        ],
+        'i18n' => [
+            'translations' => [
+                'app*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
+                    'fileMap' => [
+                        'app' => 'app.php',
+                    ],
+                ],
+                'cruds*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
+                    'fileMap' => ['cruds' => 'cruds.php'],
+                ],
+                'models' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
+                    'fileMap' => ['models' => 'models.php'],
+                ],
+                'models.plural' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@app/messages',
+                    'fileMap' => ['models.plural' => 'models.plural.php'],
+                ],
+                'giiant*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@vendor/schmunk42/yii2-giiant/src/messages',
+                    'sourceLanguage' => 'en-US',
+                ],
+                'yii*' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
+                    'basePath' => '@yii/messages',
+                    'sourceLanguage' => 'en-US',
+                ],
+            ],
+        ],
+    ],
+    'modules' => [
+        'gridview' => [
+            'class' => '\kartik\grid\Module',
         ],
     ],
     'params' => $params,

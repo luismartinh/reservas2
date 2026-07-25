@@ -49,7 +49,19 @@ $this->params['breadcrumbs'][] = Yii::t('cruds', 'Ver');
             'checkout',
             'checkin',
             'max_pax',
-            'caracteristicas',
+            [
+                'attribute' => 'caracteristicas',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    $lines = $model->getFeaturesLines();
+
+                    if (empty($lines)) {
+                        return '';
+                    }
+
+                    return nl2br(Html::encode(implode("\n", $lines)));
+                },
+            ],
             // 🔹 Nuevo campo: color de la cabaña tomado de config[color_cabana]
             [
                 'attribute' => 'color_cabana',

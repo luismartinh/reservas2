@@ -148,6 +148,58 @@ The command above will execute unit and functional tests. Unit tests are testing
 tests are for testing user interaction. Acceptance tests are disabled by default as they require additional setup since
 they perform testing in real browser. 
 
+### Running tests with Docker
+
+This project runs `php` and `mysql` inside `docker compose`. To avoid using the development database directly, the
+recommended flow is:
+
+```
+# prepare reservas2_test from reservas2_1
+../scripts/prepare_reservas2_test_db.sh
+
+# run any Codeception suite inside the php container
+../scripts/run_reservas2_tests.sh unit
+../scripts/run_reservas2_tests.sh functional
+```
+
+There is also a `Makefile` at the repository root with shortcuts by domain:
+
+```
+make test-db-prepare
+make test-fast
+make test-smoke
+make test-usuario-unit
+make test-usuario-functional
+make test-usuario-all
+make test-tarifa-all
+make test-cabana-all
+make test-request-reserva-all
+make test-reserva-all
+make test-reservas-core-all
+make test-dominios-all
+```
+
+Suggested usage:
+
+```
+# all tests for one bounded domain
+make test-tarifa-all
+make test-cabana-all
+make test-request-reserva-all
+make test-reserva-all
+
+# quick feedback loops
+make test-fast
+make test-smoke
+
+# all reservation-related domains together
+make test-reservas-core-all
+
+# all covered domains together
+make test-dominios-all
+```
+
+`config/test_db.php` is configured to use the `reservas2_test` database on the Docker service `db`.
 
 ### Running  acceptance tests
 

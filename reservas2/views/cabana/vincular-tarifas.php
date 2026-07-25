@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::encode($this->title) ?>
 
         <small class="text-muted">
-            <?= Html::encode($model->descr) ?>
+            <?= Html::encode($cabana->descr) ?>
         </small>
     </h1>
 

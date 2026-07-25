@@ -81,7 +81,6 @@ abstract class CabanaTarifa extends \yii\db\ActiveRecord
             return;
         }
 
-        /*
         $res = self::isTarifaRangeOverlap($this->id_cabana, $this->id_tarifa);
 
         if ($res['status'] == 'error') {
@@ -93,66 +92,6 @@ abstract class CabanaTarifa extends \yii\db\ActiveRecord
         if ($res['status'] == 'SI') {
             $this->addError($attribute, $res['msg']);
         }
-
-        */
-
-        
-
-        /*
-        if (!$this->id_cabana || !$this->id_tarifa) {
-            return;
-        }
-
-        // Obtener la tarifa seleccionada y su rango
-        $tarifa = \app\models\Tarifa::findOne($this->id_tarifa);
-        if (!$tarifa || empty($tarifa->inicio) || empty($tarifa->fin)) {
-            $this->addError($attribute, Yii::t('models', 'La tarifa seleccionada no tiene un rango válido.'));
-            return;
-        }
-
-        $newInicio = $tarifa->inicio; // asume 'Y-m-d' o 'Y-m-d H:i:s' según tu BD
-        $newFin = $tarifa->fin;
-
-        // Si guardás como DATE y querés cubrir el día completo, podés ajustar:
-        // if (strlen($newInicio) === 10) $newInicio .= ' 00:00:00';
-        // if (strlen($newFin)    === 10) $newFin    .= ' 23:59:59';
-
-        // Buscar cualquier vínculo existente de la misma cabaña cuyo rango se superponga
-        $params = [
-            ':cabana' => $this->id_cabana,
-            ':new_inicio' => $newInicio,
-            ':new_fin' => $newFin,
-        ];
-
-        $sql = "
-                SELECT 1
-                FROM cabanas_tarifas ct
-                INNER JOIN tarifas t ON t.id = ct.id_tarifa
-                WHERE ct.id_cabana = :cabana
-                " . ($this->isNewRecord ? "" : "AND ct.id <> :self_id") . "
-                AND NOT (
-                        :new_fin   < t.inicio
-                    OR  :new_inicio > t.fin
-                )
-                LIMIT 1
-            ";
-
-        if (!$this->isNewRecord) {
-            $params[':self_id'] = $this->id;
-        }
-
-        $exists = (new \yii\db\Query())
-            ->from(['x' => new \yii\db\Expression("($sql)")])
-            ->params($params)
-            ->exists();
-
-        if ($exists) {
-            $this->addError($attribute, Yii::t(
-                'models',
-                'La tarifa seleccionada se superpone con otra tarifa ya asociada a esta cabaña.'
-            ));
-        }
-            */
     }
 
 

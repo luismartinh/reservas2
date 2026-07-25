@@ -158,6 +158,9 @@ class Cabana extends BaseCabana
     {
         parent::afterFind();
 
+        $this->config = $this->normalizeJsonValue($this->config);
+        $this->caracteristicas = $this->normalizeJsonValue($this->caracteristicas);
+
         // ======================
         // Color de cabaña (config)
         // ======================
@@ -247,6 +250,21 @@ class Cabana extends BaseCabana
         $this->caracteristicas = !empty($data) ? $data : null;
 
         return true;
+    }
+
+    private function normalizeJsonValue($value)
+    {
+        if (!is_string($value) || $value === '') {
+            return $value;
+        }
+
+        $decoded = json_decode($value, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $decoded;
+        }
+
+        return $value;
     }
 
     public static function coloresUsados()

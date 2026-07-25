@@ -66,6 +66,9 @@ abstract class Tarifa extends \yii\db\ActiveRecord
         $parent = parent::rules();
 
         return ArrayHelper::merge($parent, [
+            ['fecha', 'default', 'value' => function () {
+                return date('Y-m-d H:i:s'); }],
+
             // o seteala por defecto (ver más abajo)
             [['descr', 'inicio', 'fin', 'valor_dia', 'min_dias', 'activa', 'fecha'], 'required'],
 
@@ -116,8 +119,6 @@ abstract class Tarifa extends \yii\db\ActiveRecord
             ['min_dias', 'integer', 'min' => 1],
             ['valor_dia', 'number', 'min' => 0.000001],
 
-            ['fecha', 'default', 'value' => function () {
-                return date('Y-m-d H:i:s'); }],
             ['fecha', 'date', 'type' => 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
             [['activa', 'created_by', 'updated_by'], 'integer'],

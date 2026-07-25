@@ -159,7 +159,13 @@ class UsuarioController extends BaseUsuarioController
             $model->addError('_exception', $e->errorInfo[2] ?? $e->getMessage());
             Yii::error("ERROR:" . Yii::$app->controller->id . "/create " . ($e->errorInfo[2] ?? $e->getMessage()));
         }
-        return $this->render('create', ['model' => $model, 'nivel' => Yii::$app->user->identity->nivel]);
+        return $this->render('create', [
+            'model' => $model,
+            'nivel' => Yii::$app->user->identity->nivel,
+            'user' => Yii::$app->user->identity,
+            'relAttributes' => [],
+            'relAttributesHidden' => [],
+        ]);
     }
 
 
@@ -443,6 +449,7 @@ class UsuarioController extends BaseUsuarioController
             'nivel' => Yii::$app->user->identity->nivel,
             'relAttributes' => $relAttributes,
             'relAttributesHidden' => $relAttributesHidden,
+            'user' => Yii::$app->user->identity,
         ]);
     }
 

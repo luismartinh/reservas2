@@ -373,11 +373,16 @@ class CabanaController extends BaseCabanaController
                 $ct->id_cabana = $id_cabana;
                 $ct->id_tarifa = $idTarifa;
 
-                if ($ct->save())
+                if ($ct->save()) {
                     $ok++;
-                else
-                    $errors[] = "No se pudo vincular '{$t->descr}'.";
-                array_merge($errors, (array) $ct->getErrorSummary(true));
+                } else {
+                    $summary = (array) $ct->getErrorSummary(true);
+                    if ($summary) {
+                        $errors = array_merge($errors, $summary);
+                    } else {
+                        $errors[] = "No se pudo vincular '{$t->descr}'.";
+                    }
+                }
             }
 
             if ($ok > 0)
@@ -418,7 +423,7 @@ class CabanaController extends BaseCabanaController
             ->all();
         */
 
-        $tarifasDisponibles = \app\models\CabanaTarifa::getTarifasDisponibles($id_cabana);
+        $tarifasDisponibles = \app\models\CabanaTarifa::getTarifasDisponibles($id_cabana, true);
         $listaTarifas = ArrayHelper::map(
             $tarifasDisponibles,
             'id',

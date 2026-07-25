@@ -86,7 +86,7 @@ class GrupoAccesoSearch extends GrupoAcceso
     public function searchIndex($params,$nivel)
     {
 
-        $query = GrupoAcceso::find()->where(['>=', 'nivel', $nivel]);
+        $query = GrupoAcceso::find()->alias('grupo_acceso')->where(['>=', 'grupo_acceso.nivel', $nivel]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -101,15 +101,15 @@ class GrupoAccesoSearch extends GrupoAcceso
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
-            'created_by' => $this->created_by,
-            'updated_by' => $this->updated_by,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'nivel' => $this->nivel,
+            'grupo_acceso.id' => $this->id,
+            'grupo_acceso.created_by' => $this->created_by,
+            'grupo_acceso.updated_by' => $this->updated_by,
+            'grupo_acceso.created_at' => $this->created_at,
+            'grupo_acceso.updated_at' => $this->updated_at,
+            'grupo_acceso.nivel' => $this->nivel,
         ]);
 
-        $query->andFilterWhere(['like', 'descr', $this->descr]);
+        $query->andFilterWhere(['like', 'grupo_acceso.descr', $this->descr]);
 
         return $dataProvider;
     }
@@ -128,7 +128,7 @@ class GrupoAccesoSearch extends GrupoAcceso
     {
         //$query = GrupoAcceso::find();
 
-        $query = GrupoAcceso::find()->where(['>=', 'nivel', $nivel]);
+        $query = GrupoAcceso::find()->alias('grupo_acceso')->where(['>=', 'grupo_acceso.nivel', $nivel]);
 
 
 
@@ -147,18 +147,16 @@ class GrupoAccesoSearch extends GrupoAcceso
             return $dataProvider;
         }
 
-        if ($this->esUsuarioGrupo != null && $id_usuario != null) {
+        if ($this->esUsuarioGrupo !== null && $id_usuario !== null) {
             if ($this->esUsuarioGrupo == 1) {
-                $query = GrupoAcceso::find()
-                    ->joinWith('usuarios')
-                    ->where(['usuario.id' => $id_usuario])
+                $query->joinWith('usuarios')
+                    ->andWhere(['usuario.id' => $id_usuario])
                     ->distinct(true);
 
 
             } else {
-                $query = GrupoAcceso::find()
-                    ->joinWith('usuarios')
-                    ->where([
+                $query->joinWith('usuarios')
+                    ->andWhere([
                         'or',
                         ['usuario.id' => null], // Incluye grupos sin usuarios
                         ['not', ['usuario.id' => $id_usuario]] // Excluye los que tienen el usuario dado
@@ -175,27 +173,18 @@ class GrupoAccesoSearch extends GrupoAcceso
 
             }
 
-            $dataProvider = new ActiveDataProvider([
-                'query' => $query,
-                'pagination' => [
-                    'pageSize' => 20,
-                    'pageParam' => 'page-grupoaccesos',
-                ]
-
-            ]);
-
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
-            'created_by' => $this->created_by,
-            'updated_by' => $this->updated_by,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'nivel' => $this->nivel,
+            'grupo_acceso.id' => $this->id,
+            'grupo_acceso.created_by' => $this->created_by,
+            'grupo_acceso.updated_by' => $this->updated_by,
+            'grupo_acceso.created_at' => $this->created_at,
+            'grupo_acceso.updated_at' => $this->updated_at,
+            'grupo_acceso.nivel' => $this->nivel,
         ]);
 
-        $query->andFilterWhere(['like', 'descr', $this->descr]);
+        $query->andFilterWhere(['like', 'grupo_acceso.descr', $this->descr]);
 
         return $dataProvider;
     }

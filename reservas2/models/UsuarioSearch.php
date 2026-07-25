@@ -140,7 +140,7 @@ class UsuarioSearch extends Usuario
     {
         //$query = Usuario::find();
 
-        $query = Usuario::find()->where(['>=', 'nivel', $nivel]);
+        $query = Usuario::find()->alias('usuario')->where(['>=', 'usuario.nivel', $nivel]);
 
 
 
@@ -155,29 +155,29 @@ class UsuarioSearch extends Usuario
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
-            'activo' => $this->activo,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'created_by' => $this->created_by,
-            'updated_by' => $this->updated_by,
-            'nivel' => $this->nivel
+            'usuario.id' => $this->id,
+            'usuario.activo' => $this->activo,
+            'usuario.created_at' => $this->created_at,
+            'usuario.updated_at' => $this->updated_at,
+            'usuario.created_by' => $this->created_by,
+            'usuario.updated_by' => $this->updated_by,
+            'usuario.nivel' => $this->nivel
         ]);
 
-        $query->andFilterWhere(['like', 'login', $this->login])
-            ->andFilterWhere(['like', 'nombre', $this->nombre])
-            ->andFilterWhere(['like', 'apellido', $this->apellido])
-            ->andFilterWhere(['like', 'pwd', $this->pwd])
-            ->andFilterWhere(['like', 'id_session', $this->id_session])
-            ->andFilterWhere(['like', 'last_login_ip', $this->last_login_ip])
-            ->andFilterWhere(['like', 'codigo', $this->codigo])
-            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
-            ->andFilterWhere(['like', 'password_hash', $this->password_hash])
-            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'user_sign_token', $this->user_sign_token])
-            ->andFilterWhere(['like', 'access_token', $this->access_token])
-            ->andFilterWhere(['like', 'locate', $this->locate]);
+        $query->andFilterWhere(['like', 'usuario.login', $this->login])
+            ->andFilterWhere(['like', 'usuario.nombre', $this->nombre])
+            ->andFilterWhere(['like', 'usuario.apellido', $this->apellido])
+            ->andFilterWhere(['like', 'usuario.pwd', $this->pwd])
+            ->andFilterWhere(['like', 'usuario.id_session', $this->id_session])
+            ->andFilterWhere(['like', 'usuario.last_login_ip', $this->last_login_ip])
+            ->andFilterWhere(['like', 'usuario.codigo', $this->codigo])
+            ->andFilterWhere(['like', 'usuario.auth_key', $this->auth_key])
+            ->andFilterWhere(['like', 'usuario.password_hash', $this->password_hash])
+            ->andFilterWhere(['like', 'usuario.password_reset_token', $this->password_reset_token])
+            ->andFilterWhere(['like', 'usuario.email', $this->email])
+            ->andFilterWhere(['like', 'usuario.user_sign_token', $this->user_sign_token])
+            ->andFilterWhere(['like', 'usuario.access_token', $this->access_token])
+            ->andFilterWhere(['like', 'usuario.locate', $this->locate]);
 
 
         if ($this->last_login_time) {
@@ -185,7 +185,7 @@ class UsuarioSearch extends Usuario
             $range = explode(' - ', $this->last_login_time);
             $query->andFilterWhere([
                 'between',
-                'last_login_time',
+                'usuario.last_login_time',
                 Utils::DMY2SQLdate($range[0], '-'),
                 Utils::DMY2SQLdate($range[1], '-', '23:59:59')
             ]);
@@ -207,7 +207,7 @@ class UsuarioSearch extends Usuario
     {
         //$query = Usuario::find();
 
-        $query = Usuario::find()->where(['>=', 'nivel', $nivel]);
+        $query = Usuario::find()->alias('usuario')->where(['>=', 'usuario.nivel', $nivel]);
 
 
 
@@ -227,18 +227,16 @@ class UsuarioSearch extends Usuario
             return $dataProvider;
         }
 
-        if ($this->esUsuarioGrupo != null && $id_grupo != null) {
+        if ($this->esUsuarioGrupo !== null && $id_grupo !== null) {
             if ($this->esUsuarioGrupo == 1) {
-                $query = Usuario::find()
-                    ->joinWith('grupoAccesos')
-                    ->where(['grupo_acceso.id' => $id_grupo])
+                $query->joinWith('grupoAccesos')
+                    ->andWhere(['grupo_acceso.id' => $id_grupo])
                     ->distinct(true);
 
 
             } else {
-                $query = Usuario::find()
-                    ->joinWith('grupoAccesos')
-                    ->where([
+                $query->joinWith('grupoAccesos')
+                    ->andWhere([
                         'or',
                         ['grupo_acceso.id' => null],
                         ['not', ['grupo_acceso.id' => $id_grupo]]
@@ -255,42 +253,33 @@ class UsuarioSearch extends Usuario
 
             }
 
-            $dataProvider = new ActiveDataProvider([
-                'query' => $query,
-                'pagination' => [
-                    'pageSize' => 20,
-                    'pageParam' => 'page-usuarios',
-                ]
-
-            ]);
-
         }
 
         $query->andFilterWhere([
-            'id' => $this->id,
-            'last_login_time' => $this->last_login_time,
-            'activo' => $this->activo,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'created_by' => $this->created_by,
-            'updated_by' => $this->updated_by,
-            'nivel' => $this->nivel
+            'usuario.id' => $this->id,
+            'usuario.last_login_time' => $this->last_login_time,
+            'usuario.activo' => $this->activo,
+            'usuario.created_at' => $this->created_at,
+            'usuario.updated_at' => $this->updated_at,
+            'usuario.created_by' => $this->created_by,
+            'usuario.updated_by' => $this->updated_by,
+            'usuario.nivel' => $this->nivel
         ]);
 
-        $query->andFilterWhere(['like', 'login', $this->login])
-            ->andFilterWhere(['like', 'nombre', $this->nombre])
-            ->andFilterWhere(['like', 'apellido', $this->apellido])
-            ->andFilterWhere(['like', 'pwd', $this->pwd])
-            ->andFilterWhere(['like', 'id_session', $this->id_session])
-            ->andFilterWhere(['like', 'last_login_ip', $this->last_login_ip])
-            ->andFilterWhere(['like', 'codigo', $this->codigo])
-            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
-            ->andFilterWhere(['like', 'password_hash', $this->password_hash])
-            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'user_sign_token', $this->user_sign_token])
-            ->andFilterWhere(['like', 'access_token', $this->access_token])
-            ->andFilterWhere(['like', 'locate', $this->locate]);
+        $query->andFilterWhere(['like', 'usuario.login', $this->login])
+            ->andFilterWhere(['like', 'usuario.nombre', $this->nombre])
+            ->andFilterWhere(['like', 'usuario.apellido', $this->apellido])
+            ->andFilterWhere(['like', 'usuario.pwd', $this->pwd])
+            ->andFilterWhere(['like', 'usuario.id_session', $this->id_session])
+            ->andFilterWhere(['like', 'usuario.last_login_ip', $this->last_login_ip])
+            ->andFilterWhere(['like', 'usuario.codigo', $this->codigo])
+            ->andFilterWhere(['like', 'usuario.auth_key', $this->auth_key])
+            ->andFilterWhere(['like', 'usuario.password_hash', $this->password_hash])
+            ->andFilterWhere(['like', 'usuario.password_reset_token', $this->password_reset_token])
+            ->andFilterWhere(['like', 'usuario.email', $this->email])
+            ->andFilterWhere(['like', 'usuario.user_sign_token', $this->user_sign_token])
+            ->andFilterWhere(['like', 'usuario.access_token', $this->access_token])
+            ->andFilterWhere(['like', 'usuario.locate', $this->locate]);
 
 
         return $dataProvider;

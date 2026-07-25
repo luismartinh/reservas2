@@ -35,7 +35,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= $this->render('_form', [
         'model' => $model,
         'nivel' => $nivel,
-        'user' => $user
+        'user' => $user,
+        'relAttributes' => $relAttributes ?? [],
+        'relAttributesHidden' => $relAttributesHidden ?? [],
     ]); ?>
 
 
