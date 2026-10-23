@@ -3,26 +3,15 @@
 namespace app\components;
 
 use Yii;
-use yii\base\Component;
 
-class OpenAIClientGeminiSql extends Component
+class OpenAIClientGeminiSql extends GeminiClient
 {
-    private $apiKey;
-
-    public function __construct($config = [])
-    {
-        parent::__construct($config);
-        $this->apiKey = "AIzaSyBUOf2co9ePd7dracuF0dcqtXnePay9mgo";
-
-    }
-
     /**
-     * Sends a question to the OpenAI API using the specified endpoint and returns the response.
+     * Sends a question to Gemini through the shared secure transport.
      *
      * This function constructs a prompt containing information about the Yii2 application
-     * and the user's question, sends a request to the OpenAI API, and processes the response.
-     * It handles errors that may occur during the cURL request and logs the API response
-     * for debugging purposes.
+     * and the user's question, sends a request to Gemini, and processes the response.
+     * Transport errors and diagnostics are handled without recording response bodies.
      *
      * @param string $question The user's question to be sent to the OpenAI API.
      * @param \app\models\Usuario $user The user object representing the current user.
@@ -30,12 +19,8 @@ class OpenAIClientGeminiSql extends Component
      *               and the response content from the API if successful.
      */
 
-    public function askQuestion($question,$user)
+    protected function askConfiguredQuestion($question, $user)
     {
-
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$this->apiKey";
-
-
 
         $systemInstruction_text = $this->getSystemInstruction_text();
         $systemInstruction_text .= "Este es el esquema de la base de datos: " . json_encode($this->getSchema()) . "\n";
@@ -55,9 +40,6 @@ class OpenAIClientGeminiSql extends Component
 
 
             "generationConfig" => [
-                "temperature" => 1,
-                "topK" => 40,
-                "topP" => 0.95,
                 "maxOutputTokens" => 8192,
                 "responseMimeType" => "text/plain"
             ]
@@ -66,51 +48,14 @@ class OpenAIClientGeminiSql extends Component
 
 
 
-        $ch = curl_init($url);
-        if (!$ch) {
-
-            return [
-                'st' => 'error',
-                'msg' => 'Error: No se pudo inicializar cURL.'
-            ];
+        $result = $this->sendRequest($data);
+        if ($result['st'] === 'error') {
+            return $result;
         }
+        $responseData = $result['data'];
 
-        // Configurar cURL
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-
-
-        $response = curl_exec($ch);
-
-        if ($response === false) {
-            return [
-                'st' => 'error',
-                'msg' => 'Error en la solicitud cURL: ' . curl_error($ch)
-            ];
-
-        }
-
-        if (curl_errno($ch)) {
-
-            return [
-                'st' => 'error',
-                'msg' => 'Error en la conexión: ' . curl_error($ch)
-            ];
-        }
-
-        curl_close($ch);
-
-        $responseData = json_decode($response, true);
-
-        file_put_contents(__DIR__ . '/debug_openai_gemini_last_response.json', json_encode($responseData, JSON_PRETTY_PRINT));
-
-
-
-        if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+        if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])
+            && is_string($responseData['candidates'][0]['content']['parts'][0]['text'])) {
 
 
             $respuesta=$responseData['candidates'][0]['content']['parts'][0]['text'];
@@ -196,14 +141,12 @@ class OpenAIClientGeminiSql extends Component
 
         } catch (\Exception $e) {
             // Manejo de errores
-            Yii::error($e->getMessage());
+            $this->recordDiagnostic('context_error');
 
             $json= json_encode(null, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         }
 
 
-        // Guardar en archivo JSON
-        file_put_contents(__DIR__ . '/debug_openai_gemini_get_user.json', $json);
 
         return $json;
     }

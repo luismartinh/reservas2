@@ -4,6 +4,8 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+    env_file:
+      - ../.env
     environment:
       DB_DSN: mysql:host=host.docker.internal;port=33207;dbname=reservas2_1
       TEST_DB_DSN: mysql:host=host.docker.internal;port=33207;dbname=reservas2_test

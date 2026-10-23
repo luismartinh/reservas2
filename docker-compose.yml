@@ -6,6 +6,9 @@ services:
       context: .
       dockerfile: ./Dockerfile
 
+    env_file:
+      - .env
+
     volumes:
       - ./:/var/www/html/
       - ~/.composer-docker/cache:/root/.composer/cache:delegated

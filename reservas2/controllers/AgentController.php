@@ -29,7 +29,7 @@ class AgentController extends Controller
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => ['ask-gemini','aOPENAI_API_KEY_ENV'],
+                            'actions' => ['ask-gemini', 'check-gemini-config', 'aOPENAI_API_KEY_ENV'],
                             'roles' => ['@'],
                         ],
                     ]
@@ -38,6 +38,17 @@ class AgentController extends Controller
         );
     }
 
+
+    public function actionCheckGeminiConfig()
+    {
+        if (Yii::$app->user->isGuest
+            || !Identificador::autorizarPorNivel(Yii::$app->user->identity, Niveles::ADMIN)['auth']) {
+            throw new \yii\web\ForbiddenHttpException('Acceso denegado.');
+        }
+
+        Yii::$app->response->headers->set('Cache-Control', 'no-store');
+        return $this->asJson((new OpenAIClientGemini())->checkConfiguration());
+    }
 
     public function actionAskGemini()
     {

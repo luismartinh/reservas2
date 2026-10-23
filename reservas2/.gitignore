@@ -38,3 +38,10 @@ web/assets/
 config/db.php
 .env
 otros.txt
+
+# Local configuration and generated diagnostics (examples remain versioned).
+/config/params-local.php
+/config/*-local.php
+.env.*
+!.env.example
+/components/debug_*.json
