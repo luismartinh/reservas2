@@ -385,6 +385,10 @@ $this->registerCssFile(
                 ]
             ];
 
+            if (\app\components\asistente\Acceso::permitido(Yii::$app->user->identity)) {
+                array_unshift($items, ['label' => 'Asistente', 'url' => ['/asistente/index']]);
+            }
+
             echo Nav::widget([
                 'options' => ['class' => 'navbar-nav'],
                 'items' => $items,

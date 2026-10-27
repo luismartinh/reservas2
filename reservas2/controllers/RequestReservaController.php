@@ -122,6 +122,8 @@ class RequestReservaController extends BaseRequestReservaController
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
+        if (!Yii::$app->request->isPost) { throw new \yii\web\MethodNotAllowedHttpException(); }
+
         $permiso = Identificador::autorizar(
             Yii::$app->user->identity,
             Yii::$app->controller->id . '/update',
@@ -147,7 +149,17 @@ class RequestReservaController extends BaseRequestReservaController
         $obs = Yii::$app->request->post('obs', '');
         $model->obs = is_string($obs) ? trim($obs) : '';
 
-        if (!$model->validate(['obs'])) {
+        $fields = ['obs'];
+        if (array_key_exists('referencia', Yii::$app->request->post())) {
+            $referencia = Yii::$app->request->post('referencia');
+            if ($referencia !== null && !is_string($referencia)) {
+                throw new \yii\web\BadRequestHttpException('Referencia inválida.');
+            }
+            $model->referencia = $referencia;
+            $fields[] = 'referencia';
+        }
+
+        if (!$model->validate($fields)) {
             $errores = $model->getFirstErrors();
             return [
                 'success' => false,
@@ -155,7 +167,7 @@ class RequestReservaController extends BaseRequestReservaController
             ];
         }
 
-        if (!$model->save(false, ['obs'])) {
+        if (!$model->save(false, $fields)) {
             return [
                 'success' => false,
                 'message' => Yii::t('app', 'No se pudo guardar la observación.'),
@@ -164,7 +176,7 @@ class RequestReservaController extends BaseRequestReservaController
 
         return [
             'success' => true,
-            'message' => Yii::t('app', 'Observaciones guardadas correctamente.'),
+            'message' => Yii::t('app', 'Datos de la solicitud guardados correctamente.'),
         ];
     }
 
@@ -461,6 +473,10 @@ class RequestReservaController extends BaseRequestReservaController
             return;
         }
 
+        \app\components\ReservaOcupacion::exigirLibres(
+            array_column($model->requestCabanas, 'id_cabana'), $model->desde, $model->hasta
+        );
+
         // --- No existe reserva: crearla en base al RequestReserva actual ---
 
         // 1) LOCADOR a partir del email
@@ -588,7 +604,7 @@ class RequestReservaController extends BaseRequestReservaController
         }
 
         // 3) Modelo dinámico para el form del modal
-        $form = new DynamicModel(['monto', 'comprobante']);
+        $form = new DynamicModel(['monto', 'comprobante', 'notas']);
         $form->monto = null;
         $form->comprobante = null;
 
@@ -641,6 +657,7 @@ class RequestReservaController extends BaseRequestReservaController
 
                 $tx = Yii::$app->db->beginTransaction();
                 try {
+                    $reservaReq = \app\components\PagosReserva::exigirSinCambios($reservaReq);
                     // registro_pagos: append
                     $regPagos = is_array($reservaReq->registro_pagos) ? $reservaReq->registro_pagos : [];
                     $entry = [
@@ -684,13 +701,7 @@ class RequestReservaController extends BaseRequestReservaController
                         }
                         $finalFs = $privateDir . DIRECTORY_SEPARATOR . basename($tempPathFs);
                         if (@rename($tempPathFs, $finalFs)) {
-                            $registros = is_array($reservaReq->registro_pagos) ? $reservaReq->registro_pagos : [];
-                            if (!empty($registros)) {
-                                $lastIndex = count($registros) - 1;
-                                $registros[$lastIndex]['archivo'] = $finalFs; // ruta privada
-                                $reservaReq->registro_pagos = $registros;
-                                @$reservaReq->save(false, ['registro_pagos']);
-                            }
+                            \app\components\PagosReserva::reubicarArchivo($reservaReq->id, $archivoPublicWeb, $finalFs);
                         }
                     }
 
@@ -823,6 +834,7 @@ class RequestReservaController extends BaseRequestReservaController
 
             $tx = Yii::$app->db->beginTransaction();
             try {
+                $reservaReq = \app\components\PagosReserva::exigirSinCambios($reservaReq);
                 // Actualizar montos
                 $reservaReq->pagado = max(0, (float) $reservaReq->pagado - $montoAEliminar);
                 $reservaReq->registro_pagos = $regPagos;

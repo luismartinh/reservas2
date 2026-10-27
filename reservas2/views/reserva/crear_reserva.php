@@ -1,5 +1,5 @@
 <?php
-use yii\base\DynamicModel;
+use app\models\ReservaSolicitudForm;
 use yii\bootstrap5\Html;
 use yii\bootstrap5\ActiveForm;
 
@@ -7,7 +7,7 @@ use yii\bootstrap5\ActiveForm;
 /** @var \app\models\Cabana[] $cabanas */
 /** @var string $desde */
 /** @var string $hasta */
-/** @var DynamicModel $formModel */
+/** @var ReservaSolicitudForm $formModel */
 
 $this->title = Yii::t('app', 'Crear reserva');
 ?>
@@ -67,6 +67,7 @@ if ($d && $h) {
         'totales' => $totales,
         'desde' => $desde,
         'hasta' => $hasta,
+        'dias' => $dias,
         'mostrarSwitch' => false, // no mostrar switch
     ]) ?>
 
@@ -140,6 +141,9 @@ if ($d && $h) {
         <?= $af->field($formModel, 'domicilio')
             ->textInput(['maxlength' => 100])
             ->label(Yii::t('app', 'Domicilio')) ?>
+    </div>
+    <div class="col-md-12">
+        <?= $this->render('@app/views/locador/_ubicacion', ['form' => $af, 'model' => $formModel]) ?>
     </div>
     <div class="col-md-12">
         <?= $af->field($formModel, 'obs')

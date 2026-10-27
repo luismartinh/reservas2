@@ -153,6 +153,8 @@ $config = [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
+                    'logVars' => ['_GET', '_POST', '_FILES', '_COOKIE', '_SESSION', '_SERVER',
+                        '!_SESSION.__asistente', '!_SESSION.__asistente_reserva', '!_SESSION.__asistente_pago', '!_SESSION.__asistente_eliminar_pago', '!_SESSION.__asistente_eliminar_reserva', '!_SESSION.__asistente_pasajero', '!_SERVER.GEMINI_API_KEY', '!_SERVER.OPENAI_API_KEY'],
                 ],
             ],
         ],
@@ -221,6 +223,10 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
+        'panels' => [
+            'request' => ['class' => 'yii\debug\panels\RequestPanel',
+                'censoredVariableNames' => ['SESSION.__asistente', 'SESSION.__asistente_reserva', 'SESSION.__asistente_pago', 'SESSION.__asistente_eliminar_pago', 'SESSION.__asistente_eliminar_reserva', 'SESSION.__asistente_pasajero', 'SERVER.GEMINI_API_KEY', 'SERVER.OPENAI_API_KEY']],
+        ],
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
     ];

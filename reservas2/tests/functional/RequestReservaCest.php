@@ -6,6 +6,58 @@ class RequestReservaCest
 {
     private $seq = 0;
 
+    public function guardarReferenciaValidaYPreservaCamposNoEnviados(\FunctionalTester $I)
+    {
+        $actor = $this->crearUsuario(2);
+        $this->otorgarPermisos($actor, ['request-reserva/update']);
+        $request = $this->crearRequestReserva($this->crearEstado('confirmado', 'Confirmado'));
+        $I->amLoggedInAs($actor);
+        $url = '/index-test.php?r=request-reserva%2Fguardar-obs&id=' . $request->id;
+        $I->sendAjaxPostRequest($url, ['obs' => 'Observación', 'referencia' => '  Agencia <b>uno</b>  ', 'total' => 1]);
+        $I->seeResponseCodeIs(200);
+        $request->refresh();
+        $I->assertSame('Agencia <b>uno</b>', $request->referencia);
+        $I->assertEquals(2200, $request->total);
+        $I->sendAjaxPostRequest($url, ['obs' => 'Nueva observación']);
+        $request->refresh();
+        $I->assertSame('Agencia <b>uno</b>', $request->referencia);
+        $I->sendAjaxPostRequest($url, ['obs' => 'No guardar', 'referencia' => str_repeat('a', 46)]);
+        $I->assertFalse(json_decode($I->grabPageSource(), true)['success']);
+        $request->refresh();
+        $I->assertSame('Nueva observación', $request->obs);
+        $I->assertSame('Agencia <b>uno</b>', $request->referencia);
+        $I->sendAjaxPostRequest($url, ['obs' => '', 'referencia' => '']);
+        $request->refresh();
+        $I->assertNull($request->referencia);
+    }
+
+    public function referenciaExigePermisoPostYCsrf(\FunctionalTester $I)
+    {
+        $request = $this->crearRequestReserva($this->crearEstado('confirmado', 'Confirmado'));
+        $I->amLoggedInAs($this->crearUsuario(2));
+        $url = '/index-test.php?r=request-reserva%2Fguardar-obs&id=' . $request->id;
+        $I->sendAjaxPostRequest($url, ['obs' => '', 'referencia' => 'Sin permiso']);
+        $I->assertFalse(json_decode($I->grabPageSource(), true)['success']);
+        $request->refresh();
+        $I->assertNull($request->referencia);
+        $actor = $this->crearUsuario(2);
+        $this->otorgarPermisos($actor, ['request-reserva/update']);
+        $I->amLoggedInAs($actor);
+        $I->amOnPage($url);
+        $I->seeResponseCodeIs(405);
+        $handler = function () { Yii::$app->request->enableCsrfValidation = true; };
+        Yii::$app->on(\yii\base\Application::EVENT_BEFORE_REQUEST, $handler);
+        try {
+            $I->sendAjaxPostRequest($url, ['obs' => '', 'referencia' => 'Sin CSRF']);
+            $I->seeResponseCodeIs(400);
+        } finally {
+            Yii::$app->off(\yii\base\Application::EVENT_BEFORE_REQUEST, $handler);
+            Yii::$app->request->enableCsrfValidation = false;
+        }
+        $request->refresh();
+        $I->assertNull($request->referencia);
+    }
+
     public function guardarObsActualizaLaSolicitud(\FunctionalTester $I)
     {
         $actor = $this->crearUsuario(2);

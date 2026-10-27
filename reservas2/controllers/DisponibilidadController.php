@@ -1053,6 +1053,10 @@ class DisponibilidadController extends \yii\web\Controller
 
             $tx = Yii::$app->db->beginTransaction();
             try {
+                $reservaReq = \app\components\PagosReserva::exigirSinCambios($reservaReq);
+                \app\components\ReservaOcupacion::exigirLibres(
+                    array_column($reservaReq->requestCabanas, 'id_cabana'), $reservaReq->desde, $reservaReq->hasta
+                );
 
                 if (!$locador->save()) {
                     throw new \Exception(Yii::t('app', 'No se pudo guardar el Locador.'));
@@ -1138,14 +1142,7 @@ class DisponibilidadController extends \yii\web\Controller
                     $finalFs = $privateDir . DIRECTORY_SEPARATOR . basename($tempPathFs);
                     if (@rename($tempPathFs, $finalFs)) {
                         // Actualizar el último entry para que no quede público
-                        $registros = is_array($reservaReq->registro_pagos) ? $reservaReq->registro_pagos : [];
-                        if (!empty($registros)) {
-                            $lastIndex = count($registros) - 1;
-                            $registros[$lastIndex]['archivo'] = $finalFs; // almacenar ruta privada del FS
-                            $reservaReq->registro_pagos = $registros;
-                            // Guardar silenciosamente; si falla, no rompemos el flujo
-                            @$reservaReq->save(false, ['registro_pagos']);
-                        }
+                        \app\components\PagosReserva::reubicarArchivo($reservaReq->id, $archivoPublicWeb, $finalFs);
                     }
                 }
 

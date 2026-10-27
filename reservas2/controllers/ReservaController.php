@@ -16,7 +16,7 @@ use app\models\RequestReserva;
 use app\models\RequestResponse;
 use app\models\Reserva;
 use app\models\ReservaSearch;
-use yii\base\DynamicModel;
+use app\models\ReservaSolicitudForm;
 use yii\filters\AccessControl;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
@@ -290,12 +290,13 @@ class ReservaController extends BaseReservaController
         }
 
         // Modelo dinámico para form (precargar denominación y email desde request_reserva)
-        $formModel = new DynamicModel([
+        $formModel = new ReservaSolicitudForm([
             'denominacion',
             'documento',
             'email',
             'telefono',
             'domicilio',
+            'id_localidad',
             'obs',
             'send_email',
             'monto',
@@ -437,6 +438,12 @@ class ReservaController extends BaseReservaController
             $locador->telefono = $formModel->telefono;
             $locador->domicilio = $formModel->domicilio;
             $locador->obs = $formModel->obs;
+            $datosCliente = Yii::$app->request->post('DynamicModel', []);
+            if (is_array($datosCliente) && (array_key_exists('id_localidad', $datosCliente)
+                || array_key_exists('id_provincia', $datosCliente))) {
+                $locador->id_localidad = $formModel->id_localidad;
+                $locador->id_provincia = $formModel->id_provincia;
+            }
 
             // Usar validadores del modelo (unique documento, unique email, longitudes, etc.)
             if (!$locador->validate()) {
@@ -483,6 +490,7 @@ class ReservaController extends BaseReservaController
 
             $tx = Yii::$app->db->beginTransaction();
             try {
+                \app\components\ReservaOcupacion::exigirLibres($ids, $desdeFinal, $hastaFinal);
 
                 if (!$locador->save()) {
                     throw new \Exception(Yii::t('app', 'No se pudo guardar el Locador.'));
@@ -591,14 +599,7 @@ class ReservaController extends BaseReservaController
                     $finalFs = $privateDir . DIRECTORY_SEPARATOR . basename($tempPathFs);
                     if (@rename($tempPathFs, $finalFs)) {
                         // Actualizar el último entry para que no quede público
-                        $registros = is_array($reqReserva->registro_pagos) ? $reqReserva->registro_pagos : [];
-                        if (!empty($registros)) {
-                            $lastIndex = count($registros) - 1;
-                            $registros[$lastIndex]['archivo'] = $finalFs; // almacenar ruta privada del FS
-                            $reqReserva->registro_pagos = $registros;
-                            // Guardar silenciosamente; si falla, no rompemos el flujo
-                            @$reqReserva->save(false, ['registro_pagos']);
-                        }
+                        \app\components\PagosReserva::reubicarArchivo($reqReserva->id, $archivoPublicWeb, $finalFs);
                     }
                 }
 

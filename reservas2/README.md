@@ -110,6 +110,16 @@ CONFIGURATION
 
 ### Gemini API
 
+El chat administrativo de disponibilidad, tarifas y reservas se documenta en
+[doc/asistente-disponibilidad.md](doc/asistente-disponibilidad.md): configuración,
+límites, pruebas manuales/automatizadas y lista de archivos para FTP. También permite
+preparar reservas y confirmarlas en un formulario privado, sin pago inicial.
+«Cargar un pago» identifica la reserva y abre un formulario privado con revisión,
+confirmación de acreditación y comprobante opcional. «Eliminar/anular/revertir/cancelar/borrar pago»
+permite seleccionar y confirmar la eliminación de un movimiento cargado por error.
+«Eliminar/borrar reserva» revisa su impacto antes de quitar la reserva y su ocupación;
+conserva solicitudes, pagos y comprobantes desvinculados.
+
 Ambos clientes Gemini priorizan `GEMINI_API_KEY` del entorno del proceso
 PHP. Las dos configuraciones Docker Compose cargan el archivo `.env` de la raíz
 del repositorio mediante `env_file` en el servicio `php`. Para una instalación
@@ -363,3 +373,17 @@ vendor/bin/codecept run functional,unit --coverage --coverage-html --coverage-xm
 ```
 
 You can see code coverage output under the `tests/_output` directory.
+
+### Proveedor del asistente: Gemini u OpenAI
+
+El chat permite elegir desde el `.env` privado `ASISTENTE_PROVEEDOR=gemini`
+(default) u `ASISTENTE_PROVEEDOR=openai`. Para OpenAI configurar `OPENAI_API_KEY`
+y, opcionalmente, `ASISTENTE_OPENAI_MODELO` (default `gpt-5.4-mini`). No hay
+selector público ni cambio automático al otro proveedor. Tras editar `.env`,
+recrear solo PHP con `docker compose up -d --no-deps --force-recreate php` y
+recargar el chat; cambiar proveedor/modelo inicia una conversación nueva.
+
+Para producción por FTP, estas variables se pueden agregar al mismo archivo
+privado `reservas.env` fuera de `public_html`. No se modifican las claves ni la
+integración de Gemini. Ver configuración, pruebas simuladas, límites y listado
+de archivos en [la documentación del asistente](doc/asistente-disponibilidad.md).

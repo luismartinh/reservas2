@@ -13,6 +13,10 @@ abstract class GeminiClient extends Component
     /** Private file outside public_html for deployments managed through FTP. */
     public $apiKeyFile = '/home/vaqxtmgw/reservas.env';
 
+    // Defaults preserved for existing clients. A subclass may use a shorter budget.
+    public $connectTimeout = 10;
+    public $requestTimeout = 60;
+
     /** Local checks only: no transport, response bodies or credential values. */
     public function checkConfiguration()
     {
@@ -146,8 +150,8 @@ abstract class GeminiClient extends Component
                 ],
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POSTFIELDS => $payload,
-                CURLOPT_CONNECTTIMEOUT => 10,
-                CURLOPT_TIMEOUT => 60,
+                CURLOPT_CONNECTTIMEOUT => (int) $this->connectTimeout,
+                CURLOPT_TIMEOUT => (int) $this->requestTimeout,
                 CURLOPT_FOLLOWLOCATION => false,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,

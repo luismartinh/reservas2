@@ -1,0 +1,57 @@
+.asistente-chat { max-width: 960px; margin-inline: auto; }
+.asistente-mensajes { min-height: 12rem; max-height: 55vh; overflow-y: auto; padding: .5rem; }
+.asistente-fila { display: flex; margin-bottom: .8rem; }
+.asistente-fila.usuario { justify-content: flex-end; }
+.asistente-burbuja { max-width: 90%; padding: .8rem 1rem; border-radius: 1rem; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--bs-tertiary-bg); }
+.usuario .asistente-burbuja { background: var(--bs-primary); color: white; position: relative; padding-right: 3rem; }
+.asistente-reenviar { position: absolute; top: .4rem; right: .5rem; display: inline-flex; align-items: center; justify-content: center; width: 1.8rem; height: 1.8rem; padding: 0; border: 0; border-radius: .4rem; background: transparent; color: inherit; font-size: 1rem; cursor: pointer; }
+.asistente-reenviar:hover:not(:disabled) { background: rgba(255, 255, 255, .18); }
+.asistente-reenviar:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.asistente-reenviar:disabled { opacity: .45; cursor: not-allowed; }
+.asistente-etiqueta { display: block; font-weight: 600; font-size: .8rem; margin-bottom: .25rem; }
+.asistente-burbuja.asistente-error-respuesta { background: var(--bs-danger-bg-subtle, #f8d7da); color: var(--bs-danger-text-emphasis, #842029); border: 1px solid var(--bs-danger-border-subtle, #f5c2c7); }
+.asistente-burbuja-tabla { width: 100%; max-width: 100%; min-width: 0; white-space: normal; }
+.asistente-titulo { font-size: 1.05rem; font-weight: 600; margin: .2rem 0 .5rem; }
+.asistente-comentario { margin: 0 0 .5rem; }
+.asistente-nota { font-size: .78rem; margin: 0 0 .3rem; }
+.asistente-tabla-contenedor { margin-top: .8rem; }
+.asistente-tabla { margin-bottom: 0; font-size: .85rem; --bs-table-bg: transparent; }
+.asistente-tabla th, .asistente-tabla td { padding: .6rem .5rem; }
+.asistente-tabla thead th { font-weight: 600; }
+.asistente-criterio { display: block; font-weight: 400; font-size: .75rem; margin-top: .25rem; }
+.asistente-fecha { white-space: nowrap; }
+.asistente-importe { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.asistente-recurso, .asistente-texto-detalle { white-space: pre-wrap; }
+.asistente-tabla-reservas td:nth-child(3) { min-width: 10rem; }
+.asistente-tabla-reservas { min-width: 46rem; }
+.asistente-tabla-reservas thead th,
+.asistente-tabla-reservas tbody th[scope="row"] { white-space: nowrap; }
+.asistente-codigo-seguimiento { white-space: normal; overflow-wrap: anywhere; }
+.asistente-dato-agrupado { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; white-space: nowrap; }
+.asistente-dato-agrupado + .asistente-dato-agrupado { margin-top: .3rem; }
+.asistente-dato-etiqueta { font-size: .75rem; }
+.asistente-fecha-registro { white-space: pre; text-align: right; }
+.asistente-nota-pago { white-space: normal; min-width: 10rem; text-align: left; }
+.asistente-detalle-pagos { margin-top: .75rem; }
+.asistente-texto-detalle { margin-top: .5rem; }
+.asistente-reserva-frame { display: block; width: 100%; height: 75vh; border: 0; }
+.asistente-procesando { display: flex; align-items: center; gap: .6rem; color: var(--bs-primary); padding: .5rem; }
+.asistente-espera { display: inline-block; flex-shrink: 0; width: 1rem; height: 1rem; border: .15rem solid currentColor; border-right-color: transparent; border-radius: 50%; animation: asistente-girar .8s linear infinite; }
+@keyframes asistente-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .asistente-espera { animation: none; } }
+.asistente-chat [hidden] { display: none !important; }
+
+.asistente-acciones-pendientes { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: 1rem; margin-bottom: 1rem; border: 2px solid var(--bs-primary, #0d6efd); border-radius: .75rem; background: var(--bs-primary-bg-subtle, #cfe2ff); }
+.asistente-acciones-pendientes[hidden] { display: none; }
+.asistente-acciones-pendientes strong, #asistente-pago-descripcion { display: block; }
+
+#asistente-pago-modal .modal-content { position: relative; }
+.asistente-pago-cargando { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.85); border-radius: var(--bs-modal-border-radius, .5rem); }
+.asistente-pago-cargando[hidden] { display: none; }
+
+.asistente-acciones-pendientes[data-operacion="eliminar"], .asistente-acciones-pendientes[data-operacion="eliminar_reserva"] { border-color: var(--bs-danger, #dc3545); background: var(--bs-danger-bg-subtle, #f8d7da); }
+
+.asistente-tabla-pasajeros { min-width: 35rem; }
+.asistente-tabla-pasajeros thead th, .asistente-tabla-pasajeros tbody th { white-space: nowrap; }
+.asistente-datos-pasajero { min-width: 14rem; }
+.asistente-observaciones-pasajero { min-width: 10rem; white-space: pre-wrap; }

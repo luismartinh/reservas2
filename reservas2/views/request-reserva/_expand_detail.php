@@ -18,7 +18,7 @@ $msgId = 'request-obs-msg-' . (int) $model->id;
         <button class="nav-link active" id="<?= Html::encode($obsPaneId) ?>-tab" data-bs-toggle="tab"
             data-bs-target="#<?= Html::encode($obsPaneId) ?>" type="button" role="tab"
             aria-controls="<?= Html::encode($obsPaneId) ?>" aria-selected="true">
-            <?= Html::encode(Yii::t('app', 'Observaciones')) ?>
+            <?= Html::encode(Yii::t('app', 'Referencia y observaciones')) ?>
         </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -42,7 +42,13 @@ $msgId = 'request-obs-msg-' . (int) $model->id;
             ],
         ]); ?>
 
+        <?= Html::label('Referencia', 'request-referencia-' . (int) $model->id, ['class' => 'form-label']) ?>
+        <?= Html::textInput('referencia', $model->referencia, [
+            'id' => 'request-referencia-' . (int) $model->id, 'class' => 'form-control mb-3', 'maxlength' => 45,
+        ]) ?>
+        <?= Html::label('Observaciones', 'request-obs-' . (int) $model->id, ['class' => 'form-label']) ?>
         <?= Html::textarea('obs', (string) ($model->obs ?? ''), [
+            'id' => 'request-obs-' . (int) $model->id,
             'class' => 'form-control mb-3',
             'rows' => 6,
             'maxlength' => 500,
@@ -52,7 +58,7 @@ $msgId = 'request-obs-msg-' . (int) $model->id;
 
         <div class="d-flex justify-content-end">
             <?= Html::submitButton(
-                '<i class="bi bi-floppy me-2"></i>' . Yii::t('app', 'Guardar observaciones'),
+                '<i class="bi bi-floppy me-2"></i>' . Yii::t('app', 'Guardar referencia y observaciones'),
                 ['class' => 'btn btn-primary']
             ) ?>
         </div>

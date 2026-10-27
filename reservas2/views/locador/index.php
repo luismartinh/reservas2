@@ -13,7 +13,7 @@ FontAwesomeAsset::register($this);
 /**
  * @var yii\web\View $this
  * @var yii\data\ActiveDataProvider $dataProvider
- * @var app\models\TarifaSearch $searchModel
+ * @var app\models\LocadorSearch $searchModel
  */
 
 $this->title = Yii::t('models', 'Administrar Pasajeros');
@@ -45,6 +45,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'action' => ['index'],
                 'options' => ['class' => 'row g-3 align-items-end'],
             ]); ?>
+
+            <div class="col-12">
+                <?= $form->field($searchModel, 'buscar')->textInput(['maxlength' => 150])
+                    ->label('Buscar por nombre, apellido, documento, teléfono, email, dirección, observaciones o ubicación') ?>
+            </div>
+            <div class="col-12">
+                <?= $this->render('_ubicacion', ['form' => $form, 'model' => $searchModel, 'busqueda' => true]) ?>
+            </div>
 
             <div class="col-md-5">
                 <?= $form->field($searchModel, 'domicilio')
@@ -149,6 +157,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             [
                                 'label' => Yii::t('app', 'Mas Info:'),
                                 'content' =>
+                                    Html::tag('div', Html::tag('strong', 'Localidad - Provincia') . '<br>' .
+                                        Html::encode($model->ubicacionDescripcion ?? 'Sin ubicación'), ['class' => 'mb-3']) .
                                     '<div class="mb-3">' .
                                     Html::label(Yii::t('app', 'Domicilio'), null, ['class' => 'form-label fw-bold']) .
                                     Html::textarea(
@@ -196,26 +206,29 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
-                'vAlign' => 'middle',
-                'hAlign' => 'middle',
                 'attribute' => 'denominacion',
-                'headerOptions' => ['style' => 'text-align:center'],
-                'contentOptions' => ['style' => 'text-align:left'],
+                'label' => 'Cliente',
+                'format' => 'raw',
+                'filter' => false,
+                'value' => function ($model) {
+                    return Html::tag('strong', Html::encode($model->denominacion)) .
+                        Html::tag('div', Html::encode('Documento: ' . $model->documento)) .
+                        Html::tag('div', Html::encode('Teléfono: ' . $model->telefono)) .
+                        Html::tag('div', Html::encode('Email: ' . $model->email));
+                },
+                'contentOptions' => ['class' => 'align-middle'],
             ],
             [
-                'vAlign' => 'middle',
-                'hAlign' => 'middle',
-                'attribute' => 'documento',
-                'headerOptions' => ['style' => 'text-align:center'],
-                'contentOptions' => ['style' => 'text-align:center'],
+                'attribute' => 'calificacion',
+                'format' => 'raw',
+                'value' => function ($model) {
+                    return Yii::$app->view->render('@app/views/locador/_calificacion', ['valor' => $model->calificacion]);
+                },
             ],
-            'email:email',
             [
-                'vAlign' => 'middle',
-                'hAlign' => 'middle',
-                'attribute' => 'telefono',
-                'headerOptions' => ['style' => 'text-align:center'],
-                'contentOptions' => ['style' => 'text-align:center'],
+                'attribute' => 'id_localidad',
+                'value' => function ($model) { return $model->ubicacionDescripcion; },
+                'filter' => false,
             ],
         ];
 

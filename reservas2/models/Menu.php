@@ -52,7 +52,7 @@ class Menu extends BaseMenu
         $items = null;
 
 
-        $id_menus = $user->accesosDisponibles()->select(['id_menu'])->distinct()->asArray()->all();
+        $id_menus = $user->accesosDisponibles()->select(['id_menu', 'acceso'])->distinct()->asArray()->all();
 
         // Extraer los valores de 'id_menu' como un array plano
         $id_menus_array = array_column($id_menus, 'id_menu');
@@ -60,8 +60,25 @@ class Menu extends BaseMenu
         $ms = Menu::find()
             ->where(['menu' => $rootMenuKey])
             ->andWhere(['id' => $id_menus_array]) // Filtra por los valores de id_menu
+            ->andWhere(['not in', 'url', ['tarifa/index', 'tarifa/calendario', '/tarifa/index', '/tarifa/calendario']])
             ->orderBy(['menu_path' => SORT_ASC])
             ->all();
+
+        // Both tariff screens use tarifa/index. One acceso.id_menu cannot represent
+        // both links: define them here so navigation never rewrites that association.
+        if (in_array('tarifa/index', array_column($id_menus, 'acceso'), true)) {
+            $tariffMenus = [
+                [\app\config\RootMenu::CONFIG, 'Reservas/Tarifas', 'Tarifas', 'tarifa/index'],
+                [\app\config\RootMenu::ADMIN, 'Tarifas/Calendario', 'Calendario', 'tarifa/calendario'],
+            ];
+            foreach ($tariffMenus as $definition) {
+                if ((string) $rootMenuKey === (string) $definition[0]) {
+                    $ms[] = new self(['menu' => (string) $definition[0], 'menu_path' => $definition[1],
+                        'label' => $definition[2], 'url' => $definition[3]]);
+                }
+            }
+            usort($ms, function ($left, $right) { return strcmp($left->menu_path, $right->menu_path); });
+        }
 
         if(count($ms)==0){
             return '';
@@ -71,7 +88,7 @@ class Menu extends BaseMenu
 
         foreach ($ms as $msitem) {
             $it = null;
-            if (str_contains($msitem->menu_path, "/")) {
+            if (strpos($msitem->menu_path, "/") !== false) {
                 $submenues = explode("/", $msitem->menu_path);
                 switch (count($submenues)) {
 

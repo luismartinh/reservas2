@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'asistente' => require __DIR__ . '/asistente.php',
     'idAPP' => 'bt5',
     'bsVersion' => '5.x',
     'adminEmail' => 'cabanas@dinasis.com.es',

@@ -8,9 +8,24 @@ use yii\helpers\FileHelper;
 
 /**
  * This is the model class for table "request_reservas".
+ * @property string|null $referencia
  */
 class RequestReserva extends BaseRequestReserva
 {
+    public function rules()
+    {
+        return array_merge(parent::rules(), [
+            [['referencia'], 'trim'],
+            [['referencia'], 'default', 'value' => null],
+            [['referencia'], 'string', 'max' => 45],
+        ]);
+    }
+
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), ['referencia' => 'Referencia']);
+    }
+
     public function getRequestResponses()
     {
         return $this->hasMany(\app\models\RequestResponse::class, ['id_request' => 'id'])

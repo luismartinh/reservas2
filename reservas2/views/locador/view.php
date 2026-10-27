@@ -7,6 +7,7 @@ use yii\bootstrap5\Tabs;
 
 use kartik\icons\FontAwesomeAsset;
 FontAwesomeAsset::register($this);
+\app\assets\CalificacionAsset::register($this);
 
 /**
  * @var yii\web\View $this
@@ -50,6 +51,12 @@ $this->params['breadcrumbs'][] = Yii::t('cruds', 'Ver');
 			'documentos',
 			'domicilio',
             'obs:ntext',
+            [
+                'attribute' => 'calificacion',
+                'format' => 'raw',
+                'value' => $this->render('_calificacion', ['valor' => $model->calificacion]),
+            ],
+            ['label' => 'Ubicación', 'value' => $model->ubicacionDescripcion],
 
         ],
     ]);

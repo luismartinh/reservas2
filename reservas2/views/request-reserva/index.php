@@ -301,6 +301,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'vAlign' => 'middle',
                 'hAlign' => 'right',
+                'attribute' => 'referencia',
+                'format' => 'text',
+                'filter' => false,
+            ],
+            [
+                'vAlign' => 'middle',
+                'hAlign' => 'right',
                 'attribute' => 'total',
                 'headerOptions' => ['style' => 'text-align:center'],
                 'contentOptions' => ['style' => 'text-align:right'],

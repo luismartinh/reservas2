@@ -18,6 +18,7 @@
 
 <!-- attribute denominacion -->
 <?php echo $form->field($model, 'denominacion')->textInput(['maxlength' => true]) ?>
+<?= $form->field($model, 'referencia')->textInput(['maxlength' => 45]) ?>
 
 <!-- attribute email -->
 <?php echo $form->field($model, 'email')->textInput(['maxlength' => true]) ?>

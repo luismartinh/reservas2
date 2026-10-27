@@ -95,7 +95,13 @@ use yii\bootstrap5\Html;
 
 	<div class="row">
 
-		<div class="col-md-3"> 
+		<div class="col-md-3">
+
+            <?= $form->field($model, 'referencia')->textInput(['maxlength' => 45]) ?>
+
+        </div>
+
+		<div class="col-md-3">
 
 				<?php
 
@@ -108,7 +114,7 @@ use yii\bootstrap5\Html;
 
 		</div>
 
-		<div class="col-md-3"> 
+		<div class="col-md-3">
 
 				<?php
 
@@ -121,7 +127,7 @@ use yii\bootstrap5\Html;
 
 		</div>	
 
-		<div class="col-md-6 text-end">
+		<div class="col-md-3 text-end">
 
 			<?= Html::submitButton('<i class="bi bi-search me-2"></i> Buscar', [
 				'class' => 'btn btn-primary btn-lg',

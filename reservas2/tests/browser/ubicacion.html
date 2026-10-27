@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<title>Pruebas de ubicación con Select2</title>
+<link rel="stylesheet" href="../../vendor/select2/select2/dist/css/select2.css">
+<form>
+    <div class="ubicacion-selector" data-provincia-actual="2" data-localidades-url="/localidades-simuladas">
+        <select class="ubicacion-provincia"><option value="">Sin provincia</option><option value="2" selected>Provincia inicial</option><option value="6">Otra provincia</option></select>
+        <select class="ubicacion-localidad"><option value=""></option><option value="10" selected>Localidad guardada</option><option value="11">Otra descripción</option></select>
+        <p class="ubicacion-estado"></p>
+    </div>
+</form>
+<pre id="resultado">PENDIENTE</pre>
+<script src="../../vendor/bower-asset/jquery/dist/jquery.js"></script>
+<script src="../../vendor/select2/select2/dist/js/select2.js"></script>
+<script src="../../web/js/ubicacion.js"></script>
+<script>
+(function ($) {
+    'use strict';
+    var count = 0;
+    function check(value, description) {
+        if (!value) { throw new Error(description); }
+        count++;
+    }
+    try {
+        var requests = [];
+        $.getJSON = function (url, params) {
+            var deferred = $.Deferred();
+            deferred.abort = function () { deferred.aborted = true; };
+            deferred.params = params;
+            requests.push(deferred);
+            return deferred;
+        };
+        var provincia = $('.ubicacion-provincia');
+        var localidad = $('.ubicacion-localidad');
+        provincia.select2({placeholder: 'Buscar provincia…', allowClear: true, selectOnClose: false,
+            minimumResultsForSearch: 0, width: '100%'});
+        localidad.select2({placeholder: 'Buscar localidad…', allowClear: true, selectOnClose: false,
+            minimumResultsForSearch: 0, width: '100%'});
+        provincia.select2('open');
+        $('.select2-search__field').val('Otra').trigger('input');
+        check(provincia.val() === '2' && requests.length === 0, 'Abrir y buscar provincia no selecciona ni consulta localidades');
+        provincia.select2('close');
+        check(provincia.val() === '2' && localidad.val() === '10' && requests.length === 0,
+            'Cerrar provincia sin elegir conserva ambos valores');
+        localidad.select2('open');
+        check(localidad.val() === '10', 'Abrir conserva la localidad guardada');
+        var search = $('.select2-search__field');
+        search.val('descripción').trigger('input');
+        var results = $('.select2-results__option[aria-selected]');
+        check(results.length === 1 && results.text() === 'Otra descripción', 'Busca por descripción');
+        localidad.select2('close');
+        check(localidad.val() === '10', 'Cerrar con una coincidencia no la selecciona');
+        provincia.trigger('change');
+        check(requests.length === 0 && localidad.val() === '10', 'Un evento repetido de provincia conserva localidad');
+
+        provincia.select2('open');
+        $('.select2-search__field').val('Otra').trigger('input');
+        $('.select2-results__option[aria-selected]').trigger('mouseup');
+        check(requests.length === 1 && requests[0].params.provincia === '6', 'Sólo consulta la provincia elegida');
+        check(localidad.val() === '' && localidad.prop('disabled'), 'Limpia y bloquea mientras carga');
+        var submit = $.Event('submit');
+        $('form').trigger(submit);
+        check(submit.isDefaultPrevented(), 'Impide guardar mientras carga');
+        requests[0].resolve({items: [{id: 20, descr: 'Primera nueva'}, {id: 21, descr: 'Segunda nueva'}]});
+        check(localidad.val() === '' && !localidad.prop('disabled'), 'Cargar opciones no selecciona la primera');
+        localidad.select2('open');
+        localidad.select2('close');
+        check(localidad.val() === '', 'Abrir y cerrar sin elegir mantiene el placeholder');
+        localidad.select2('open');
+        $('.select2-search__field').val('Segunda').trigger('input');
+        $('.select2-results__option[aria-selected]').trigger('mouseup');
+        check(localidad.val() === '21', 'La elección explícita selecciona la localidad');
+        provincia.trigger('change');
+        check(requests.length === 1 && localidad.val() === '21', 'Repetir la provincia tampoco borra una elección nueva');
+
+        provincia.val('2').trigger('change');
+        provincia.val('6').trigger('change');
+        check(requests[1].aborted, 'Cancela la petición anterior');
+        requests[2].resolve({items: [{id: 30, descr: 'Resultado vigente'}]});
+        requests[1].resolve({items: [{id: 99, descr: 'Respuesta tardía'}]});
+        check(localidad.find('option[value="99"]').length === 0 && localidad.find('option[value="30"]').length === 1,
+            'Una respuesta tardía no reemplaza las opciones vigentes');
+
+        provincia.val('2').trigger('change');
+        requests[3].reject({}, 'error');
+        check($('.ubicacion-estado').hasClass('text-danger'), 'Muestra el fallo');
+        provincia.trigger('change');
+        check(requests.length === 5, 'Permite reintentar la misma provincia tras un fallo');
+        provincia.val('').trigger('change');
+        requests[4].resolve({items: [{id: 40, descr: 'Ignorar'}]});
+        check(localidad.val() === '' && localidad.find('option').length === 1 && !localidad.prop('disabled'),
+            'Quitar la provincia descarta respuestas pendientes y limpia localidad');
+        provincia.select2('open');
+        $('.select2-search__field').val('Otra').trigger('input');
+        provincia.select2('close');
+        check(provincia.val() === '' && localidad.val() === '' && requests.length === 5,
+            'Abrir y cerrar con provincia vacía no selecciona un resultado');
+        $('#resultado').text('PASS: ' + count + ' comprobaciones con jQuery y Select2 reales.');
+        document.documentElement.setAttribute('data-test-result', 'pass');
+    } catch (error) {
+        $('#resultado').text('FAIL: ' + error.message);
+        document.documentElement.setAttribute('data-test-result', 'fail');
+    }
+})(jQuery);
+</script>
+</html>

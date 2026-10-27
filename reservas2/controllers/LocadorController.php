@@ -32,11 +32,11 @@ class LocadorController extends BaseLocadorController
             [
                 'access' => [
                     'class' => AccessControl::class,
-                    'only' => ['index', 'view', 'create', 'update', 'delete'],
+                    'only' => ['index', 'view', 'create', 'update', 'delete', 'localidades'],
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => ['index', 'view', 'create', 'update', 'delete'],
+                            'actions' => ['index', 'view', 'create', 'update', 'delete', 'localidades'],
                             'roles' => ['@'],
                             'matchCallback' => function ($rule, $action) {
                                 return true;
@@ -49,6 +49,36 @@ class LocadorController extends BaseLocadorController
         );
     }
 
+
+    public function actionLocalidades($provincia)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        if (!Yii::$app->request->isGet) { throw new \yii\web\MethodNotAllowedHttpException(); }
+        $identity = Yii::$app->user->identity;
+        if (!$identity || (int) $identity->activo !== 1) {
+            throw new \yii\web\ForbiddenHttpException('Acceso denegado.');
+        }
+        $admin = Identificador::autorizarPorNivel($identity, \app\config\Niveles::ADMIN);
+        $allowed = $admin['auth'];
+        foreach (['index', 'create', 'update'] as $action) {
+            if ($allowed) { break; }
+            $permission = Identificador::autorizar($identity, 'locador/' . $action, 'Editar Pasajero', null);
+            $allowed = $permission['auth'];
+        }
+        if (!$allowed) {
+            $permission = Identificador::autorizar($identity, 'reserva/reservar', 'Crear reserva', null);
+            $allowed = $permission['auth'];
+        }
+        if (!$allowed) { throw new \yii\web\ForbiddenHttpException('Acceso denegado.'); }
+        if (!is_scalar($provincia) || !preg_match('/^[1-9][0-9]*$/D', (string) $provincia)) {
+            throw new \yii\web\BadRequestHttpException('Provincia inválida.');
+        }
+        if (!\app\models\Provincia::findOne($provincia)) {
+            throw new NotFoundHttpException('La provincia no existe.');
+        }
+        return ['items' => \app\models\Localidad::find()->select(['id', 'descr'])
+            ->where(['id_provincia' => $provincia])->orderBy('descr')->asArray()->all()];
+    }
 
     /**
      * Lists all Locador models.
@@ -148,6 +178,7 @@ class LocadorController extends BaseLocadorController
         }
 
         $model = Yii::createObject(Locador::class);
+        $model->loadDefaultValues();
 
         try {
 

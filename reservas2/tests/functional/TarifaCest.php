@@ -6,6 +6,56 @@ class TarifaCest
 {
     private $seq = 0;
 
+    public function menuTarifasEsEstableAunqueLaAsociacionAnteriorSeaOtra(\FunctionalTester $I)
+    {
+        $actor = $this->crearUsuario(2);
+        $this->otorgarPermisos($actor, ['tarifa/index']);
+        $access = $this->buscarOCrearAcceso('tarifa/index');
+        // Preserve an unrelated entry while fixing the two tariff links.
+        $otherMenu = new \app\models\Menu(['descr' => 'Menú prueba', 'label' => 'Otro enlace',
+            'menu' => (string) \app\config\RootMenu::CONFIG, 'menu_path' => 'Otro/' . $this->nextSuffix('menu'),
+            'url' => 'site/contact']);
+        $I->assertTrue($otherMenu->save());
+        $otherAccess = $this->buscarOCrearAcceso($this->nextSuffix('menu/acceso'));
+        $otherAccess->id_menu = $otherMenu->id; $I->assertTrue($otherAccess->save());
+        $actor->setAcceso($otherAccess->id); $actor->refresh();
+        $I->amLoggedInAs($actor);
+        $I->amOnRoute('site/index');
+        foreach ([['0', 'Reservas/Tarifas', 'tarifa/index'], ['1', 'Tarifas/Calendario', 'tarifa/calendario']] as $legacy) {
+            $menu = \app\models\Menu::find()->where(['menu' => $legacy[0], 'menu_path' => $legacy[1]])->one();
+            if (!$menu) {
+                $menu = new \app\models\Menu(['descr' => 'Tarifas', 'label' => 'Tarifas',
+                    'menu' => $legacy[0], 'menu_path' => $legacy[1], 'url' => $legacy[2]]);
+                $I->assertTrue($menu->save());
+            }
+            $access->id_menu = $menu->id; $I->assertTrue($access->save());
+            $before = \app\models\Menu::getMenu(null, $actor);
+            $I->assertSame(1, substr_count($before, 'r=tarifa%2Findex'));
+            $I->assertSame(1, substr_count($before, 'r=tarifa%2Fcalendario'));
+            $I->assertStringContainsString('r=site%2Fcontact', $before);
+            foreach (['tarifa/index', 'tarifa/calendario', 'tarifa/index', 'site/index'] as $route) {
+                $I->amOnRoute($route);
+                $I->seeResponseCodeIs(200);
+                $access->refresh();
+                $I->assertSame((int) $menu->id, (int) $access->id_menu);
+                $I->assertSame($before, \app\models\Menu::getMenu(null, $actor));
+            }
+        }
+    }
+
+    public function sinPermisoNoMuestraNiPermiteTarifas(\FunctionalTester $I)
+    {
+        $actor = $this->crearUsuario(2);
+        $I->amLoggedInAs($actor);
+        $html = \app\models\Menu::getMenu(null, $actor);
+        $I->assertStringNotContainsString('r=tarifa%2Findex', $html ?? '');
+        $I->assertStringNotContainsString('r=tarifa%2Fcalendario', $html ?? '');
+        foreach (['tarifa/index', 'tarifa/calendario'] as $route) {
+            $I->amOnRoute($route);
+            $I->seeInCurrentUrl('r=site%2Flogin');
+        }
+    }
+
     public function tarifaCrudBasico(\FunctionalTester $I)
     {
         $actor = $this->crearUsuario(2);

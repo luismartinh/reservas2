@@ -1,6 +1,6 @@
 <?php
 
-use app\config\Empresas;
+use app\components\asistente\Acceso;
 use yii\bootstrap5\Html;
 
 /** @var yii\web\View $this */
@@ -40,17 +40,13 @@ $url_images = Yii::getAlias('@web') . '/images/';
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-12 text-start"> <!-- Asegura que ocupe toda la fila y alinee a la izquierda -->
-                <?= Html::a('<i class="bi bi-patch-question"></i> ' . Yii::t('cruds', 'Asistente de ayuda para mis funciones'), ['agent/ask-gemini'], ['class' => 'btn btn-link']) ?>
+        <?php if (Acceso::permitido(Yii::$app->user->identity)): ?>
+            <div class="row">
+                <div class="col-12 text-start">
+                    <?= Html::a('<i class="bi bi-chat-dots"></i> ' . Yii::t('cruds', 'Asistente'), ['asistente/index'], ['class' => 'btn btn-link']) ?>
+                </div>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12 text-start"> <!-- Asegura que ocupe toda la fila y alinee a la izquierda -->
-                <?= Html::a('<i class="bi bi-patch-question"></i> ' . Yii::t('cruds', 'Asistente de ayuda para obtener información de mi base de datos'), ['agent/aOPENAI_API_KEY_ENV'], ['class' => 'btn btn-link']) ?>
-            </div>
-        </div>
+        <?php endif; ?>
 
     </div>
 

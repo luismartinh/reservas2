@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\config\RootMenu;
 use app\helpers\CalendarHelper;
 use app\models\Cabana;
 use app\models\CabanaTarifa;
@@ -65,18 +64,11 @@ class TarifaController extends BaseTarifaController
 
         $u = Yii::$app->user->identity;
 
-        $menu = new \app\models\Menu();
-        $menu->descr = "Administrar Tarifas";
-        $menu->label = "Tarifas";
-        $menu->menu = (string) RootMenu::CONFIG;
-        $menu->menu_path = "Reservas/Tarifas";
-        $menu->url = Yii::$app->controller->id . '/index';
-
         $permiso = Identificador::autorizar(
             $u,
             Yii::$app->controller->id . '/index',
             "Administrar Tarifas",
-            $menu
+            null
         );
 
         if (!$permiso['auth']) {
@@ -98,18 +90,11 @@ class TarifaController extends BaseTarifaController
     {
         $u = Yii::$app->user->identity;
 
-        $menu = new \app\models\Menu();
-        $menu->descr = "Administrar Tarifas";
-        $menu->label = "Tarifas";
-        $menu->menu = (string) RootMenu::ADMIN;
-        $menu->menu_path = "Tarifas/Calendario";
-        $menu->url = Yii::$app->controller->id . '/calendario';
-
         $permiso = Identificador::autorizar(
             $u,
             Yii::$app->controller->id . '/index',
             "Administrar reservas",
-            $menu
+            null
         );
 
         if (!$permiso['auth']) {

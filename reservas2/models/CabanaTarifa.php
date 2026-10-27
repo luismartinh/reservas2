@@ -137,11 +137,17 @@ class CabanaTarifa extends BaseCabanaTarifa
      */
     public static function calcularTotalParaCabana(int $idCabana, string $desde, string $hasta): float
     {
+        return (float) array_sum(array_column(self::calcularDetalleParaCabana($idCabana, $desde, $hasta), 'subtotal'));
+    }
+
+    /** Same tariff selection as the total; exposes the actual daily rate per segment. */
+    public static function calcularDetalleParaCabana(int $idCabana, string $desde, string $hasta): array
+    {
         // --- Normalizar a [desde, hasta] inclusivo y además tener hastaExcl (semi-abierto)
         [$d, $hExcl] = self::normalizarRango($desde, $hasta);
         $totalDias = (int) $d->diff($hExcl)->days;  // ya inclusivo (porque hExcl = hasta+1)
         if ($totalDias <= 0) {
-            return 0.0;
+            return [];
         }
         $desdeStr = $d->format('Y-m-d');
         $hastaInclStr = (clone $hExcl)->modify('-1 day')->format('Y-m-d');
@@ -156,7 +162,7 @@ class CabanaTarifa extends BaseCabanaTarifa
             ->all();
 
         if (!$tarifas) {
-            return 0.0;
+            return [];
         }
 
         // ¿Alguna cubre todo el rango inclusivo? Si sí, elegir UNA según min_dias y aplicar a todo:
@@ -168,7 +174,10 @@ class CabanaTarifa extends BaseCabanaTarifa
         });
         if ($cubridoras) {
             $mejor = self::elegirPorMinDias($cubridoras, $totalDias);
-            return $mejor->valor_dia * $totalDias;
+            return [[
+                'desde' => $desdeStr, 'hasta' => $hastaInclStr, 'dias' => $totalDias,
+                'valor_dia' => (float) $mejor->valor_dia, 'subtotal' => $mejor->valor_dia * $totalDias,
+            ]];
         }
 
         // --- SEGMENTACIÓN: construir límites (fronteras) dentro de [d, hExcl) ---
@@ -195,7 +204,7 @@ class CabanaTarifa extends BaseCabanaTarifa
         sort($segmentBorders);
 
         // --- Recorrer segmentos consecutivos [B[i], B[i+1]) ---
-        $total = 0.0;
+        $detalle = [];
         for ($i = 0; $i < count($segmentBorders) - 1; $i++) {
             $segIni = (new \DateTime($segmentBorders[$i]))->setTime(0, 0, 0);
             $segFinEx = (new \DateTime($segmentBorders[$i + 1]))->setTime(0, 0, 0);
@@ -220,10 +229,15 @@ class CabanaTarifa extends BaseCabanaTarifa
 
             // Elegir exactamente UNA tarifa para el segmento, según la regla de min_dias y el total de la estadía
             $tElegida = self::elegirPorMinDias($candidatas, $totalDias);
-            $total += $tElegida->valor_dia * $diasSeg;
+            $detalle[] = [
+                'desde' => $segIni->format('Y-m-d'),
+                'hasta' => (clone $segFinEx)->modify('-1 day')->format('Y-m-d'),
+                'dias' => $diasSeg, 'valor_dia' => (float) $tElegida->valor_dia,
+                'subtotal' => $tElegida->valor_dia * $diasSeg,
+            ];
         }
 
-        return $total;
+        return $detalle;
     }
 
 

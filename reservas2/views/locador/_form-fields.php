@@ -22,5 +22,8 @@
 <!-- attribute domicilio -->
 <?php echo $form->field($model, 'domicilio')->textInput(['maxlength' => true]) ?>
 
+<?= $this->render('_ubicacion', ['form' => $form, 'model' => $model]) ?>
+<?= $this->render('_calificacion-input', ['form' => $form, 'model' => $model]) ?>
+
 <!-- attribute obs -->
 <?php echo $form->field($model, 'obs')->textarea(['rows' => 4]) ?>

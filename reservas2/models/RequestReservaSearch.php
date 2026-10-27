@@ -41,7 +41,8 @@ class RequestReservaSearch extends RequestReserva
                     'updated_at',
                     'impagas',
                     'vencidas',
-                    'codigo_reserva'
+                    'codigo_reserva',
+                    'referencia'
                 ],
                 'safe'
             ],
@@ -107,6 +108,7 @@ class RequestReservaSearch extends RequestReserva
             ->andFilterWhere(['like', 'obs', $this->obs])
             ->andFilterWhere(['like', 'registro_pagos', $this->registro_pagos])
             ->andFilterWhere(['like', 'codigo_reserva', $this->codigo_reserva])
+            ->andFilterWhere(['like', 'referencia', $this->referencia])
             ->andFilterWhere(['like', 'email_token', $this->email_token]);
 
         return $dataProvider;
@@ -160,6 +162,7 @@ class RequestReservaSearch extends RequestReserva
             ->andFilterWhere(['like', 'obs', $this->obs])
             ->andFilterWhere(['like', 'registro_pagos', $this->registro_pagos])
             ->andFilterWhere(['like', 'codigo_reserva', $this->codigo_reserva])
+            ->andFilterWhere(['like', 'referencia', $this->referencia])
             ->andFilterWhere(['like', 'email_token', $this->email_token]);
 
         if (!empty($this->fecha)) {
@@ -195,9 +198,8 @@ class RequestReservaSearch extends RequestReserva
         }
 
         if (!empty($this->denominacion)) {
-            $query->andFilterWhere(['like', 'denominacion', $this->denominacion])
-                ->orFilterWhere(['like', 'email', $this->denominacion])
-            ;
+            $query->andWhere(['or', ['like', 'denominacion', $this->denominacion],
+                ['like', 'email', $this->denominacion]]);
 
         }
 
