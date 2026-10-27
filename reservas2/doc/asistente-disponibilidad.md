@@ -1253,3 +1253,78 @@ como titular, impagas o creación, ni omite errores de comunicación del proveed
 Ejecuta la función Yii existente con autorización actualizada y conserva IDs y
 período en `seleccion_reservas` para consultas posteriores. La tabla con contactos
 permanece sólo en la presentación privada, fuera del historial enviado al modelo.
+
+### Consultas por audio
+
+El botón «Grabar consulta» captura sólo audio mediante `getUserMedia` y
+`MediaRecorder`, con permiso del navegador. Requiere HTTPS o localhost; en un
+celular que accede a una IP local por HTTP seguirá disponible el chat de texto.
+El navegador elige WebM/Opus o MP4 según soporte, detiene a los 60 segundos y
+limita la grabación a 2 MB. También ofrece detener y cancelar. Al cancelar,
+cambiar de conversación o salir de la página libera las pistas del micrófono e
+ignora respuestas pendientes. Cancelar una petición ya enviada no asegura que el
+proveedor deje de procesarla o cobrarla; no se reintenta automáticamente.
+
+La transcripción se muestra en un campo editable separado. «Pasar a consulta» la
+agrega al texto que ya estuviera escrito sin borrarlo; valida el límite combinado
+de 2.000 caracteres. Sólo «Enviar» usa la conversación, las funciones y las
+confirmaciones existentes. Una transcripción por sí sola no ejecuta operaciones,
+crea borradores ni se agrega al historial de la conversación.
+
+Configuración privada en `.env` local o en el `reservas.env` externo existente:
+
+```dotenv
+ASISTENTE_AUDIO_HABILITADO=1
+ASISTENTE_AUDIO_MODELO=gpt-transcribe
+# Reutiliza OPENAI_API_KEY, definida exclusivamente en el entorno privado.
+```
+
+Son los valores predeterminados si las variables de audio no existen. Usar `0`
+para desactivar tanto el botón como el endpoint. El proveedor del chat continúa
+siendo `ASISTENTE_PROVEEDOR`; el audio usa OpenAI de forma independiente mediante
+`TranscriptorInterface` y `OpenAITranscriptor`. No debe configurarse el modelo de
+chat como modelo de audio. La cuenta necesita acceso al modelo y cuota disponible.
+La API y el modelo predeterminado se verificaron contra la documentación oficial:
+https://developers.openai.com/api/docs/guides/speech-to-text
+
+POST `asistente/transcribir` recibe `audio`, `conversacion` y CSRF. Exige un
+administrador activo, conversación propia vigente y los mismos límites por usuario
+que las consultas del chat (transcribir y consultar cuentan como dos llamadas).
+No acepta claves, URL ni modelo desde el cliente. Comprueba los bytes reales y el
+MIME del temporal PHP y rechaza archivos vacíos, formatos ajenos y tamaños mayores
+a 2 MB, independientemente del nombre/MIME/tamaño declarados por el cliente.
+El límite de duración es del grabador del navegador: el servidor no analiza la
+duración del contenedor ni necesita ffmpeg; aplica el límite de bytes y llamadas.
+El límite `upload_max_filesize` de PHP debe permitir al menos 2 MB y
+`post_max_size` debe permitir el archivo más la envoltura multipart (por ejemplo,
+8 MB). Un límite menor del hosting puede rechazar la carga antes de Yii.
+
+La transferencia usa cURL multipart por HTTPS con certificado verificado,
+sin seguir redirecciones, conexión de hasta 5 s y respuesta de hasta 60 s. PHP
+usa un presupuesto acotado de 75 s y el navegador espera hasta 80 s. El bloqueo
+de sesión se libera durante la llamada y al terminar se revalida usuario, nivel,
+vigencia y revisión de conversación. Devuelve texto o errores públicos sin copiar
+el cuerpo de error de OpenAI. Conserva CSRF; un rechazo actualiza el token para la
+siguiente grabación sin reenviar audio automáticamente.
+
+El audio permanece sólo en el temporal de carga de PHP hasta finalizar la petición:
+no se mueve a `web`, no se guarda en BD y no se incorpora al historial ni a logs.
+Se envía a OpenAI con la advertencia visible en la interfaz; el historial previo
+no se envía a transcribir. El almacenamiento/retención del proveedor se rige por
+la configuración de la cuenta de OpenAI. No se agregan dependencias ni servicios.
+
+Pruebas (API simulada, sin costos ni claves reales):
+
+- `tests/unit/models/AsistenteAudioTest.php`: multipart, MIME/tamaño real,
+  autorización, respuesta inválida/larga, configuración y errores sin reintentos.
+- `tests/functional/AsistenteAudioCest.php`: CSRF/POST, identidad/conversación,
+  revocación de permiso durante la llamada, límites y ausencia de escritura en
+  historial. Se ejecuta también `AsistenteCest.php` para regresiones del chat.
+- `node tests/browser/asistente-audio.test.js`: grabación, revisión, cancelación,
+  respuesta tardía, formato MP4, permiso denegado, límite de tiempo, conservación
+  del texto previo y actualización CSRF sin reenvío automático.
+
+Antes de usar en producción: probar una grabación real desde el celular y desde
+el navegador habitual, con HTTPS y la cuenta de OpenAI configurada. Las pruebas
+automatizadas simulan el dispositivo y la API; no certifican acceso de la cuenta,
+compatibilidad de todos los navegadores ni el permiso de un micrófono físico.

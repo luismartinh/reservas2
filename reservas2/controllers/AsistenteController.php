@@ -32,7 +32,7 @@ class AsistenteController extends Controller
     public function behaviors()
     {
         return ['verbs' => ['class' => VerbFilter::class, 'actions' => [
-            'index' => ['GET'], 'mensaje' => ['POST'], 'nueva' => ['POST'], 'reservar' => ['GET', 'POST'], 'pago' => ['GET', 'POST'], 'eliminar-pago' => ['GET', 'POST'], 'eliminar-reserva' => ['GET', 'POST'], 'pasajero' => ['GET', 'POST'], 'pasajero-detalle' => ['GET'],
+            'index' => ['GET'], 'mensaje' => ['POST'], 'nueva' => ['POST'], 'reservar' => ['GET', 'POST'], 'pago' => ['GET', 'POST'], 'eliminar-pago' => ['GET', 'POST'], 'eliminar-reserva' => ['GET', 'POST'], 'pasajero' => ['GET', 'POST'], 'pasajero-detalle' => ['GET'], 'transcribir' => ['POST'],
         ]]];
     }
 
@@ -106,6 +106,7 @@ class AsistenteController extends Controller
         $context = $this->contexto();
         $state = $context->actual(Yii::$app->user->id);
         return $this->render('index', ['initial' => $context->visible($state),
+            'audioConfig' => \app\components\asistente\ConfiguracionAudio::leer(),
             'providerLabel' => Configuracion::leer()['proveedor'] === 'openai' ? 'OpenAI' : 'Gemini']);
     }
 
@@ -147,6 +148,56 @@ class AsistenteController extends Controller
         Acceso::exigir($identity);
         $context->exigir($userId, $snapshot['id'], $snapshot['revision']);
         return $identity;
+    }
+
+    public function actionTranscribir()
+    {
+        $permiso = Identificador::autorizarPorNivel(
+            Yii::$app->user->identity,
+            Niveles::ADMIN
+        );
+        if (!$permiso['auth']) {
+            Yii::$app->session->setFlash('danger', Yii::t('app', $permiso['msg']));
+            return $this->redirect($permiso['redirect']);
+        }
+        $limits = new Limites();
+        try {
+            $audioConfig = \app\components\asistente\ConfiguracionAudio::leer();
+            if (!$audioConfig['habilitado']) { throw new ForbiddenHttpException(); }
+            $userId = Yii::$app->user->id;
+            $context = $this->contexto();
+            $snapshot = $context->exigir($userId, Yii::$app->request->post('conversacion'));
+            $audio = \yii\web\UploadedFile::getInstanceByName('audio');
+            if (!$audio) { throw new \yii\web\UnprocessableEntityHttpException('No se recibió un audio válido. Grabá nuevamente.'); }
+            $limits->adquirir($userId);
+            $limits->consumir(Configuracion::leer(), new \DateTimeImmutable('now', new \DateTimeZone(Yii::$app->timeZone)));
+            if (is_callable('set_time_limit')) { @set_time_limit(75); }
+            $identity = $this->revalidar($userId, $context, $snapshot);
+            Yii::$app->session->close();
+            $transcriptor = Yii::createObject(['class' => \app\components\asistente\OpenAITranscriptor::class,
+                'model' => $audioConfig['modelo']]);
+            $result = $transcriptor->transcribir($identity, $audio);
+            $this->revalidar($userId, $context, $snapshot);
+            if (empty($result['ok'])) {
+                $code = $result['code'] ?? 'provider_error';
+                $messages = [
+                    'provider_configuration' => 'La transcripción no está configurada. Revisá la clave y el modelo de audio de OpenAI en el servidor.',
+                    'provider_rate_limit' => 'OpenAI alcanzó un límite de uso o cuota. Esperá antes de volver a grabar.',
+                    'provider_timeout' => 'Se agotó el tiempo para transcribir. Podés volver a grabar o escribir la consulta.',
+                    'transcript_too_long' => 'La transcripción supera los 2.000 caracteres. Grabá una consulta más breve.',
+                    'invalid_response' => 'No se pudo reconocer una consulta en el audio. Grabá nuevamente o escribila.',
+                ];
+                Yii::$app->response->statusCode = $code === 'provider_rate_limit' ? 429 : 503;
+                return $this->asJson(['ok' => false, 'mensaje' => $messages[$code] ?? 'No se pudo transcribir el audio. Intentá nuevamente o escribí la consulta.']);
+            }
+            // No history, reservation function or write runs until the administrator sends the edited text.
+            return $this->asJson(['ok' => true, 'texto' => $result['texto'], 'conversacion' => $snapshot['id']]);
+        } catch (\yii\web\UnprocessableEntityHttpException $e) {
+            Yii::$app->response->statusCode = 422;
+            return $this->asJson(['ok' => false, 'mensaje' => $e->getMessage()]);
+        } catch (HttpException $e) { return $this->errorPublico($e->statusCode);
+        } catch (\Throwable $e) { return $this->errorPublico(503);
+        } finally { $limits->liberar(); }
     }
 
     public function actionMensaje()

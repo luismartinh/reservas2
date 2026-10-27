@@ -6,7 +6,7 @@ class AsistenteAsset extends \yii\web\AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = ['css/asistente.css'];
-    public $js = ['js/asistente.js'];
+    public $js = ['js/asistente-audio.js', 'js/asistente.js'];
     public $depends = [AppAsset::class];
 
     public function init()

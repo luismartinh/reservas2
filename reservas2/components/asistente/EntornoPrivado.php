@@ -8,7 +8,7 @@ class EntornoPrivado
 
     public static function valor($name, $file = self::ARCHIVO)
     {
-        if (!in_array($name, ['ASISTENTE_PROVEEDOR', 'ASISTENTE_OPENAI_MODELO', 'OPENAI_API_KEY'], true)) {
+        if (!in_array($name, ['ASISTENTE_PROVEEDOR', 'ASISTENTE_OPENAI_MODELO', 'OPENAI_API_KEY', 'ASISTENTE_AUDIO_HABILITADO', 'ASISTENTE_AUDIO_MODELO'], true)) {
             throw new \InvalidArgumentException('unsupported_private_setting');
         }
         $env = getenv($name);

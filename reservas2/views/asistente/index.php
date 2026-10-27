@@ -8,7 +8,9 @@ use yii\bootstrap5\Modal;
 AsistenteAsset::register($this);
 \app\assets\CalificacionAsset::register($this);
 $this->title = 'Asistente de disponibilidad, tarifas y reservas';
-$settings = ['pasajeroDetalleUrl' => Url::to(['asistente/pasajero-detalle']), 'pasajeroUrl' => Url::to(['asistente/pasajero']), 'initial' => $initial, 'mensajeUrl' => Url::to(['asistente/mensaje']),
+$settings = ['audio' => ['habilitado' => $audioConfig['habilitado'], 'url' => Url::to(['asistente/transcribir']),
+    'maxBytes' => \app\components\asistente\ConfiguracionAudio::MAX_BYTES,
+    'maxSegundos' => \app\components\asistente\ConfiguracionAudio::MAX_SEGUNDOS], 'pasajeroDetalleUrl' => Url::to(['asistente/pasajero-detalle']), 'pasajeroUrl' => Url::to(['asistente/pasajero']), 'initial' => $initial, 'mensajeUrl' => Url::to(['asistente/mensaje']),
     'nuevaUrl' => Url::to(['asistente/nueva']), 'reservaUrl' => Url::to(['asistente/reservar']), 'pagoUrl' => Url::to(['asistente/pago']), 'eliminarPagoUrl' => Url::to(['asistente/eliminar-pago']), 'eliminarReservaUrl' => Url::to(['asistente/eliminar-reserva']), 'seguimientoUrl' => Url::to(['disponibilidad/seguimiento'])];
 ?>
 <section id="asistente-chat" class="asistente-chat card my-3" data-config="<?= Html::encode(Json::encode($settings)) ?>">
@@ -70,6 +72,24 @@ $settings = ['pasajeroDetalleUrl' => Url::to(['asistente/pasajero-detalle']), 'p
             <button type="submit" class="btn btn-primary" id="asistente-enviar">Enviar</button>
         </div>
         <?= Html::endForm() ?>
+        <?php if ($audioConfig['habilitado']): ?>
+        <div id="asistente-audio" class="asistente-audio mt-2">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button type="button" id="asistente-audio-grabar" class="btn btn-outline-secondary btn-sm" aria-label="Grabar consulta por audio" aria-describedby="asistente-audio-aviso">🎙 Grabar consulta</button>
+                <button type="button" id="asistente-audio-detener" class="btn btn-danger btn-sm" hidden>Detener y transcribir</button>
+                <button type="button" id="asistente-audio-cancelar" class="btn btn-outline-secondary btn-sm" hidden>Cancelar audio</button>
+                <span id="asistente-audio-estado" class="small" role="status" aria-live="polite"></span>
+            </div>
+            <p id="asistente-audio-aviso" class="small text-body-secondary mb-0 mt-1">Hasta 60 segundos. El audio se envía a OpenAI para transcribir. Revisá el texto antes de enviarlo.</p>
+            <p id="asistente-audio-error" class="alert alert-danger small mt-2 mb-0" role="alert" hidden></p>
+            <div id="asistente-audio-revision" class="mt-2" hidden>
+                <label for="asistente-audio-texto" class="form-label small">Transcripción: revisá y corregí lo que haga falta</label>
+                <textarea id="asistente-audio-texto" class="form-control" rows="3" maxlength="2000"></textarea>
+                <button type="button" id="asistente-audio-usar" class="btn btn-primary btn-sm mt-2">Pasar a consulta</button>
+            </div>
+        </div>
+        <?php endif; ?>
+
     </div>
 </section>
 <?php Modal::begin(['id' => 'asistente-reserva-modal', 'title' => 'Reserva', 'size' => Modal::SIZE_EXTRA_LARGE]); ?>

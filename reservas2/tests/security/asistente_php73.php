@@ -4,6 +4,7 @@
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 $root = dirname(__DIR__, 2);
 $files = array_merge(glob($root . '/components/asistente/*.php'), [
+    $root . '/tests/unit/models/AsistenteAudioTest.php', $root . '/tests/functional/AsistenteAudioCest.php',
     $root . '/models/Provincia.php', $root . '/models/Localidad.php', $root . '/models/UbicacionTrait.php',
     $root . '/models/Locador.php', $root . '/models/LocadorSearch.php',
     $root . '/models/RequestReserva.php', $root . '/models/RequestReservaSearch.php',

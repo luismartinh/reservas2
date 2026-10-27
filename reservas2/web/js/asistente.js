@@ -168,6 +168,7 @@
     function error(text) { $('#asistente-error').text(text).prop('hidden', !text); }
     function busy(value) {
         sending = value;
+        if (window.reservasAsistenteAudio) { window.reservasAsistenteAudio.actualizarEstado(value || resetting); }
         $('#asistente-enviar').prop('disabled', value || resetting);
         $('#asistente-procesando').prop('hidden', !value);
         resendButtons.forEach(function (button) { button.prop('disabled', value || resetting); });
@@ -486,7 +487,7 @@
             : ((xhr.responseJSON || {}).mensaje || 'No se pudo completar la consulta. Intentá más tarde.'));
     }
     function send(text, clearInput) {
-        if (sending || resetting) { return; }
+        if (sending || resetting || (window.reservasAsistenteAudio && window.reservasAsistenteAudio.ocupado())) { return; }
         text = text.trim();
         if (!text) { return; }
         if (Array.from(text).length > 2000) { error('El mensaje supera los 2.000 caracteres.'); return; }
@@ -510,6 +511,7 @@
     });
     $('#asistente-nueva').on('click', function () {
         if (resetting) { return; }
+        if (window.reservasAsistenteAudio) { window.reservasAsistenteAudio.cancelar(); }
         paymentEpoch++;
         paymentUrl = null;
         paymentBusy(false);
@@ -526,6 +528,7 @@
         post(config.nuevaUrl, { conversacion: conversation }).done(function (response) {
             if (!response.ok) { error(response.mensaje); return; }
             conversation = response.conversacion;
+            if (window.reservasAsistenteAudio) { window.reservasAsistenteAudio.cambiarConversacion(conversation); }
             render(response);
             $('#asistente-mensaje').val('');
         }).fail(failed).always(function () {
